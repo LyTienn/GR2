@@ -132,7 +132,7 @@ const Membership = () => {
 
                     {/* QR CODE */}
                     <div className="bg-white p-2 rounded-xl border border-slate-100 shadow-inner mb-6 inline-block">
-                        <img src={qrUrl} alt="Mã QR Thanh toán" className="w-64 h-64 object-contain" />
+                        <img src={qrUrl} alt="Mã QR Thanh toán" referrerPolicy="no-referrer" className="w-64 h-64 object-contain" />
                     </div>
 
                     <div className="text-left bg-yellow-50 p-4 rounded-lg border border-yellow-200 text-sm mb-6 space-y-3">
