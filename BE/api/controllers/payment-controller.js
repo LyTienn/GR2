@@ -76,22 +76,6 @@ class PaymentController {
     }
   }
 
-  static async cancelPendingSubscriptions() {
-    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-    const pendingSubs = await Subscription.findAll({
-      where: {
-        status: "PENDING",
-        created_at: { [Op.lt]: fiveMinutesAgo }
-      }
-    });
-
-    for (const sub of pendingSubs) {
-      sub.status = "CANCELLED";
-      await sub.save();
-      console.log(`Auto-cancelled subscription ${sub.subscription_id}`);
-    }
-  }
-
   static calculateExpiryDate(package_details) {
     const now = new Date();
 
@@ -116,12 +100,15 @@ class PaymentController {
       }
 
       const orderId = `DH${Date.now()}`;
+      const now = new Date();
+      const expiryPending = new Date(now.getTime() + 1 * 60 * 1000); // +1 phút
+
       await Subscription.create({
         user_id: userId,
         package_details,
         amount: amount,
         start_date: new Date(),
-        expiry_date: PaymentController.calculateExpiryDate(package_details),
+        expiry_date: expiryPending,
         payment_transaction_id: orderId,
         status: "PENDING",
       });
