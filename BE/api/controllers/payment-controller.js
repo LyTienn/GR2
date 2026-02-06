@@ -436,7 +436,7 @@ class PaymentController {
         package_details,
         amount: amount,
         start_date: new Date(),
-        expiry_date: PaymentController.calculateExpiryDate(package_details),
+        expiry_date: new Date(Date.now() + 5 * 60 * 1000),
         payment_transaction_id: orderId,
         status: "PENDING",
       });
