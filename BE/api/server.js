@@ -22,7 +22,7 @@ import comicRoutes from "./routes/comic-route.js";
 import subscriptionRoutes from "./routes/subscription-route.js";
 import chapterRoutes from "./routes/chapter-route.js";
 import { initializeVectorStore } from "./services/rag-service.js";
-
+import cron from "node-cron";
 
 dotenv.config();
 
@@ -130,6 +130,12 @@ app.use((err, req, res, next) => {
     success: false,
     message: "Something went wrong!",
   });
+});
+
+cron.schedule("*/1 * * * *", () => {
+  PaymentController.cancelPendingSubscriptions()
+    .then(() => console.log("Checked and cancelled pending subscriptions"))
+    .catch((err) => console.error("Error cancelling pending subscriptions:", err));
 });
 
 // Start server
