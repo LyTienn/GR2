@@ -37,6 +37,30 @@ class PaymentController {
   static async getPaymentHistory(req, res) {
     try {
       const userId = req.user.userId; // Từ middleware authenticate
+      const now = new Date();
+      const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
+
+      await Subscription.update(
+        { status: "CANCELLED" },
+        {
+          where: {
+            user_id: userId,
+            status: "PENDING",
+            start_date: { [Op.lt]: fiveMinutesAgo }
+          }
+        }
+      );
+
+      await Subscription.update(
+        { status: "EXPIRED" },
+        {
+          where: {
+            user_id: userId,
+            status: "ACTIVE",
+            expiry_date: { [Op.lt]: now }
+          }
+        }
+      );
 
       const subscriptions = await Subscription.findAll({
         where: { user_id: userId },
@@ -100,15 +124,13 @@ class PaymentController {
       }
 
       const orderId = `DH${Date.now()}`;
-      const now = new Date();
-      const expiryPending = new Date(now.getTime() + 1 * 60 * 1000); // +1 phút
 
       await Subscription.create({
         user_id: userId,
         package_details,
         amount: amount,
         start_date: new Date(),
-        expiry_date: expiryPending,
+        expiry_date: PaymentController.calculateExpiryDate(package_details),
         payment_transaction_id: orderId,
         status: "PENDING",
       });
