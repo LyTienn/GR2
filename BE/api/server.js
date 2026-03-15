@@ -32,7 +32,7 @@ const DB_SYNC = process.env.DB_SYNC || "alter"; // options: 'alter' | 'force' | 
 
 // Middleware
 // Allow FE dev servers on ports 5173 and 5174
-const allowedOrigins = ["http://localhost:5173", "http://localhost:5174"];
+const allowedOrigins = ["http://localhost:5173", "http://localhost:5174", "https://thuviensach.io.vn/"];
 app.use(
   cors({
     origin: (origin, callback) => {

@@ -1,4 +1,5 @@
 import Axios_config from '../config/Axios-config.jsx';
+import HttpClient from './HttpClient.jsx';
 
 const AuthService = {
     login: async (credentials) => {
