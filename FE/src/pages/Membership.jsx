@@ -4,8 +4,8 @@ import { Check, Star, Shield, ArrowLeft, Loader2, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
 import { useSelector, useDispatch } from "react-redux";
-import axios from "@/config/Axios-config";
-import { setUser } from "@/redux/Auth/AuthSlice";
+// import axios from "@/config/Axios-config";
+// import { setUser } from "@/store/Auth/authSlice";
 
 const Membership = () => {
     const { user } = useSelector((state) => state.auth);
@@ -87,7 +87,7 @@ const Membership = () => {
                         const updatedUser = res.data || res.data.user;
                         console.log("Polling User Tier:", updatedUser.tier);
                         if (updatedUser.tier === 'PREMIUM') {
-                            dispatch(setUser(updatedUser));
+                            // dispatch(setUser(updatedUser));
                             setPaymentInfo(null);
                             clearInterval(interval);
                         }

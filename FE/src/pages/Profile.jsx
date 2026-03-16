@@ -19,8 +19,8 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import AuthService from "@/service/AuthService";
-import { fetchUserProfile } from "@/redux/Auth/AuthThunk";
-import { setUser } from "@/redux/Auth/AuthSlice";
+// import { fetchUserProfile } from "@/store/Auth/AuthThunk";
+// import { setUser } from "@/store/Auth/authSlice";
 
 export default function ProfilePage() {
   const { user, isAuthenticated } = useSelector((state) => state.auth);
@@ -71,13 +71,13 @@ export default function ProfilePage() {
       if (res.success || res.data?.success) {
         const updatedUser = res.data?.user || res.data?.data?.user || res.user;
         if (updatedUser) {
-          dispatch(setUser(updatedUser));
+          // dispatch(setUser(updatedUser));
           setProfileData({
             fullName: updatedUser.fullName || updatedUser.full_name || "",
             email: updatedUser.email || "",
           });
         }
-        dispatch(fetchUserProfile());
+        // dispatch(fetchUserProfile());
         toast.success("Cập nhật hồ sơ thành công");
       }
     } catch (error) {

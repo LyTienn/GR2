@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 // import { clearAuthError } from "@/redux/Auth/AuthSlice";
-import { loginUser } from "../../redux/Auth/AuthThunk";
+import { loginStart } from "@/store/Auth";
 import { toast } from "react-toastify";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,9 +32,9 @@ const LoginForm = () => {
             toast.warn("Vui lòng điền đầy đủ thông tin");
             return;
         }
-        const res = await dispatch(loginUser({ email, password }));
+        const res = dispatch(loginStart({ email, password }));
 
-        if(loginUser.fulfilled.match(res)){
+        if(loginStart.fulfilled.match(res)){
             const role = (res.payload?.role || "").toUpperCase();
             toast.success("Đăng nhập thành công. Chào mừng bạn quay trở lại!");
             if (role === "ADMIN") {
@@ -43,7 +43,7 @@ const LoginForm = () => {
                 navigate("/");
             }
         } 
-        else if (loginUser.rejected.match(res)) {
+        else if (loginStart.rejected.match(res)) {
             const errorMessage = res.payload || "Email hoặc mật khẩu không chính xác";
             toast.error(errorMessage);
         }

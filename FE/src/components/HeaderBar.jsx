@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { logoutUser } from '@/redux/Auth/AuthThunk';
+// import { logoutUser } from '@/store/Auth/AuthThunk';
 import Search from './Search';
 import { Button } from "@/components/ui/button";
 import { BookOpen, User, LogOut, Library, LayoutDashboard, Zap, Settings, Crown, Menu, X } from "lucide-react"
@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from 'react-toastify';
-import { setUser } from '@/redux/Auth/AuthSlice';
+// import { setUser } from '@/store/Auth/authSlice';
 
 const HeaderBar = () => {
   const dispatch = useDispatch();

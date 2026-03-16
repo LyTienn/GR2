@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { registerUser } from "@/redux/Auth/AuthThunk";
+import { registerStart } from "@/store/Auth";
 
 const RegisterForm = () => {
     const [name, setName] = useState("");
@@ -22,8 +22,8 @@ const RegisterForm = () => {
             toast.error("Mật khẩu xác nhận không khớp");
             return;
         }
-        const res = await dispatch(registerUser({ email, password, fullName: name }));
-        if (registerUser.fulfilled.match(res)) {
+        const res = dispatch(registerStart({ email, password, fullName: name }));
+        if (registerStart.fulfilled.match(res)) {
             toast.success("Đăng ký thành công. Vui lòng đăng nhập.");
             navigate("/login");
         }

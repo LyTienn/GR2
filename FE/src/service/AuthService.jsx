@@ -1,41 +1,42 @@
-import Axios_config from '../config/Axios-config.jsx';
 import HttpClient from './HttpClient.jsx';
 
+const login = (credentials) => {
+    return HttpClient.post('/auth/login', credentials);
+};
+
+const register = (userData) => {
+    return HttpClient.post('/auth/register', userData);
+};
+
+const logout = () => {
+    return HttpClient.post('/auth/logout');
+};
+
+const getProfile = () => {
+    return HttpClient.get('/users/profile');
+};
+
+const updateProfile = (userData) => {
+    return HttpClient.put('/users/profile', userData);
+};
+
+const changePassword = (passwordData) => {
+    return HttpClient.post('/users/change-password', passwordData);
+};
+
+//USER XÓA
+const deleteAccount = (password) => {
+    return HttpClient.delete('/users/account', { body: { password } });
+};
+
 const AuthService = {
-    login: async (credentials) => {
-        const res = await Axios_config.post('/auth/login', credentials);
-        return res.data.user;
-    },
-
-    register: async(userData) => {
-        const res = await Axios_config.post('/auth/register', userData);
-        return res.data.user;
-    },
-
-    logout: async() => {
-        await Axios_config.post('/auth/logout');
-    },
-
-    getProfile: async() => {
-        const res = await Axios_config.get('/users/profile');
-        return res.data;
-    },
-
-    updateProfile: async(userData) => {
-        const res = await Axios_config.put('/users/profile', userData);
-        return res.data.user;
-    },
-
-    changePassword: async(passwordData) => {
-        const res = await Axios_config.post('/users/change-password', passwordData);
-        return res.data;
-    },
-
-    //USER XÓA
-    deleteAccount: async(password) => {
-        const res = await Axios_config.delete('/users/account', { data: { password } });
-        return res.data;
-    }
+    login,
+    register,
+    logout,
+    getProfile,
+    updateProfile,
+    changePassword,
+    deleteAccount
 };
 
 export default AuthService;

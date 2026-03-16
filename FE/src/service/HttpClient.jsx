@@ -3,6 +3,8 @@ import { catchError, switchMap, filter, take } from 'rxjs/operators';
 import { throwError, BehaviorSubject, defer, of } from 'rxjs';
 import { toast } from 'react-toastify';
 import { buildRequestUrl, extractHeaders, removeCustomKeys } from './HttpHelper';
+import { store } from '@/store/configureStore';
+import { logoutSuccess } from '@/store/Auth/authSlice';
 
 const BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -11,6 +13,7 @@ const refreshTokenSubject = new BehaviorSubject(null);
 
 const logoutAndRedirect = () => {
   toast.error("Phiên đăng nhập hết hạn, vui lòng đăng nhập lại!");
+  store.dispatch(logoutSuccess());
   window.location.href = '/login';
   return throwError(() => new Error('Session Expired'));
 };
@@ -39,7 +42,6 @@ const handle401Error = (requestObj) => {
       })
     );
   } else {
-    // Đang refresh dở, các request lỗi 401 khác xếp hàng chờ
     return refreshTokenSubject.pipe(
       filter(done => done !== null),
       take(1),
