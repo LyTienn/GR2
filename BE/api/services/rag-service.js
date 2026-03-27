@@ -60,7 +60,7 @@ export const initializeVectorStore = async () => {
         const books = await Book.findAll({
             where: {
                 is_deleted: 0,
-                embedding: { [Op.ne]: null }
+                // embedding: { [Op.ne]: null }
             },
             attributes: ['id', 'title', 'summary', 'language', 'author_id', 'embedding', 'image_url'],
             order: [['id', 'DESC']]

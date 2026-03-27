@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 // import { clearAuthError } from "@/redux/Auth/AuthSlice";
@@ -17,37 +17,33 @@ const LoginForm = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const { isLoading } = useSelector((state) => state.auth);
+    const { isLoading, user, error, isAuthenticated } = useSelector((state) => state.auth);
 
-    // useEffect(() => {
-    //     if (isAuthenticated) {
-    //         navigate("/"); 
-    //     }
-    //     dispatch(clearAuthError());
-    // }, [isAuthenticated, navigate, dispatch]);
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if(!email || !password) {
-            toast.warn("Vui lòng điền đầy đủ thông tin");
-            return;
-        }
-        const res = dispatch(loginStart({ email, password }));
-
-        if(loginStart.fulfilled.match(res)){
-            const role = (res.payload?.role || "").toUpperCase();
+    useEffect(() => {
+        if (isAuthenticated && user) {
             toast.success("Đăng nhập thành công. Chào mừng bạn quay trở lại!");
-            if (role === "ADMIN") {
+            if ((user.role || "").toUpperCase() === "ADMIN") {
                 navigate("/admin");
             } else {
                 navigate("/");
             }
-        } 
-        else if (loginStart.rejected.match(res)) {
-            const errorMessage = res.payload || "Email hoặc mật khẩu không chính xác";
-            toast.error(errorMessage);
         }
-    }
+    }, [isAuthenticated, user, navigate]);
+
+    useEffect(() => {
+        if (error) {
+            toast.error(error);
+        }
+    }, [error]);
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (!email || !password) {
+            toast.warn("Vui lòng điền đầy đủ thông tin");
+            return;
+        }
+        dispatch(loginStart({ email, password }));
+    };
 
     return (
         <Card className="w-full max-w-md">

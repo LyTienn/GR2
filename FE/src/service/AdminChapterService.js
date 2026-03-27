@@ -1,17 +1,18 @@
-import axiosInstance from '../config/Axios-config.jsx';
+// import axiosInstance from '../config/Axios-config.jsx';
+import HttpClient from "./HttpClient";
 
 const AdminChapterService = {
     getChapterById: (id) => {
-        return axiosInstance.get(`/chapters/${id}`);
+        return HttpClient.get(`/chapters/${id}`);
     },
     updateChapter: (id, data) => {
-        return axiosInstance.put(`/chapters/${id}`, data);
+        return HttpClient.put(`/chapters/${id}`, data);
     },
     deleteChapter: (id) => {
-        return axiosInstance.delete(`/chapters/${id}`);
+        return HttpClient.delete(`/chapters/${id}`);
     },
     createChapter: (data) => {
-        return axiosInstance.post(`/chapters`, data);
+        return HttpClient.post(`/chapters`, data);
     }
 };
 

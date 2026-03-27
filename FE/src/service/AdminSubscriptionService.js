@@ -1,13 +1,14 @@
-import axiosInstance from '../config/Axios-config.jsx';
+// import axiosInstance from '../config/Axios-config.jsx';
+import HttpClient from "./HttpClient";
 
 const AdminSubscriptionService = {
     getAllSubscriptions: async (params) => {
-        const res = await axiosInstance.get('/subscriptions/admin/all', { params });
+        const res = HttpClient.get('/subscriptions/admin/all', { params });
         return res; // axios interceptor already returns response.data
     },
 
     updateSubscription: async (id, data) => {
-        return await axiosInstance.put(`/subscriptions/admin/${id}`, data);
+        return HttpClient.put(`/subscriptions/admin/${id}`, data);
     }
 };
 

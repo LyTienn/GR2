@@ -6,7 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/HeaderBar";
 import BookCard from "@/components/BookCard";
 import { AccountSidebar } from "@/components/Account-sidebar";
-import axios from "@/config/Axios-config";
+// import axios from "@/config/Axios-config";
+import HttpClient from "@/service/HttpClient";
 
 const BookShelf = () => {
     const { isAuthenticated } = useSelector((state) => state.auth);
@@ -20,10 +21,10 @@ const BookShelf = () => {
         setLoading(true);
         try {
             const [resFav, resRead] = await Promise.all([
-                axios.get('/bookshelf?status=FAVORITE'),
-                axios.get('/bookshelf?status=READING')
+                HttpClient.get('/bookshelf?status=FAVORITE'),
+                HttpClient.get('/bookshelf?status=READING')
             ]);
-            
+            console.log(resFav, resRead);
             if (resFav.success && resFav.data) {
                 // Backend trả về: { favorites:Array(1), reading:Array(0), total:1 }
                 // Cần trỏ đúng vào favorites

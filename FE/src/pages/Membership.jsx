@@ -4,7 +4,8 @@ import { Check, Star, Shield, ArrowLeft, Loader2, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
 import { useSelector, useDispatch } from "react-redux";
-// import axios from "@/config/Axios-config";
+import PaymentService from "@/service/PaymentService";
+import AuthService from "@/service/AuthService";
 // import { setUser } from "@/store/Auth/authSlice";
 
 const Membership = () => {
@@ -49,7 +50,7 @@ const Membership = () => {
 
         try {
             setLoading(true);
-            const res = await axios.post("/payment/sepay/create", {
+            const res = await PaymentService.createSepayPayment({
                 package_details: pkg.id,
                 amount: pkg.price,
             });
@@ -82,7 +83,7 @@ const Membership = () => {
         if (paymentInfo) {
             interval = setInterval(async () => {
                 try {
-                    const res = await axios.get('/users/profile');
+                    const res = AuthService.getProfile();
                     if (res.success && res.data) {
                         const updatedUser = res.data || res.data.user;
                         console.log("Polling User Tier:", updatedUser.tier);

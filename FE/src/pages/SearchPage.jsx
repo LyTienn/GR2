@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
-import axios from "@/config/Axios-config";
+import HttpClient from "@/service/HttpClient";
+import { firstValueFrom } from 'rxjs';
 import BookCard from "@/components/BookCard";
 import Header from "@/components/HeaderBar";
 import {
@@ -51,30 +52,20 @@ const SearchPage = () => {
         const fetchFilters = async () => {
             try {
                 const [subjectsRes, authorsRes] = await Promise.all([
-                    axios.get('/subjects?limit=100'), // Increase limit to get all for filter
-                    axios.get('/authors?limit=100')
+                    firstValueFrom(HttpClient.get("/subjects", { search: { limit: 100 } })), // Increase limit to get all for filter
+                    firstValueFrom(HttpClient.get('/authors', { search: { limit: 100 } }))
                 ]);
 
                 // Handle Subjects
                 if (subjectsRes.success) {
                     const subjectData = subjectsRes.data?.subjects || subjectsRes.data || [];
-                    if (Array.isArray(subjectData)) {
-                        setSubjects(subjectData);
-                    } else {
-                        console.warn("Subjects API returned non-array data:", subjectsRes.data);
-                        setSubjects([]);
-                    }
+                    setSubjects(Array.isArray(subjectData) ? subjectData : [])
                 }
 
                 // Handle Authors
                 if (authorsRes.success) {
                     const authorData = authorsRes.data?.authors || authorsRes.data || [];
-                    if (Array.isArray(authorData)) {
-                        setAuthors(authorData);
-                    } else {
-                        console.warn("Authors API returned non-array data:", authorsRes.data);
-                        setAuthors([]);
-                    }
+                    setAuthors(Array.isArray(authorData) ? authorData : []);
                 }
             } catch (error) {
                 console.error("Failed to fetch filters:", error);
@@ -106,7 +97,7 @@ const SearchPage = () => {
             if (selectedAuthor) params.authorId = selectedAuthor;
             if (selectedType) params.type = selectedType;
 
-            const res = await axios.get('/books', { params });
+            const res = await firstValueFrom(HttpClient.get('/books', { search: params }));
             const resultData = res.data?.books || [];
 
             setBooks(Array.isArray(resultData) ? resultData : []);

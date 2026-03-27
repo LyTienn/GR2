@@ -3,7 +3,8 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import ListSection from '../components/ListSection';
 import HeaderBar from '../components/HeaderBar';
-import axios from '@/config/Axios-config';
+import HttpClient from '@/service/HttpClient';
+import { firstValueFrom } from 'rxjs';
 import { useNavigate, Link } from 'react-router-dom';
 import {
   BookOpen,
@@ -33,7 +34,7 @@ const HomePage = () => {
     const fetchBooks = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('/books', { params: { limit: 50 } });
+        const response = await firstValueFrom(HttpClient.get('/books', { search: { limit: 100 } })) ;
         if (response.success && response.data) {
           const booksSource = response.data.books || (Array.isArray(response.data) ? response.data : []);
 
@@ -55,7 +56,7 @@ const HomePage = () => {
 
     const fetchStats = async () => {
       try {
-        const response = await axios.get('/public/stats');
+        const response = await firstValueFrom(HttpClient.get('/public/stats'));
         if (response.success && response.data) {
           setStats({
             books: response.data.books || 0,

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-// import { logoutUser } from '@/store/Auth/AuthThunk';
 import Search from './Search';
 import { Button } from "@/components/ui/button";
 import { BookOpen, User, LogOut, Library, LayoutDashboard, Zap, Settings, Crown, Menu, X } from "lucide-react"
@@ -14,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from 'react-toastify';
-// import { setUser } from '@/store/Auth/authSlice';
+import { logoutStart } from '@/store/Auth';
 
 const HeaderBar = () => {
   const dispatch = useDispatch();
@@ -23,12 +22,21 @@ const HeaderBar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Lấy state auth
-  const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const { user, isAuthenticated, isLoading, error } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      // Đăng xuất thành công
+      toast.success('Đăng xuất thành công!');
+      navigate('/homepage');
+    }
+    if (error) {
+      toast.error(error);
+    }
+  }, [isAuthenticated, error, navigate]);
 
   const handleLogout = () => {
-    dispatch(logoutUser());
-    toast.success('Đăng xuất thành công!');
-    navigate('/homepage');
+    dispatch(logoutStart());
   };
 
   useEffect(() => {

@@ -2,7 +2,8 @@ import { Search as SearchIcon, Loader2, X } from "lucide-react";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { debounce } from "lodash";
-import axios from "@/config/Axios-config";
+// import axios from "@/config/Axios-config";
+import HttpClient from "@/service/HttpClient";
 
 const Search = ({ variant = "dynamic", className = "" }) => {
     const [isOpen, setIsOpen] = useState(variant === "static");
@@ -31,7 +32,7 @@ const Search = ({ variant = "dynamic", className = "" }) => {
         }
         try {
             setLoading(true);
-            const res = await axios.get(`/books?keyword=${encodeURIComponent(term)}`);
+            const res = HttpClient.get(`/books?keyword=${encodeURIComponent(term)}`);
             const resultData = res.data?.books || [];
             setSuggestions(Array.isArray(resultData) ? resultData.slice(0, 5) : []);
         } catch (error) {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Loader2, Search, BookOpen } from 'lucide-react';
-import axiosInstance from '../../config/Axios-config';
+// import axiosInstance from '../../config/Axios-config';
+import HttpClient from '../../service/HttpClient';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 
 const COLORS = {
@@ -36,7 +37,7 @@ const BookAnalytics = () => {
         try {
             setLoadingBooks(true);
             // Use new endpoint to get only books with comments
-            const res = await axiosInstance.get('/comments/books-with-comments', { params: { limit: 100 } });
+            const res = HttpClient.get('/comments/books-with-comments', { params: { limit: 100 } });
             setBooks(res?.data || []);
         } catch (error) {
             console.error("Error fetching books:", error);
@@ -55,7 +56,7 @@ const BookAnalytics = () => {
                 params.sentiment = sentiment;
             }
 
-            const commentsRes = await axiosInstance.get(`/comments/books/${bookId}/comments`, { params });
+            const commentsRes = HttpClient.get(`/comments/books/${bookId}/comments`, { params });
             setBookComments(commentsRes?.data?.comments || []);
 
             // Fetch Sentiment Stats (only once or always? Always is fine to keep chart updated if needed, but chart usually visualizes ALL comments)
@@ -64,7 +65,7 @@ const BookAnalytics = () => {
             // If just filter changed, maybe don't fetch stats? 
             // Let's refactor: Fetch stats only when book changes. Fetch comments when book OR filter changes.
             if (sentiment === 'ALL' || !sentimentStats) {
-                const statsRes = await axiosInstance.get('/comments/sentiment-stats', { params: { bookId } });
+                const statsRes = HttpClient.get('/comments/sentiment-stats', { params: { bookId } });
                 setSentimentStats(statsRes?.data || null);
             }
 

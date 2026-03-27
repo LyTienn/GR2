@@ -22,7 +22,7 @@ export const loginEpic = action$ => action$.pipe(
 export const logoutEpic = (action$) => action$.pipe(
     ofType(logoutStart.type),
     switchMap(() =>
-        HttpClient.post('auth/logout').pipe(
+        HttpClient.post('/auth/logout').pipe(
             map(() => logoutSuccess()),
             catchError(error => of(logoutFailure(error.response?.message || "Đăng xuất thất bại")))
         )

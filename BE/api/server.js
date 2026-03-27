@@ -23,6 +23,7 @@ import subscriptionRoutes from "./routes/subscription-route.js";
 import chapterRoutes from "./routes/chapter-route.js";
 import { initializeVectorStore } from "./services/rag-service.js";
 import cron from "node-cron";
+import PaymentController from "./controllers/payment-controller.js";
 
 dotenv.config();
 
@@ -161,7 +162,7 @@ const startServer = async () => {
     });
 
     // Initialize RAG Vector Store
-    initializeVectorStore();
+    // initializeVectorStore();
   } catch (error) {
     console.error("❌ Unable to start server:", error);
     process.exit(1);
