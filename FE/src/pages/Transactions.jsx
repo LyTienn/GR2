@@ -45,7 +45,19 @@ export default function Transactions() {
     try {
       setLoading(true);
       setError(null);
-
+      try {
+        const subRes = await PaymentService.getCurrentSubscription();
+        console.log("✅ Current Subscription:", subRes);
+        if (subRes.success) {
+          if(subRes.data.isExpired) {
+            toast.warn("Hội viên của bạn đã hết hạn. Vui lòng gia hạn để tiếp tục sử dụng dịch vụ.");
+          } else if (subRes.data.subcription) {
+            console.log("✅ Subscription Details:", subRes.data.subcription);
+          }
+        }
+      } catch (subErr) {
+        console.warn("⚠️ Failed to fetch current subscription:", subErr);
+      }
       const res = await PaymentService.getPaymentHistory();
 
       if (res.success && res.data?.history) {

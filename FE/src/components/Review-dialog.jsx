@@ -12,7 +12,8 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "react-toastify";
 import { Star, StarHalf, MessageCircle } from "lucide-react";
-import axios from "@/config/Axios-config";
+import { firstValueFrom } from "rxjs";
+import HttpClient from "@/service/HttpClient";
 
 const ReviewDialog = ({ bookId, onReviewAdded }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -33,12 +34,15 @@ const ReviewDialog = ({ bookId, onReviewAdded }) => {
             toast.error("Vui lòng chọn đánh giá sao.");
             return;
         }
+        
         setSubmitting(true);
         try {
-            await axios.post(`/comments/books/${bookId}/comments`, {
-                rating: rating,
-                content: comment,
-            });
+            await firstValueFrom(
+                HttpClient.post(`/comments/books/${bookId}/comments`, {
+                    rating: rating,
+                    content: comment,
+                })
+            );
             toast.success("Đánh giá của bạn đã được gửi thành công!");
             setIsOpen(false);
             setRating(0);
@@ -47,6 +51,7 @@ const ReviewDialog = ({ bookId, onReviewAdded }) => {
                 onReviewAdded();
             }
         } catch (err) {
+            console.error("Lỗi gửi đánh giá:", err);
             if (err.response && err.response.status === 409) {
                 toast.error("Bạn đã đánh giá cuốn sách này trước đó.");
             } else {

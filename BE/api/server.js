@@ -133,11 +133,11 @@ app.use((err, req, res, next) => {
   });
 });
 
-cron.schedule("*/1 * * * *", () => {
-  PaymentController.cancelPendingSubscriptions()
-    .then(() => console.log("Checked and cancelled pending subscriptions"))
-    .catch((err) => console.error("Error cancelling pending subscriptions:", err));
-});
+// cron.schedule("*/1 * * * *", () => {
+//   PaymentController.cancelPendingSubscriptions()
+//     .then(() => console.log("Checked and cancelled pending subscriptions"))
+//     .catch((err) => console.error("Error cancelling pending subscriptions:", err));
+// });
 
 // Start server
 const startServer = async () => {

@@ -6,7 +6,9 @@ import { Switch } from "@/components/ui/switch";
 import { ChevronRight, List, FileText, ChevronLeft, ArrowLeft, Headphones, Sparkles, Loader2, Lock, Globe, Palette } from "lucide-react";
 import Header from "@/components/HeaderBar";
 import { toast } from "react-toastify";
-import axios from "@/config/Axios-config";
+// import axios from "@/config/Axios-config";
+import HttpClient from "@/service/HttpClient";
+import { firstValueFrom } from "rxjs";
 import { debounce } from "lodash";
 // import AudioPlayer from "@/components/AudioPlayer";
 // import ComicReader from "@/components/ComicReader";
@@ -67,10 +69,12 @@ export default function ReadBookPage() {
   const saveProgress = useRef(
     debounce(async (bId, cId, scrollPercent) => {
       try {
-        await axios.put(`/bookshelf/books/${bId}/progress`, {
-          chapterId: cId,
-          scrollPosition: scrollPercent
-        });
+        await firstValueFrom(
+          HttpClient.put(`/bookshelf/books/${bId}/progress`, {
+            chapterId: cId,
+            scrollPosition: scrollPercent
+          })
+        );
       } catch (error) {
         console.error("❌ Lỗi lưu tiến độ:", error);
       }
@@ -94,18 +98,20 @@ export default function ReadBookPage() {
     if (bookId && isAuthenticated) {
       const initReadingStatus = async () => {
         try {
-          // Check if book is already in bookshelf
-          const checkResponse = await axios.get(`/bookshelf/books/${bookId}/check`);
+          const checkResponse = await firstValueFrom(
+            HttpClient.get(`/bookshelf/books/${bookId}/check`)
+          );
 
-          // Only add if not already in READING status
           if (!checkResponse.data?.isReading) {
-            await axios.post(`/bookshelf/books/${bookId}`, {
-              bookId: bookId,
-              status: 'READING'
-            });
+            await firstValueFrom(
+              HttpClient.post(`/bookshelf/books/${bookId}`, {
+                bookId: bookId,
+                status: 'READING'
+              })
+            );
           }
         } catch (error) {
-          // Silently ignore errors - bookshelf management is not critical
+          console.error("Lỗi khởi tạo trạng thái đọc:", error);
         }
       };
       initReadingStatus();
@@ -115,9 +121,10 @@ export default function ReadBookPage() {
   useEffect(() => {
     const fetchBook = async () => {
       try {
-        const res = await axios.get(`/books/${bookId}`);
-        setBook(res.data);
+        const res = await firstValueFrom(HttpClient.get(`/books/${bookId}`));
+        setBook(res.data ?? res);
       } catch (err) {
+        console.error("Lỗi load sách:", err);
         toast.error("Lỗi khi tải thông tin sách.");
       }
     };
@@ -131,15 +138,23 @@ export default function ReadBookPage() {
       try {
         setLoading(true);
         const [resChapters, resProgress] = await Promise.all([
-          axios.get(`/books/${bookId}/chapters`),
-          isAuthenticated ? axios.get(`/bookshelf/books/${bookId}/progress`).catch(() => null) : null
+          firstValueFrom(HttpClient.get(`/books/${bookId}/chapters`)).catch(() => null),
+          isAuthenticated 
+            ? firstValueFrom(HttpClient.get(`/bookshelf/books/${bookId}/progress`)).catch(() => null) 
+            : null
         ]);
 
         let finalChapters = [];
-        const rawChaps = resChapters;
-        if (Array.isArray(rawChaps)) finalChapters = rawChaps;
-        else if (rawChaps.data && Array.isArray(rawChaps.data)) finalChapters = rawChaps.data;
-        else if (rawChaps.data?.data && Array.isArray(rawChaps.data.data)) finalChapters = rawChaps.data.data;
+        if (resChapters) {
+          const rawChaps = resChapters.data ?? resChapters;
+          if (Array.isArray(rawChaps)) {
+            finalChapters = rawChaps;
+          } else if (rawChaps?.data && Array.isArray(rawChaps.data)) {
+            finalChapters = rawChaps.data;
+          } else if (rawChaps?.data?.data && Array.isArray(rawChaps.data.data)) {
+            finalChapters = rawChaps.data.data;
+          }
+        }
         setChapters(finalChapters);
 
         let chapterToLoad = null;
@@ -171,7 +186,7 @@ export default function ReadBookPage() {
         }
 
       } catch (err) {
-        console.error(err);
+        console.error("Lỗi tải dữ liệu:", err);
         toast.error("Lỗi khi tải dữ liệu sách.");
       } finally {
         setLoading(false);
@@ -225,7 +240,9 @@ export default function ReadBookPage() {
     hasMarkedCompleted.current = true;
     saveProgress.cancel();
     try {
-      await axios.delete(`/bookshelf/books/${bookId}?status=READING`);
+      await firstValueFrom(
+        HttpClient.delete(`/bookshelf/books/${bookId}?status=READING`)
+      );
       return;
     } catch (error) {
       console.error("Lỗi xóa sách:", error);

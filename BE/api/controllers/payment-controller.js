@@ -35,69 +35,174 @@ class PaymentController {
   }
 
   static async getPaymentHistory(req, res) {
+  try {
+    const userId = req.user.userId;
+    const now = new Date();
+    const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
+
+    // 1. Hủy các giao dịch PENDING quá 5 phút
+    await Subscription.update(
+      { status: "CANCELLED" },
+      {
+        where: {
+          user_id: userId,
+          status: "PENDING",
+          start_date: { [Op.lt]: fiveMinutesAgo }
+        }
+      }
+    );
+
+    // 2. Đánh dấu các subscription EXPIRED
+    const expiredSubs = await Subscription.update(
+      { status: "EXPIRED" },
+      {
+        where: {
+          user_id: userId,
+          status: "ACTIVE",
+          expiry_date: { [Op.lt]: now }
+        }
+      }
+    );
+
+    // 3. ✅ DOWNGRADE USER nếu có subscription EXPIRED
+    if (expiredSubs[0] > 0) {
+      const hasActiveSub = await Subscription.findOne({
+        where: {
+          user_id: userId,
+          status: "ACTIVE"
+        }
+      });
+
+      // Nếu không còn subscription ACTIVE nào, downgrade user
+      if (!hasActiveSub) {
+        await User.update(
+          { tier: "BASIC" },
+          { where: { user_id: userId } }
+        );
+        console.log(`✅ Downgraded user ${userId} to BASIC (subscription expired)`);
+      }
+    }
+
+    // 4. Lấy lịch sử
+    const subscriptions = await Subscription.findAll({
+      where: { user_id: userId },
+      order: [["start_date", "DESC"]],
+      attributes: [
+        "subscription_id",
+        "package_details",
+        "start_date",
+        "expiry_date",
+        "payment_transaction_id",
+        "status",
+      ],
+    });
+
+    const history = subscriptions.map((sub) => ({
+      id: sub.subscription_id,
+      transactionId: sub.payment_transaction_id,
+      package: sub.package_details,
+      amount: PaymentController.getPackageAmount(sub.package_details),
+      status: sub.status,
+      statusText: PaymentController.getStatusText(sub.status),
+      startDate: sub.start_date,
+      expiryDate: sub.expiry_date,
+    }));
+
+    res.status(200).json({
+      success: true,
+      data: { history },
+    });
+  } catch (error) {
+    console.error("Get payment history error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+}
+
+  static async getCurrentSubscription(req, res) {
     try {
-      const userId = req.user.userId; // Từ middleware authenticate
-      const now = new Date();
-      const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
+    const userId = req.user.userId;
+    const now = new Date();
 
-      await Subscription.update(
-        { status: "CANCELLED" },
-        {
-          where: {
-            user_id: userId,
-            status: "PENDING",
-            start_date: { [Op.lt]: fiveMinutesAgo }
-          }
-        }
+    // Tìm subscription ACTIVE gần nhất
+    const subscription = await Subscription.findOne({
+      where: {
+        user_id: userId,
+        status: "ACTIVE"
+      },
+      order: [["expiry_date", "DESC"]],
+      attributes: [
+        "subscription_id",
+        "package_details",
+        "start_date",
+        "expiry_date",
+        "status"
+      ]
+    });
+
+    // Nếu hết hạn, tự động downgrade
+    if (subscription && new Date(subscription.expiry_date) < now) {
+      subscription.status = "EXPIRED";
+      await subscription.save();
+
+      await User.update(
+        { tier: "BASIC" },
+        { where: { user_id: userId } }
       );
 
-      await Subscription.update(
-        { status: "EXPIRED" },
-        {
-          where: {
-            user_id: userId,
-            status: "ACTIVE",
-            expiry_date: { [Op.lt]: now }
-          }
-        }
-      );
+      console.log(`✅ Auto-downgraded user ${userId} to BASIC (subscription expired)`);
 
-      const subscriptions = await Subscription.findAll({
-        where: { user_id: userId },
-        order: [["start_date", "DESC"]],
-        attributes: [
-          "subscription_id",
-          "package_details",
-          "start_date",
-          "expiry_date",
-          "payment_transaction_id",
-          "status",
-        ],
-      });
-
-      // Map sang format dễ đọc hơn
-      const history = subscriptions.map((sub) => ({
-        id: sub.subscription_id,
-        transactionId: sub.payment_transaction_id,
-        package: sub.package_details,
-        amount: PaymentController.getPackageAmount(sub.package_details),
-        status: sub.status,
-        statusText: PaymentController.getStatusText(sub.status),
-        startDate: sub.start_date,
-        expiryDate: sub.expiry_date,
-      }));
-
-      res.status(200).json({
+      return res.status(200).json({
         success: true,
-        data: { history },
-      });
-    } catch (error) {
-      console.error("Get payment history error:", error);
-      res.status(500).json({
-        success: false,
-        message: "Server error",
+        data: {
+          subscription: null,
+          isExpired: true,
+          message: "Gói hội viên đã hết hạn"
+        }
       });
     }
+
+    // Nếu còn hạn
+    if (subscription) {
+      const expiryDate = new Date(subscription.expiry_date);
+      const daysRemaining = Math.ceil(
+        (expiryDate - now) / (1000 * 60 * 60 * 24)
+      );
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          subscription: {
+            id: subscription.subscription_id,
+            package: subscription.package_details,
+            startDate: subscription.start_date,
+            expiryDate: subscription.expiry_date,
+            isActive: true,
+            daysRemaining: daysRemaining
+          },
+          isExpired: false
+        }
+      });
+    }
+
+    // Không có subscription
+    return res.status(200).json({
+      success: true,
+      data: {
+        subscription: null,
+        isExpired: false,
+        message: "Bạn chưa có gói hội viên"
+      }
+    });
+  } catch (error) {
+    console.error("Get current subscription error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
+  }
   }
 
 //   static async getPaymentById(req, res) {

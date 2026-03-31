@@ -13,8 +13,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import HeaderBar from "./HeaderBar";
-// THAY ĐỔI 1: Import axios từ config để nhận interceptor và cookie
-import axios from "@/config/Axios-config";
+import HttpClient from "@/service/HttpClient";
+import { firstValueFrom } from "rxjs";
 import { useSelector } from "react-redux";
 import { ReviewsSection } from "@/components/Review-section";
 import ReviewDialog from "@/components/Review-dialog";
@@ -32,34 +32,47 @@ export default function BookSection({ book: bookProp }) {
 
   // LOGIC 1: Load thông tin sách
   useEffect(() => {
-    if (!bookProp && params.id) {
-      setLoading(true);
-      axios.get(`/books/${params.id}`)
-        .then(res => {
-          setBook(res.data || res);
-        })
-        .catch(() => setBook(null))
-        .finally(() => setLoading(false));
-    }
-  }, [params.id, bookProp]);
+  if (!bookProp && params.id) {
+    setLoading(true);
+    const subscription = HttpClient.get(`/books/${params.id}`)
+      .subscribe({
+        next: (res) => {
+          setBook(res.data ?? res);
+        },
+        error: (error) => {
+          console.error("Lỗi load sách:", error);
+          setBook(null);
+        },
+        complete: () => {
+          setLoading(false);
+        }
+      });
+    
+    // Cleanup subscription
+    return () => subscription.unsubscribe();
+  }
+}, [params.id, bookProp]);
+
 
   // LOGIC 2: Kiểm tra trạng thái yêu thích ngay khi load 
   useEffect(() => {
-    if (isAuthenticated && book?.id) {
-      const checkFavoriteStatus = async () => {
-        try {
-          const res = await axios.get(`/bookshelf/books/${book.id}/check`);
-
+  if (isAuthenticated && book?.id) {
+    const subscription = HttpClient.get(`/bookshelf/books/${book.id}/check`)
+      .subscribe({
+        next: (res) => {
           if (res.success && res.data) {
             setIsFavorite(res.data.isFavorite);
           }
-        } catch (error) {
+        },
+        error: (error) => {
           console.error("Lỗi check status:", error);
         }
-      };
-      checkFavoriteStatus();
-    }
-  }, [isAuthenticated, book?.id]);
+      });
+
+    // Cleanup subscription
+    return () => subscription.unsubscribe();
+  }
+}, [isAuthenticated, book?.id]);
 
   if (!book) {
     return (
@@ -71,31 +84,46 @@ export default function BookSection({ book: bookProp }) {
 
   // LOGIC 3: Xử lý Toggle
   const handleToggleFavorite = async () => {
-    if (!isAuthenticated) {
-      toast.error("Bạn cần đăng nhập để thêm sách vào yêu thích");
-      navigate("/login");
-      return;
+  if (!isAuthenticated) {
+    toast.error("Bạn cần đăng nhập để thêm sách vào yêu thích");
+    navigate("/login");
+    return;
+  }
+
+  const previousState = isFavorite;
+  setIsFavorite(!isFavorite);
+
+  try {
+    if (previousState) {
+      HttpClient.delete(`/bookshelf/books/${book.id}?status=FAVORITE`)
+        .subscribe({
+          next: () => {
+            toast.success("Đã xóa sách khỏi yêu thích");
+            window.dispatchEvent(new Event("bookshelf-updated"));
+          },
+          error: (error) => {
+            setIsFavorite(previousState);
+            toast.error(error.message || "Đã có lỗi xảy ra.");
+          }
+        });
+    } else {
+      HttpClient.post(`/bookshelf/books/${book.id}`, { status: "FAVORITE" })
+        .subscribe({
+          next: () => {
+            toast.success("Đã thêm sách vào yêu thích");
+            window.dispatchEvent(new Event("bookshelf-updated"));
+          },
+          error: (error) => {
+            setIsFavorite(previousState);
+            toast.error(error.message || "Đã có lỗi xảy ra.");
+          }
+        });
     }
-
-    const previousState = isFavorite;
-    setIsFavorite(!isFavorite);
-
-    try {
-      if (previousState) {
-        await axios.delete(`/bookshelf/books/${book.id}?status=FAVORITE`);
-        toast.success("Đã xóa sách khỏi yêu thích");
-      } else {
-        await axios.post(`/bookshelf/books/${book.id}`, { status: "FAVORITE" });
-        toast.success("Đã thêm sách vào yêu thích");
-      }
-
-      // Bắn sự kiện để BookShelf cập nhật lại list
-      window.dispatchEvent(new Event("bookshelf-updated"));
-    } catch (error) {
-      setIsFavorite(previousState);
-      toast.error(error.message || "Đã có lỗi xảy ra.");
-    }
-  };
+  } catch (error) {
+    setIsFavorite(previousState);
+    toast.error(error.message || "Đã có lỗi xảy ra.");
+  }
+};
 
   // --- CÁC HÀM XỬ LÝ UI KHÁC GIỮ NGUYÊN ---
   const handleReadBook = () => {

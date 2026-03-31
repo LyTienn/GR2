@@ -32,4 +32,7 @@ router.post("/sepay/webhook", PaymentController.sepayWebhook);
 //API Lịch sử giao dịch
 router.get("/history", authenticate, PaymentController.getPaymentHistory);
 
+//Kiểm tra subscription hiện tại & hạn hội viên
+router.get("/subscription/current", authenticate, PaymentController.getCurrentSubscription);
+
 export default router;

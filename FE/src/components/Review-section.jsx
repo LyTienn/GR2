@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Star } from "lucide-react";
 import { useSelector } from "react-redux";
-import axios from "@/config/Axios-config";
+import HttpClient from "@/service/HttpClient";
+import { firstValueFrom } from "rxjs";
 import { toast } from "react-toastify";
 import CommentMenu from "./CommentMenu";
 import {
@@ -49,11 +50,14 @@ export function ReviewsSection({ bookId, refreshKey }) {
 
   useEffect(() => {
     if (!bookId) return;
-    setLoading(true);
-    axios
-      .get(`/comments/books/${bookId}/comments`)
-      .then((res) => {
-        const d = res.data; // interceptor trả về .data
+    
+    const loadReviews = async () => {
+      setLoading(true);
+      try {
+        const res = await firstValueFrom(
+          HttpClient.get(`/comments/books/${bookId}/comments`)
+        );
+        const d = res.data;
         setReviews(
           (d?.comments || []).map((item) => ({
             id: item.comment_id,
@@ -67,23 +71,32 @@ export function ReviewsSection({ bookId, refreshKey }) {
         );
         setAverageRating(Number(d?.averageRating || 0));
         setTotalComments(d?.totalComments || 0);
-      })
-      .catch(() => {
+      } catch (error) {
+        console.error("Lỗi load đánh giá:", error);
         setReviews([]);
         setAverageRating(0);
         setTotalComments(0);
-      })
-      .finally(() => setLoading(false));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadReviews();
   }, [bookId, refreshKey]);
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`/comments/${editModal.commentId}`, {
-        content: editModal.content,
-        rating: Number(editModal.rating),
-      });
-      const res = await axios.get(`/comments/books/${bookId}/comments`);
+      await firstValueFrom(
+        HttpClient.put(`/comments/${editModal.commentId}`, {
+          content: editModal.content,
+          rating: Number(editModal.rating),
+        })
+      );
+      
+      const res = await firstValueFrom(
+        HttpClient.get(`/comments/books/${bookId}/comments`)
+      );
       const d = res.data;
       setReviews(
         (d?.comments || []).map((item) => ({
@@ -100,6 +113,7 @@ export function ReviewsSection({ bookId, refreshKey }) {
       toast.success("Cập nhật đánh giá thành công!");
       setEditModal({ open: false, commentId: null, content: "", rating: 1 });
     } catch (err) {
+      console.error("Lỗi cập nhật đánh giá:", err);
       toast.error("Đã xảy ra lỗi khi cập nhật đánh giá. Vui lòng thử lại.");
     }
   };
@@ -107,8 +121,13 @@ export function ReviewsSection({ bookId, refreshKey }) {
   const handleDeleteSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.delete(`/comments/${deleteModal.commentId}`);
-      const res = await axios.get(`/comments/books/${bookId}/comments`);
+      await firstValueFrom(
+        HttpClient.delete(`/comments/${deleteModal.commentId}`)
+      );
+      
+      const res = await firstValueFrom(
+        HttpClient.get(`/comments/books/${bookId}/comments`)
+      );
       const d = res.data;
       setReviews(
         (d?.comments || []).map((item) => ({
@@ -125,6 +144,7 @@ export function ReviewsSection({ bookId, refreshKey }) {
       toast.success("Xóa đánh giá thành công!");
       setDeleteModal({ open: false, commentId: null });
     } catch (err) {
+      console.error("Lỗi xóa đánh giá:", err);
       toast.error("Đã xảy ra lỗi khi xóa đánh giá. Vui lòng thử lại.");
     }
   };

@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/HeaderBar";
 import BookCard from "@/components/BookCard";
 import { AccountSidebar } from "@/components/Account-sidebar";
-// import axios from "@/config/Axios-config";
+import { firstValueFrom } from "rxjs";
 import HttpClient from "@/service/HttpClient";
 
 const BookShelf = () => {
@@ -17,30 +17,31 @@ const BookShelf = () => {
     const [loading, setLoading] = useState(true);
 
     const fetchBookshelf = useCallback(async () => {
-        if (!isAuthenticated) return;
-        setLoading(true);
-        try {
-            const [resFav, resRead] = await Promise.all([
-                HttpClient.get('/bookshelf?status=FAVORITE'),
-                HttpClient.get('/bookshelf?status=READING')
-            ]);
-            console.log(resFav, resRead);
-            if (resFav.success && resFav.data) {
-                // Backend trả về: { favorites:Array(1), reading:Array(0), total:1 }
-                // Cần trỏ đúng vào favorites
-                setFavorite(resFav.data.favorites || []);
-            }
-
-            if (resRead.success && resRead.data) {
-                setReading(resRead.data.reading || []);
-            }
-
-        } catch (error) {
-            console.error("Lỗi tải tủ sách:", error);
-        } finally {
-            setLoading(false);
+    if (!isAuthenticated) return;
+    setLoading(true);
+    try {
+        const [resFav, resRead] = await Promise.all([
+            firstValueFrom(HttpClient.get('/bookshelf?status=FAVORITE')),
+            firstValueFrom(HttpClient.get('/bookshelf?status=READING'))
+        ]);
+        
+        console.log("Response Favorite:", resFav);
+        console.log("Response Reading:", resRead);
+        
+        if (resFav?.data) {
+            setFavorite(resFav.data.favorites || []);
         }
-    }, [isAuthenticated]);
+
+        if (resRead?.data) {
+            setReading(resRead.data.reading || []);
+        }
+
+    } catch (error) {
+        console.error("Lỗi tải tủ sách:", error);
+    } finally {
+        setLoading(false);
+    }
+}, [isAuthenticated]);
 
     useEffect(() => {
         if (!isAuthenticated) {
