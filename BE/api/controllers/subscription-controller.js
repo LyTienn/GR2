@@ -3,9 +3,6 @@ import Subscription from "../models/subscription-model.js";
 import { Op } from "sequelize";
 
 class SubscriptionController {
-
-
-
     // Create Subscription
     static async createSubscription(req, res) {
         try {
@@ -28,43 +25,43 @@ class SubscriptionController {
         }
     }
 
-    // Get Current User Subscription
-    static async getUserSubscription(req, res) {
-        try {
-            const userId = req.user.userId;
-            const subscription = await Subscription.findOne({
-                where: { user_id: userId, status: 'ACTIVE' },
-                order: [['expiry_date', 'DESC']]
-            });
-            res.status(200).json({ success: true, data: subscription });
-        } catch (error) {
-            console.error("Get user subscription error:", error);
-            res.status(500).json({ success: false, message: "Server error" });
-        }
-    }
+    // // Get Current User Subscription
+    // static async getUserSubscription(req, res) {
+    //     try {
+    //         const userId = req.user.userId;
+    //         const subscription = await Subscription.findOne({
+    //             where: { user_id: userId, status: 'ACTIVE' },
+    //             order: [['expiry_date', 'DESC']]
+    //         });
+    //         res.status(200).json({ success: true, data: subscription });
+    //     } catch (error) {
+    //         console.error("Get user subscription error:", error);
+    //         res.status(500).json({ success: false, message: "Server error" });
+    //     }
+    // }
 
-    // Cancel Subscription
-    static async cancelSubscription(req, res) {
-        try {
-            const userId = req.user.userId;
-            const { subscriptionId } = req.params;
-            const subscription = await Subscription.findOne({
-                where: { subscription_id: subscriptionId, user_id: userId }
-            });
+    // // Cancel Subscription
+    // static async cancelSubscription(req, res) {
+    //     try {
+    //         const userId = req.user.userId;
+    //         const { subscriptionId } = req.params;
+    //         const subscription = await Subscription.findOne({
+    //             where: { subscription_id: subscriptionId, user_id: userId }
+    //         });
 
-            if (!subscription) {
-                return res.status(404).json({ success: false, message: "Subscription not found" });
-            }
+    //         if (!subscription) {
+    //             return res.status(404).json({ success: false, message: "Subscription not found" });
+    //         }
 
-            subscription.status = 'CANCELLED';
-            await subscription.save();
+    //         subscription.status = 'CANCELLED';
+    //         await subscription.save();
 
-            res.status(200).json({ success: true, message: "Subscription cancelled", data: subscription });
-        } catch (error) {
-            console.error("Cancel subscription error:", error);
-            res.status(500).json({ success: false, message: "Server error" });
-        }
-    }
+    //         res.status(200).json({ success: true, message: "Subscription cancelled", data: subscription });
+    //     } catch (error) {
+    //         console.error("Cancel subscription error:", error);
+    //         res.status(500).json({ success: false, message: "Server error" });
+    //     }
+    // }
 
     // Admin: Get all subscriptions
     static async adminGetAllSubscriptions(req, res) {

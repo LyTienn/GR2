@@ -49,6 +49,15 @@ export const fetchProfileEpic = (action$) => action$.pipe(
     )
 );
 
+// export const fetchSubcriptionEpic = (action$) => action$.pipe(
+//     ofType(fetchSubcriptionStart.type),
+//     switchMap(() =>
+//         HttpClient.get('/payment/subscription/current').pipe(
+//             map(res => fetchSubcriptionSuccess(res.data.data)),
+//             catchError(error => of(fetchSubcriptionFailure(error.response?.message || "Lấy thông tin hội viên thất bại")))
+//         ))
+// );
+
 const authEpic = [loginEpic, logoutEpic, registerEpic, fetchProfileEpic];
 
 export default authEpic;

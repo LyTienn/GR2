@@ -14,15 +14,35 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from 'react-toastify';
 import { logoutStart } from '@/store/Auth';
+import PaymentService from '@/service/PaymentService';
+import { selectAuthUser, selectIsAuthenticated, selectAuthLoading, selectAuthError } from '@/store/Auth/authSelector';
 
 const HeaderBar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [subscription, setSubscription] = useState(null);
+  const [isExpired, setIsExpired] = useState(false);
 
-  // Lấy state auth
-  const { user, isAuthenticated, isLoading, error } = useSelector((state) => state.auth);
+  const user = useSelector(selectAuthUser);
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const isLoading = useSelector(selectAuthLoading);
+  const error = useSelector(selectAuthError);
+
+  useEffect(() => {
+    const fetchSubscription = async () => {
+      try {
+        const data = await PaymentService.getCurrentSubscription();
+        setSubscription(data.subscription);
+        setIsExpired(data.isExpired);
+      } catch (e) {
+        setSubscription(null);
+        setIsExpired(true);
+      }
+    };
+    fetchSubscription();
+  }, []);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -50,13 +70,11 @@ const HeaderBar = () => {
   const getSubscriptionText = () => {
     if (!user) return "";
     if (user.role === "ADMIN") return "Quản trị viên";
-    if (user.tier === "PREMIUM") {
-      const pkg = user.package_details;
-
+    if (user.subscription && !user.isExpired) {
+      const pkg = user.subscription.package_details;
       if (pkg === "3_THANG") return "Hội viên 3 tháng";
       if (pkg === "6_THANG") return "Hội viên 6 tháng";
       if (pkg === "12_THANG") return "Hội viên 1 năm";
-
       return "Hội viên Premium";
     }
     return "Gói thường";

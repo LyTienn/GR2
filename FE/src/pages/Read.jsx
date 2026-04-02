@@ -6,7 +6,6 @@ import { Switch } from "@/components/ui/switch";
 import { ChevronRight, List, FileText, ChevronLeft, ArrowLeft, Headphones, Sparkles, Loader2, Lock, Globe, Palette } from "lucide-react";
 import Header from "@/components/HeaderBar";
 import { toast } from "react-toastify";
-// import axios from "@/config/Axios-config";
 import HttpClient from "@/service/HttpClient";
 import { firstValueFrom } from "rxjs";
 import { debounce } from "lodash";
@@ -32,13 +31,14 @@ import {
 export default function ReadBookPage() {
   const { id: bookId } = useParams();
   const navigate = useNavigate();
-  const { isAuthenticated } = useSelector((state) => state.auth);
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
   const [book, setBook] = useState(null);
   const [chapters, setChapters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedChapter, setSelectedChapter] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [initialScrollPos, setInitialScrollPos] = useState(0);
+  const isUserPremium = user?.tier === "PREMIUM" || user?.role === "ADMIN";
   // const [showAudioPlayer, setShowAudioPlayer] = useState(false);
 
   // Summary State
@@ -273,7 +273,7 @@ export default function ReadBookPage() {
   };
 
   const handleSelectChapter = (ch) => {
-    if (ch.isLocked) {
+    if (ch.isLocked || (!isUserPremium && ch.isPremium)) {
       setShowUpgradeModal(true);
       return;
     }

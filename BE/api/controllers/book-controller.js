@@ -211,7 +211,12 @@ export const getBookChapters = async (req, res) => {
         return res.status(401).json({ success: false, message: "Người dùng không tồn tại" });
       }
 
-      if (user.tier !== "PREMIUM" && user.role !== "ADMIN") {
+      if (user.role !== "ADMIN" && (
+          user.tier !== "PREMIUM" ||
+          user.isExpired === true || // hoặc kiểm tra ngày hết hạn nếu có
+          (user.subscription_expiry && new Date(user.subscription_expiry) < new Date())
+          )) {
+        // User không phải premium hợp lệ
         const processedChapters = chapters.map((ch, index) => {
           const chapterData = ch.toJSON();
           if (index < 3) {

@@ -35,91 +35,23 @@ class PaymentController {
   }
 
   static async getPaymentHistory(req, res) {
-  try {
-    const userId = req.user.userId;
-    const now = new Date();
-    const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
-
-    // 1. Hủy các giao dịch PENDING quá 5 phút
-    await Subscription.update(
-      { status: "CANCELLED" },
-      {
-        where: {
-          user_id: userId,
-          status: "PENDING",
-          start_date: { [Op.lt]: fiveMinutesAgo }
-        }
-      }
-    );
-
-    // 2. Đánh dấu các subscription EXPIRED
-    const expiredSubs = await Subscription.update(
-      { status: "EXPIRED" },
-      {
-        where: {
-          user_id: userId,
-          status: "ACTIVE",
-          expiry_date: { [Op.lt]: now }
-        }
-      }
-    );
-
-    // 3. ✅ DOWNGRADE USER nếu có subscription EXPIRED
-    if (expiredSubs[0] > 0) {
-      const hasActiveSub = await Subscription.findOne({
-        where: {
-          user_id: userId,
-          status: "ACTIVE"
-        }
+    try {
+      const userId = req.user.userId;
+      
+      const subscriptions = await Subscription.findAll({
+        where: { user_id: userId },
+        order: [["created_at", "DESC"]],
       });
 
-      // Nếu không còn subscription ACTIVE nào, downgrade user
-      if (!hasActiveSub) {
-        await User.update(
-          { tier: "BASIC" },
-          { where: { user_id: userId } }
-        );
-        console.log(`✅ Downgraded user ${userId} to BASIC (subscription expired)`);
-      }
+      return res.status(200).json({
+        success: true,
+        data: subscriptions,
+      });
+    } catch (error) {
+      console.error("Get Payment History Error:", error);
+      return res.status(500).json({ success: false, message: "Lỗi lấy lịch sử" });
     }
-
-    // 4. Lấy lịch sử
-    const subscriptions = await Subscription.findAll({
-      where: { user_id: userId },
-      order: [["start_date", "DESC"]],
-      attributes: [
-        "subscription_id",
-        "package_details",
-        "start_date",
-        "expiry_date",
-        "payment_transaction_id",
-        "status",
-      ],
-    });
-
-    const history = subscriptions.map((sub) => ({
-      id: sub.subscription_id,
-      transactionId: sub.payment_transaction_id,
-      package: sub.package_details,
-      amount: PaymentController.getPackageAmount(sub.package_details),
-      status: sub.status,
-      statusText: PaymentController.getStatusText(sub.status),
-      startDate: sub.start_date,
-      expiryDate: sub.expiry_date,
-    }));
-
-    res.status(200).json({
-      success: true,
-      data: { history },
-    });
-  } catch (error) {
-    console.error("Get payment history error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Server error",
-    });
   }
-}
 
   static async getCurrentSubscription(req, res) {
     try {
@@ -148,11 +80,13 @@ class PaymentController {
       await subscription.save();
 
       await User.update(
-        { tier: "BASIC" },
-        { where: { user_id: userId } }
+        { tier: "FREE" },
+        { where: { user_id: userId },
+          logging: console.log
+        }
       );
 
-      console.log(`✅ Auto-downgraded user ${userId} to BASIC (subscription expired)`);
+      console.log(`✅ Auto-downgraded user ${userId} to FREE (subscription expired)`);
 
       return res.status(200).json({
         success: true,
@@ -205,312 +139,28 @@ class PaymentController {
   }
   }
 
-//   static async getPaymentById(req, res) {
-//   try {
-//     const { id } = req.params;
-//     const userId = req.user.userId;
-//     const sub = await Subscription.findOne({
-//       where: {
-//         subscription_id: id,
-//         user_id: userId,
-//       },
-//     });
-//     if (!sub) {
-//       return res.status(404).json({ success: false, message: "Không tìm thấy đơn hàng" });
-//     }
+  static async downgradeExpiredSubscriptions() {
+    try {
+      const now = new Date();
+      const expiredSubs = await Subscription.findAll({
+        where: { status: "ACTIVE", expiry_date: { [Op.lt]: now } }
+      });
 
-//     let qrUrl = null;
-//     if (sub.payment_transaction_id && sub.status === "PENDING") {
-//       const bankAccount = process.env.SEPAY_BANK_ACCOUNT;
-//       const bankName = process.env.SEPAY_BANK_NAME;
-//       const amount = sub.amount || PaymentController.getPackageAmount(sub.package_details);
-//       const content = sub.payment_transaction_id;
+      if (expiredSubs.length > 0) {
+        const subIds = expiredSubs.map(s => s.id);
+        const userIds = expiredSubs.map(s => s.user_id);
 
-//       qrUrl = `https://qr.sepay.vn/img?bank=${bankName}&acc=${bankAccount}&template=compact&amount=${amount}&des=${content}`;
-//     }
-
-//     res.json({
-//       success: true,
-//       data: {
-//         id: sub.subscription_id,
-//         transactionId: sub.payment_transaction_id,
-//         package: sub.package_details,
-//         amount: sub.amount || PaymentController.getPackageAmount(sub.package_details),
-//         status: sub.status,
-//         statusText: PaymentController.getStatusText(sub.status),
-//         startDate: sub.start_date,
-//         expiryDate: sub.expiry_date,
-//         qrUrl, 
-//       },
-//     });
-//   } catch (error) {
-//     res.status(500).json({ success: false, message: "Server error" });
-//   }
-// }
-
-  // static getVNPayMessage(responseCode) {
-  //   const messages = {
-  //     "00": "Giao dịch thành công",
-  //     "07": "Trừ tiền thành công. Giao dịch bị nghi ngờ (liên quan tới lừa đảo, giao dịch bất thường)",
-  //     "09": "Giao dịch không thành công do: Thẻ/Tài khoản của khách hàng chưa đăng ký dịch vụ InternetBanking tại ngân hàng",
-  //     10: "Giao dịch không thành công do: Khách hàng xác thực thông tin thẻ/tài khoản không đúng quá 3 lần",
-  //     11: "Giao dịch không thành công do: Đã hết hạn chờ thanh toán",
-  //     12: "Giao dịch không thành công do: Thẻ/Tài khoản của khách hàng bị khóa",
-  //     13: "Giao dịch không thành công do Quý khách nhập sai mật khẩu xác thực giao dịch (OTP)",
-  //     24: "Giao dịch không thành công do: Khách hàng hủy giao dịch",
-  //     51: "Giao dịch không thành công do: Tài khoản của quý khách không đủ số dư để thực hiện giao dịch",
-  //     65: "Giao dịch không thành công do: Tài khoản của Quý khách đã vượt quá hạn mức giao dịch trong ngày",
-  //     75: "Ngân hàng thanh toán đang bảo trì",
-  //     79: "Giao dịch không thành công do: KH nhập sai mật khẩu thanh toán quá số lần quy định",
-  //     99: "Các lỗi khác",
-  //   };
-
-  //   return messages[responseCode] || "Lỗi không xác định";
-  // }
-
-  // static async createPaymentUrl(req, res) {
-  //   try {
-  //     const { package_details, amount } = req.body;
-  //     const userId = req.user.userId;
-
-  //     // VNPay config
-  //     const vnp_TmnCode = process.env.VNP_TMN_CODE;
-  //     const vnp_HashSecret = process.env.VNP_HASH_SECRET;
-  //     const vnp_Url = process.env.VNP_URL;
-  //     const vnp_ReturnUrl = process.env.VNP_RETURN_URL;
-
-  //     if (!vnp_TmnCode || !vnp_HashSecret || !vnp_Url || !vnp_ReturnUrl) {
-  //       return res.status(500).json({
-  //         success: false,
-  //         message: "VNPay environment variables missing",
-  //       });
-  //     }
-
-  //     if (!package_details || !amount) {
-  //       return res.status(400).json({
-  //         success: false,
-  //         message: "Missing package_details or amount",
-  //       });
-  //     }
-
-  //     // Validate amount
-  //     const amountNumber = Number(amount);
-  //     if (isNaN(amountNumber) || amountNumber <= 0) {
-  //       return res.status(400).json({
-  //         success: false,
-  //         message: "Invalid amount",
-  //       });
-  //     }
-
-  //     // Order ID
-  //     const orderId = Date.now().toString();
-
-  //     // IP Address (fix IPv6)
-  //     let ipAddr =
-  //       req.headers["x-forwarded-for"] ||
-  //       req.connection?.remoteAddress ||
-  //       req.socket?.remoteAddress ||
-  //       "127.0.0.1";
-
-  //     if (ipAddr.includes("::ffff:")) {
-  //       ipAddr = ipAddr.replace("::ffff:", "");
-  //     }
-  //     ipAddr = ipAddr.split(",")[0].trim();
-
-  //     // Create date: yyyyMMddHHmmss
-  //     const date = new Date();
-  //     const createDate = [
-  //       date.getFullYear(),
-  //       String(date.getMonth() + 1).padStart(2, "0"),
-  //       String(date.getDate()).padStart(2, "0"),
-  //       String(date.getHours()).padStart(2, "0"),
-  //       String(date.getMinutes()).padStart(2, "0"),
-  //       String(date.getSeconds()).padStart(2, "0"),
-  //     ].join("");
-
-  //     let vnp_Params = {
-  //       vnp_Version: "2.1.0",
-  //       vnp_Command: "pay",
-  //       vnp_TmnCode: vnp_TmnCode,
-  //       vnp_Locale: "vn",
-  //       vnp_CurrCode: "VND",
-  //       vnp_TxnRef: orderId,
-  //       vnp_OrderInfo: `Thanh toan goi ${package_details}`,
-  //       vnp_OrderType: "other",
-  //       vnp_Amount: Math.floor(amountNumber * 100),
-  //       vnp_ReturnUrl: vnp_ReturnUrl,
-  //       vnp_IpAddr: ipAddr,
-  //       vnp_CreateDate: createDate,
-  //     };
-
-      //   if (vnp_IpnUrl) {
-      //     vnp_Params.vnp_IpnUrl = vnp_IpnUrl;
-      //   }
-
-  //     vnp_Params = PaymentController.sortObject(vnp_Params);
-
-  //     const signData = new URLSearchParams(vnp_Params).toString();
-  //     const hmac = crypto.createHmac("sha512", vnp_HashSecret);
-  //     const signed = hmac.update(Buffer.from(signData, "utf-8")).digest("hex");
-
-  //     vnp_Params["vnp_SecureHash"] = signed;
-
-  //     const paymentUrl =
-  //       vnp_Url + "?" + new URLSearchParams(vnp_Params).toString();
-
-  //     // Save subscription (PENDING)
-  //     await Subscription.create({
-  //       user_id: userId,
-  //       package_details,
-  //       start_date: new Date(),
-  //       expiry_date: PaymentController.calculateExpiryDate(package_details),
-  //       payment_transaction_id: orderId,
-  //       status: "PENDING",
-  //     });
-
-  //     console.log("✅ Created payment URL for order:", orderId);
-
-  //     return res.status(200).json({
-  //       success: true,
-  //       data: { paymentUrl },
-  //     });
-  //   } catch (error) {
-  //     console.error("❌ Create payment error:", error);
-  //     return res.status(500).json({
-  //       success: false,
-  //       message: "Server error",
-  //       error: error.message,
-  //     });
-  //   }
-  // }
-
-  // static async vnpayReturn(req, res) {
-  //   try {
-  //     let vnp_Params = req.query;
-  //     const secureHash = vnp_Params["vnp_SecureHash"];
-
-  //     // Remove hash từ params trước khi verify
-  //     delete vnp_Params["vnp_SecureHash"];
-  //     delete vnp_Params["vnp_SecureHashType"];
-
-  //     // Sort params
-  //     vnp_Params = PaymentController.sortObject(vnp_Params);
-
-  //     // Tạo chữ ký để verify
-  //     const signData = new URLSearchParams(vnp_Params).toString();
-  //     const hmac = crypto.createHmac("sha512", process.env.VNP_HASH_SECRET);
-  //     const signed = hmac.update(Buffer.from(signData, "utf-8")).digest("hex");
-
-  //     console.log("🔐 VNPay Callback - Received Hash:", secureHash);
-  //     console.log("🔐 VNPay Callback - Calculated Hash:", signed);
-
-  //     // Kiểm tra chữ ký
-  //     if (secureHash !== signed) {
-  //       console.error("❌ Invalid signature");
-  //       return res.redirect(
-  //         `${process.env.FRONTEND_URL}/payment/failed?reason=invalid_signature`
-  //       );
-  //     }
-
-  //     const orderId = vnp_Params["vnp_TxnRef"];
-  //     const responseCode = vnp_Params["vnp_ResponseCode"];
-  //     const transactionNo = vnp_Params["vnp_TransactionNo"];
-  //     const bankCode = vnp_Params["vnp_BankCode"];
-  //     const amount = vnp_Params["vnp_Amount"];
-
-  //     console.log("📋 Order ID:", orderId);
-  //     console.log("📋 Response Code:", responseCode);
-  //     console.log("📋 Transaction No:", transactionNo);
-  //     console.log("📋 Bank:", bankCode);
-
-  //     // Tìm subscription
-  //     const subscription = await Subscription.findOne({
-  //       where: { payment_transaction_id: orderId },
-  //     });
-
-  //     if (!subscription) {
-  //       console.error("❌ Subscription not found:", orderId);
-  //       return res.redirect(
-  //         `${process.env.FRONTEND_URL}/payment/failed?reason=order_not_found`
-  //       );
-  //     }
-
-  //     //  Kiểm tra đã xử lý chưa (idempotency)
-  //     if (subscription.status === "ACTIVE") {
-  //       console.log("⚠️ Order already processed:", orderId);
-  //       return res.redirect(
-  //         `${process.env.FRONTEND_URL}/payment/success?already_processed=true`
-  //       );
-  //     }
-
-  //     if (subscription.status === "CANCELLED") {
-  //       console.log("⚠️ Order already cancelled:", orderId);
-  //       return res.redirect(
-  //         `${process.env.FRONTEND_URL}/payment/failed?reason=already_cancelled`
-  //       );
-  //     }
-
-  //     if (responseCode === "00") {
-  //       // ========== THANH TOÁN THÀNH CÔNG ==========
-  //       subscription.status = "ACTIVE";
-  //       await subscription.save();
-
-  //       await User.update(
-  //         { tier: "PREMIUM" },
-  //         { where: { user_id: subscription.user_id } }
-  //       );
-
-  //       console.log("✅ Payment successful:", orderId);
-  //       console.log("✅ User upgraded to PREMIUM:", subscription.user_id);
-
-  //       return res.redirect(
-  //         `${process.env.FRONTEND_URL}/payment/success?order_id=${orderId}&amount=${amount}`
-  //       );
-  //     } else {
-  //       // ========== THANH TOÁN THẤT BẠI ==========
-  //       subscription.status = "CANCELLED";
-  //       await subscription.save();
-
-  //       const errorMessage = PaymentController.getVNPayMessage(responseCode);
-
-  //       console.error("❌ Payment failed:", orderId);
-  //       console.error("❌ Response Code:", responseCode);
-  //       console.error("❌ Reason:", errorMessage);
-
-  //       // Xử lý các trường hợp thất bại cụ thể
-  //       let reason = "unknown";
-
-  //       if (responseCode === "24") {
-  //         reason = "user_cancelled"; // User hủy
-  //       } else if (responseCode === "11") {
-  //         reason = "timeout"; // Hết hạn
-  //       } else if (responseCode === "51") {
-  //         reason = "insufficient_funds"; // Không đủ tiền
-  //       } else if (responseCode === "12") {
-  //         reason = "card_locked"; // Thẻ bị khóa
-  //       } else if (responseCode === "13" || responseCode === "79") {
-  //         reason = "wrong_otp"; // Sai OTP
-  //       } else if (responseCode === "09") {
-  //         reason = "card_not_registered"; // Chưa đăng ký internet banking
-  //       } else if (responseCode === "75") {
-  //         reason = "bank_maintenance"; // Ngân hàng bảo trì
-  //       }
-
-  //       return res.redirect(
-  //         `${
-  //           process.env.FRONTEND_URL
-  //         }/payment/failed?reason=${reason}&code=${responseCode}&message=${encodeURIComponent(
-  //           errorMessage
-  //         )}`
-  //       );
-  //     }
-  //   } catch (error) {
-  //     console.error("❌ VNPay return error:", error);
-  //     return res.redirect(
-  //       `${process.env.FRONTEND_URL}/payment/failed?reason=server_error`
-  //     );
-  //   }
-  // }
+        await Subscription.update({ status: "EXPIRED" }, { where: { id: { [Op.in]: subIds } } });
+        
+        // CHÚ Ý CHỖ NÀY: Dùng id thay vì user_id theo Model của bạn
+        await User.update({ tier: "FREE" }, { where: { id: { [Op.in]: userIds } } });
+        
+        console.log(`[CRON] Đã hạ cấp ${userIds.length} user về FREE.`);
+      }
+    } catch (error) {
+      console.error("[CRON] Lỗi hạ cấp EXPIRED:", error);
+    }
+  }
 
   static calculateExpiryDate(package_details) {
     const now = new Date();

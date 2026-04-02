@@ -6,8 +6,8 @@ const router = express.Router();
 
 // User Routes
 router.post("/", authenticate, SubscriptionController.createSubscription);
-router.get("/current", authenticate, SubscriptionController.getUserSubscription);
-router.put("/:subscriptionId/cancel", authenticate, SubscriptionController.cancelSubscription);
+// router.get("/current", authenticate, SubscriptionController.getUserSubscription);
+// router.put("/:subscriptionId/cancel", authenticate, SubscriptionController.cancelSubscription);
 
 // Admin Routes
 router.get("/admin/all", authenticate, authorizeRoles("ADMIN"), SubscriptionController.adminGetAllSubscriptions);

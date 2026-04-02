@@ -2,8 +2,8 @@ import { Search as SearchIcon, Loader2, X } from "lucide-react";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { debounce } from "lodash";
-// import axios from "@/config/Axios-config";
 import HttpClient from "@/service/HttpClient";
+import { Subject, debounceTime, switchMap, catchError, of, tap } from 'rxjs';
 
 const Search = ({ variant = "dynamic", className = "" }) => {
     const [isOpen, setIsOpen] = useState(variant === "static");
@@ -13,7 +13,7 @@ const Search = ({ variant = "dynamic", className = "" }) => {
     const inputRef = useRef(null);
     const wrapperRef = useRef(null);
     const navigate = useNavigate();
-
+    const searchSubject = useRef(new Subject()).current;
     // In static mode, always open interaction-wise, but we manage dropdown visibility differently
     const [showDropdown, setShowDropdown] = useState(false);
 
@@ -24,42 +24,53 @@ const Search = ({ variant = "dynamic", className = "" }) => {
         }
     }, [variant]);
 
-    //API gợi ý (Chỉ lấy tối đa 5 cuốn)
-    const fetchSuggestions = async (term) => {
-        if (!term.trim()) {
-            setSuggestions([]);
-            return;
-        }
-        try {
-            setLoading(true);
-            const res = HttpClient.get(`/books?keyword=${encodeURIComponent(term)}`);
-            const resultData = res.data?.books || [];
-            setSuggestions(Array.isArray(resultData) ? resultData.slice(0, 5) : []);
-        } catch (error) {
-            console.error("Live search error:", error);
-            setSuggestions([]);
-        } finally {
+    useEffect(() => {
+        const subscription = searchSubject.pipe(
+            debounceTime(400), // Đợi 400ms sau khi ngừng gõ
+            switchMap((term) => {
+                if (!term.trim()) {
+                    setLoading(false);
+                    return of(null); // Trả về null ngay nếu chuỗi rỗng
+                }
+                
+                setLoading(true);
+                // switchMap tự động HỦY request trước đó nếu có request mới bắn vào
+                return HttpClient.get(`/books?keyword=${encodeURIComponent(term)}`).pipe(
+                    catchError((error) => {
+                        console.error("Live search error:", error);
+                        return of(null);
+                    })
+                );
+            })
+        ).subscribe((res) => {
             setLoading(false);
-        }
-    };
+            if (res && res.data && res.data.books) {
+                const resultData = res.data.books;
+                setSuggestions(Array.isArray(resultData) ? resultData.slice(0, 5) : []);
+            } else {
+                setSuggestions([]);
+            }
+        });
 
-    const debouncedFetch = useCallback(
-        debounce((term) => fetchSuggestions(term), 400),
-        []
-    );
+        // Dọn dẹp (Tránh Memory Leak khi unmount component)
+        return () => subscription.unsubscribe();
+    }, []);
 
     const handleChange = (e) => {
         const term = e.target.value;
         setKeyword(term);
+        
         if (term.trim()) {
             if (variant === "dynamic") setIsOpen(true);
             setShowDropdown(true);
-            debouncedFetch(term);
         } else {
             setSuggestions([]);
             setShowDropdown(false);
             if (variant === "dynamic") setIsOpen(false);
         }
+
+        // Bắn từ khóa vào luồng RxJS thay vì gọi API trực tiếp
+        searchSubject.next(term);
     };
 
     const goToSearchPage = () => {
