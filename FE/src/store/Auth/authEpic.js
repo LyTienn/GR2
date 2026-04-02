@@ -2,6 +2,7 @@ import { ofType, combineEpics } from "redux-observable";
 import { switchMap, map, catchError } from "rxjs";
 import { of } from "rxjs";
 import HttpClient from "@/service/HttpClient";
+import { tap } from 'rxjs/operators';
 import { 
     loginStart, loginSuccess, loginFailure,
     logoutStart, logoutSuccess, logoutFailure,
@@ -31,12 +32,23 @@ export const logoutEpic = (action$) => action$.pipe(
 
 export const registerEpic = (action$) => action$.pipe(
     ofType(registerStart.type),
-    switchMap((action) =>
-        HttpClient.post('/auth/register', action.payload).pipe(
+    switchMap((action) => {
+        // Tách riêng dữ liệu gửi lên API và các hàm callback điều hướng
+        const { userData, onSuccess, onError } = action.payload;
+
+        return HttpClient.post('/auth/register', userData).pipe(
+            // Nếu API gọi thành công (200/201), tap sẽ chạy trước khi kết thúc
+            tap(() => {
+                if (onSuccess) onSuccess(); 
+            }),
             map(() => registerSuccess()),
-            catchError(error => of(registerFailure(error.response?.message || "Đăng ký thất bại")))
-        )
-    )
+            catchError(error => {
+                const errorMsg = error.response?.data?.message || error.response?.message || "Đăng ký thất bại";
+                if (onError) onError(errorMsg);
+                return of(registerFailure(errorMsg));
+            })
+        );
+    })
 );
 
 export const fetchProfileEpic = (action$) => action$.pipe(

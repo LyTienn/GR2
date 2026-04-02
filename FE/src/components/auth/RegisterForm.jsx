@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { registerStart } from "@/store/Auth";
+import { registerStart, clearAuthError } from "@/store/Auth";
 
 const RegisterForm = () => {
     const [name, setName] = useState("");
@@ -15,19 +15,27 @@ const RegisterForm = () => {
     const [confirmPassword, setConfirmPassword] = useState("");
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const { isRegisterSuccess, error } = useSelector((state) => state.auth);
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
+        
         if (password !== confirmPassword) {
             toast.error("Mật khẩu xác nhận không khớp");
             return;
         }
-        const res = dispatch(registerStart({ email, password, fullName: name }));
-        if (registerStart.fulfilled.match(res)) {
-            toast.success("Đăng ký thành công. Vui lòng đăng nhập.");
-            navigate("/login");
-        }
-    }
+
+        dispatch(registerStart({
+            userData: { email, password, fullName: name },
+            onSuccess: () => {
+                toast.success("Đăng ký thành công. Vui lòng đăng nhập.");
+                navigate("/login");
+            },
+            onError: (errorMessage) => {
+                toast.error(errorMessage);
+            }
+        }));
+    };
 
     return (
         <Card className="w-full max-w-md">

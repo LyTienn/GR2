@@ -40,7 +40,7 @@ class PaymentController {
       
       const subscriptions = await Subscription.findAll({
         where: { user_id: userId },
-        order: [["created_at", "DESC"]],
+        order: [["start_date", "DESC"]],
       });
 
       return res.status(200).json({

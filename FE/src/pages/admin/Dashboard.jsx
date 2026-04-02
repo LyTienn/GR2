@@ -300,7 +300,7 @@ export default function Dashboard() {
               </span>
             </div>
           </div>
-          <div className="relative w-full aspect-[2/1] max-h-[300px]">
+          <div className="relative w-full aspect-2/1 max-h-[300px]">
             {/* Chart Container */}
             <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 800 300">
               <defs>

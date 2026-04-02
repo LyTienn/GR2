@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { ChevronRight, List, FileText, ChevronLeft, ArrowLeft, Headphones, Sparkles, Loader2, Lock, Globe, Palette } from "lucide-react";
+import { ChevronRight, List, FileText, ChevronLeft, ArrowLeft, Headphones, Sparkles, Loader2, Lock, Globe, Palette, Maximize, Minimize } from "lucide-react";
 import Header from "@/components/HeaderBar";
 import { toast } from "react-toastify";
 import HttpClient from "@/service/HttpClient";
@@ -64,6 +64,7 @@ export default function ReadBookPage() {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [isEditingPage, setIsEditingPage] = useState(false);
   const [inputPage, setInputPage] = useState("");
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
   const contentRef = useRef(null);
   // const { addTask, updateTask, removeTask } = useProgress();
@@ -341,6 +342,28 @@ export default function ReadBookPage() {
       setSelectedChapter(nextChapter);
     }
   };
+
+  const toggleFullScreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch((err) => {
+        toast.error(`Không thể bật chế độ toàn màn hình: ${err.message}`);
+      });
+      setIsFullScreen(true);
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+        setIsFullScreen(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    const handleFsChange = () => {
+      setIsFullScreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFsChange);
+    return () => document.removeEventListener('fullscreenchange', handleFsChange);
+  }, []);
 
   // const pollSummaryTask = async (taskId) => {
   //   try {
@@ -677,6 +700,21 @@ export default function ReadBookPage() {
             <Link to={`/book/${book.id}`}><Button variant="ghost" size="sm"><ArrowLeft /></Button></Link>
             <h1 className="font-semibold text-slate-800 truncate text-sm sm:text-base">{book.title}</h1>
           </div>
+          <div className="ml-auto flex items-center gap-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={toggleFullScreen}
+              className="text-slate-500 hover:text-slate-900"
+              title={isFullScreen ? "Thoát toàn màn hình" : "Toàn màn hình"}
+            >
+              {isFullScreen ? (
+                <Minimize className="h-8 w-8" />
+              ) : (
+                <Maximize className="h-8 w-8" />
+              )}
+            </Button>
+          </div>
 
           {selectedChapter && (
             <div className="flex gap-2 sm:gap-3 items-center shrink-0">
@@ -767,25 +805,25 @@ export default function ReadBookPage() {
           className="flex-1 overflow-y-auto bg-slate-50"
         >
           <div className="min-h-full w-full flex justify-center p-6 sm:p-10 md:p-14">
-            <div className="w-full max-w-3xl bg-white shadow-sm border border-slate-100 rounded-lg p-8 sm:p-12 h-fit">
+            <div className="w-full max-w-4xl bg-white shadow-sm border border-slate-100 rounded-lg p-8 sm:p-12 h-fit">
               {selectedChapter ? (
                 <>
-                  <div className="mb-8 pb-6 border-b border-slate-200 flex items-center justify-between gap-4">
-                    <Button variant="outline" onClick={handlePrevChapter} disabled={currentIndex <= 0} className="flex gap-2 hover:bg-slate-100">
-                      <ChevronLeft className="h-4 w-4" /> Trước
+                  <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-md -mx-6 sm:-mx-10 md:-mx-12 px-6 sm:px-10 md:px-12 py-3 border-b border-slate-200 flex items-center justify-between gap-2 mb-8 transition-all">
+                    <Button variant="outline" onClick={handlePrevChapter} disabled={currentIndex <= 0} className="flex gap-1 sm:gap-2 hover:bg-slate-100 h-9 px-2 sm:px-4">
+                      <ChevronLeft className="h-4 w-4" /> <span className="hidden sm:inline">Trước</span>
                     </Button>
 
                     <div className="text-sm text-slate-600 font-medium">
                       {isEditingPage ? (
                         <form onSubmit={handlePageJump} className="flex items-center gap-2">
-                          Trang
+                          <span className="hidden sm:inline">Trang</span>
                           <input
                             type="number"
                             min={1}
                             max={chapters.length}
                             value={inputPage}
                             onChange={(e) => setInputPage(e.target.value)}
-                            onBlur={handlePageJump} // Click ra ngoài tự động chuyển trang
+                            onBlur={handlePageJump}
                             autoFocus
                             className="w-16 h-8 text-center border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-800"
                           />
@@ -793,7 +831,7 @@ export default function ReadBookPage() {
                         </form>
                       ) : (
                         <span
-                          className="cursor-pointer hover:text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded transition-all inline-block border border-transparent hover:border-blue-200"
+                          className="cursor-pointer hover:text-blue-600 hover:bg-blue-50 px-2 sm:px-3 py-1.5 rounded transition-all inline-block border border-transparent hover:border-blue-200 select-none"
                           onClick={() => setIsEditingPage(true)}
                           title="Bấm để nhập số trang"
                         >
@@ -802,14 +840,15 @@ export default function ReadBookPage() {
                       )}
                     </div>
 
-                    <Button variant="outline" onClick={handleNextChapter} disabled={currentIndex >= chapters.length - 1} className="flex gap-2 hover:bg-slate-100">
-                      Sau <ChevronRight className="h-4 w-4" />
+                    <Button variant="outline" onClick={handleNextChapter} disabled={currentIndex >= chapters.length - 1} className="flex gap-1 sm:gap-2 hover:bg-slate-100 h-9 px-2 sm:px-4">
+                      <span className="hidden sm:inline">Sau</span> <ChevronRight className="h-4 w-4" />
                     </Button>
                   </div>
-                  <article className="w-full prose prose-slate lg:prose-lg max-w-none">
-                    <h2 className="text-3xl font-bold mb-6 text-slate-900 border-b pb-4">{selectedChapter.title}</h2>
-
-                    <div className="whitespace-pre-line text-slate-700 leading-relaxed text-justify font-serif text-lg">
+                  <article className="w-full mt-8">
+                    <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-slate-900 border-b pb-4 leading-tight">
+                      {selectedChapter.title}
+                    </h2>
+                    <div className="mx-16 max-w-3xl whitespace-pre-line text-slate-700 leading-relaxed text-justify font-serif text-xl sm:px-4">
                       {selectedChapter.content}
                     </div>
                   </article>
