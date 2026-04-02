@@ -62,6 +62,8 @@ export default function ReadBookPage() {
   const isRestoring = useRef(false);
   const hasMarkedCompleted = useRef(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [isEditingPage, setIsEditingPage] = useState(false);
+  const [inputPage, setInputPage] = useState("");
 
   const contentRef = useRef(null);
   // const { addTask, updateTask, removeTask } = useProgress();
@@ -234,6 +236,33 @@ export default function ReadBookPage() {
       }
     }
   }, [selectedChapter?.id, selectedChapter?.content, initialScrollPos]);
+
+  useEffect(() => {
+    if (!isEditingPage) {
+      setInputPage(String(getCurrentChapterIndex() + 1));
+    }
+  }, [selectedChapter, chapters, isEditingPage]);
+
+  const handlePageJump = (e) => {
+    e?.preventDefault();
+    let targetPage = parseInt(inputPage, 10);
+    if (isNaN(targetPage) || targetPage < 1) {
+      targetPage = 1;
+    }
+    if (targetPage > chapters.length) targetPage = chapters.length;
+
+    const targetChapter = chapters[targetPage - 1];
+    if (targetChapter) {
+      if (targetChapter.isLocked || (!isUserPremium && targetChapter.isPremium)) {
+        setShowUpgradeModal(true);
+        setInputPage(String(getCurrentChapterIndex() + 1)); // Reset lại số cũ nếu bị chặn
+      } else {
+        setInitialScrollPos(0);
+        setSelectedChapter(targetChapter);
+      }
+    }
+    setIsEditingPage(false);
+  };
 
   const markBookAsCompleted = async () => {
     if (hasMarkedCompleted.current) return;
@@ -741,6 +770,42 @@ export default function ReadBookPage() {
             <div className="w-full max-w-3xl bg-white shadow-sm border border-slate-100 rounded-lg p-8 sm:p-12 h-fit">
               {selectedChapter ? (
                 <>
+                  <div className="mb-8 pb-6 border-b border-slate-200 flex items-center justify-between gap-4">
+                    <Button variant="outline" onClick={handlePrevChapter} disabled={currentIndex <= 0} className="flex gap-2 hover:bg-slate-100">
+                      <ChevronLeft className="h-4 w-4" /> Trước
+                    </Button>
+
+                    <div className="text-sm text-slate-600 font-medium">
+                      {isEditingPage ? (
+                        <form onSubmit={handlePageJump} className="flex items-center gap-2">
+                          Trang
+                          <input
+                            type="number"
+                            min={1}
+                            max={chapters.length}
+                            value={inputPage}
+                            onChange={(e) => setInputPage(e.target.value)}
+                            onBlur={handlePageJump} // Click ra ngoài tự động chuyển trang
+                            autoFocus
+                            className="w-16 h-8 text-center border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-800"
+                          />
+                          / {chapters.length}
+                        </form>
+                      ) : (
+                        <span
+                          className="cursor-pointer hover:text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded transition-all inline-block border border-transparent hover:border-blue-200"
+                          onClick={() => setIsEditingPage(true)}
+                          title="Bấm để nhập số trang"
+                        >
+                          Trang {currentIndex + 1} / {chapters.length}
+                        </span>
+                      )}
+                    </div>
+
+                    <Button variant="outline" onClick={handleNextChapter} disabled={currentIndex >= chapters.length - 1} className="flex gap-2 hover:bg-slate-100">
+                      Sau <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
                   <article className="w-full prose prose-slate lg:prose-lg max-w-none">
                     <h2 className="text-3xl font-bold mb-6 text-slate-900 border-b pb-4">{selectedChapter.title}</h2>
 
@@ -749,7 +814,7 @@ export default function ReadBookPage() {
                     </div>
                   </article>
 
-                  <div className="mt-12 pt-8 border-t border-slate-200 flex items-center justify-between gap-4">
+                  {/* <div className="mt-12 pt-8 border-t border-slate-200 flex items-center justify-between gap-4">
                     <Button variant="outline" onClick={handlePrevChapter} disabled={currentIndex <= 0} className="flex gap-2 hover:bg-gray-100">
                       <ChevronLeft className="h-4 w-4" /> Trước
                     </Button>
@@ -757,7 +822,7 @@ export default function ReadBookPage() {
                     <Button variant="outline" onClick={handleNextChapter} disabled={currentIndex >= chapters.length - 1} className="flex gap-2 hover:bg-gray-100">
                       Sau <ChevronRight className="h-4 w-4" />
                     </Button>
-                  </div>
+                  </div> */}
                 </>
               ) : <div className="text-center text-slate-400 py-20">Vui lòng chọn chương</div>}
             </div>
