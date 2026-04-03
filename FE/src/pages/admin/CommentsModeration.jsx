@@ -1,44 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle2, XCircle, Star, Loader2, Trash2, Bot, Settings2, RefreshCw } from 'lucide-react';
-// import axiosInstance from '../../config/Axios-config';
+import { firstValueFrom } from 'rxjs';
 import HttpClient from "../../service/HttpClient";
 
 // Temporary service definition if not exists, or move to separate file later.
 // To save tool calls, I'll implement fetch inside the component or use axiosInstance directly.
 const AdminCommentService = {
-  getAllComments: (params) => {
-    const res = HttpClient.get('/comments', { params });
+  getAllComments: async (params) => {
+    const res = await firstValueFrom(HttpClient.get('/comments', { params }));
     return res?.data;
   },
-  approveComment: (id) => {
-    return HttpClient.patch(`/comments/${id}/approve`);
+  approveComment: async (id) => {
+    return await firstValueFrom(HttpClient.patch(`/comments/${id}/approve`));
   },
-  rejectComment: (id) => {
-    return HttpClient.patch(`/comments/${id}/reject`);
+  rejectComment: async (id) => {
+    return await firstValueFrom(HttpClient.patch(`/comments/${id}/reject`));
   },
-  deleteComment: (id) => {
-    return HttpClient.delete(`/comments/${id}`);
+  deleteComment: async (id) => {
+    return await firstValueFrom(HttpClient.delete(`/comments/${id}`));
   },
-  updateStatus: (id, status) => {
-    return HttpClient.patch(`/comments/${id}/status`, { status });
+  updateStatus: async (id, status) => {
+    return await firstValueFrom(HttpClient.patch(`/comments/${id}/status`, { status }));
   },
-  bulkCheck: () => {
-    return HttpClient.post(`/comments/bulk-check-pending`);
+  bulkCheck: async () => {
+    return await firstValueFrom(HttpClient.post(`/comments/bulk-check-pending`));
   },
-  bulkApprove: () => {
-    return HttpClient.post(`/comments/bulk-approve`);
+  bulkApprove: async () => {
+    return await firstValueFrom(HttpClient.post(`/comments/bulk-approve`));
   },
-  bulkReject: () => {
-    return HttpClient.post(`/comments/bulk-reject`);
+  bulkReject: async () => {
+    return await firstValueFrom(HttpClient.post(`/comments/bulk-reject`));
   },
-  bulkClassify: () => {
-    return HttpClient.post(`/comments/bulk-classify`);
+  bulkClassify: async () => {
+    return await firstValueFrom(HttpClient.post(`/comments/bulk-classify`));
   },
-  getMode: () => {
-    return HttpClient.get(`/comments/moderation-mode`);
+  getMode: async () => {
+    return await firstValueFrom(HttpClient.get(`/comments/moderation-mode`));
   },
-  updateMode: (mode) => {
-    return HttpClient.put(`/comments/moderation-mode`, { mode });
+  updateMode: async (mode) => {
+    return await firstValueFrom(HttpClient.put(`/comments/moderation-mode`, { mode }));
   }
 };
 

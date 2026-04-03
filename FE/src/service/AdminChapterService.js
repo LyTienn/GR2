@@ -1,18 +1,18 @@
-// import axiosInstance from '../config/Axios-config.jsx';
+import { firstValueFrom } from "rxjs";
 import HttpClient from "./HttpClient";
 
 const AdminChapterService = {
-    getChapterById: (id) => {
-        return HttpClient.get(`/chapters/${id}`);
+    getChapterById: async (id) => {
+        return await firstValueFrom(HttpClient.get(`/chapters/${id}`));
     },
-    updateChapter: (id, data) => {
-        return HttpClient.put(`/chapters/${id}`, data);
+    updateChapter: async (id, data) => {
+        return await firstValueFrom(HttpClient.put(`/chapters/${id}`, data));
     },
-    deleteChapter: (id) => {
-        return HttpClient.delete(`/chapters/${id}`);
+    deleteChapter: async (id) => {
+        return await firstValueFrom(HttpClient.delete(`/chapters/${id}`));
     },
-    createChapter: (data) => {
-        return HttpClient.post(`/chapters`, data);
+    createChapter: async (data) => {
+        return await firstValueFrom(HttpClient.post(`/chapters`, data));
     }
 };
 
