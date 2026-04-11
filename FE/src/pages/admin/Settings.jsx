@@ -9,11 +9,14 @@ import {
   Check,
   AlertCircle
 } from 'lucide-react';
+import { useDispatch } from 'react-redux';
+import { logoutStart } from '@/store/Auth';
 import AuthService from '../../service/AuthService';
 import { useNavigate } from 'react-router-dom';
 
 export default function Settings() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [profile, setProfile] = useState({
     fullName: '',
     email: ''
@@ -31,10 +34,12 @@ export default function Settings() {
     try {
       setInitialLoading(true);
       const res = await AuthService.getProfile();
-      if (res && res.data && res.data.user) {
+      console.log("Dữ liệu trả về từ API:", res);
+      const userData = res?.data?.user || res?.data?.data || res?.data;
+      if (userData) {
         setProfile({
-          fullName: res.data.user.full_name || '',
-          email: res.data.user.email || ''
+          fullName: userData.full_name || '',
+          email: userData.email || ''
         });
       }
     } catch (error) {
@@ -58,6 +63,10 @@ export default function Settings() {
   };
 
   const handleChangePassword = async () => {
+    if (!security.currentPassword || !security.newPassword) {
+      setMessage({ type: 'error', text: 'Vui lòng nhập đầy đủ mật khẩu' });
+      return;
+    }
     if (security.newPassword !== security.confirmPassword) {
       setMessage({ type: 'error', text: 'Mật khẩu xác nhận không khớp.' });
       return;
@@ -70,22 +79,26 @@ export default function Settings() {
     try {
       setLoading(true);
       setMessage({ type: '', text: '' });
-      await AuthService.changePassword({
+      const res = await AuthService.changePassword({
         currentPassword: security.currentPassword,
         newPassword: security.newPassword
       });
-      setMessage({ type: 'success', text: 'Đổi mật khẩu thành công! Vui lòng đăng nhập lại.' });
-      setSecurity({ currentPassword: '', newPassword: '', confirmPassword: '' });
-
-      // Optional: Logout after password change
-      setTimeout(async () => {
-        await AuthService.logout();
-        navigate('/login');
-      }, 2000);
-
+      const isSuccess = res?.success || res?.data?.success || res?.status === 200;
+      if (isSuccess) {
+        setSecurity({ currentPassword: '', newPassword: '', confirmPassword: '' });
+        setMessage({ type: 'success', text: 'Đổi mật khẩu thành công. Đang đăng xuất...' });
+        
+        setTimeout(() => {
+          dispatch(logoutStart());
+        }, 2000);
+      } else {
+        const errText = res?.message || res?.data?.message || 'Đổi mật khẩu thất bại.';
+        setMessage({ type: 'error', text: errText });
+      }
     } catch (error) {
-      const msg = error.response?.data?.message || 'Đổi mật khẩu thất bại.';
-      setMessage({ type: 'error', text: msg });
+      console.error('Change password error:', error);
+      const errorMsg = error.response?.data?.message || error.response?.message || 'Lỗi kết nối máy chủ';
+      setMessage({ type: 'error', text: errorMsg });
     } finally {
       setLoading(false);
     }

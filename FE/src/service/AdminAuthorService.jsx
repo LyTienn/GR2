@@ -4,7 +4,7 @@ import { firstValueFrom } from "rxjs";
 const AdminAuthorService = {
   // Lấy danh sách tất cả tác giả (có phân trang)
   async getAllAuthors(params = {}) {
-    const res = await firstValueFrom(HttpClient.get('/authors', { params }));
+    const res = await firstValueFrom(HttpClient.get('/authors', { search: params }));
     return res?.data || [];
   },
 

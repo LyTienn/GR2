@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import Search from './Search';
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ import { selectAuthUser, selectIsAuthenticated, selectAuthLoading, selectAuthErr
 const HeaderBar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [subscription, setSubscription] = useState(null);
@@ -101,7 +102,11 @@ const HeaderBar = () => {
 
         {/* NAVIGATION - DESKTOP */}
         <nav className="hidden md:flex items-center gap-2">
-          <Button variant="ghost" onClick={() => navigate('/search')} className="text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+          <Button variant="ghost" onClick={() => navigate('/search')} className={`transition-colors ${
+              location.pathname === '/search' 
+                ? "bg-slate-100 text-slate-600 font-semibold" // Màu khi đang ở trang Khám phá
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100" // Màu mặc định
+            }`}>
             Khám phá
           </Button>
 

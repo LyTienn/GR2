@@ -34,12 +34,21 @@ export default function Authors() {
         sort: sortConfig.key !== 'default' ? sortConfig.key : undefined,
         order: sortConfig.direction
       };
+      console.log("1. Tham số chuẩn bị gửi đi:", params);
       const res = await AdminAuthorService.getAllAuthors(params);
-      if (res && res.authors) {
-        setAuthors(res.authors || []);
-        setTotalPages(res.totalPages || 0);
-      } else if (Array.isArray(res)) {
-        setAuthors(res); // Fallback
+      console.log("2. Cục Data nhận về từ Service:", res);
+      const payload = res?.data?.data || res?.data || res;
+
+      if (payload && payload.authors) {
+        setAuthors(payload.authors);
+        setTotalPages(payload.totalPages || 1); 
+      } else if (Array.isArray(payload)) {
+        // Fallback nếu API trả về thẳng 1 mảng
+        setAuthors(payload);
+        setTotalPages(1);
+      } else {
+        setAuthors([]);
+        setTotalPages(0);
       }
     } catch (error) {
       console.error("Failed to fetch authors", error);

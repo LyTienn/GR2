@@ -1,4 +1,5 @@
 import HttpClient from './HttpClient.jsx';
+import { firstValueFrom } from 'rxjs';
 
 const login = (credentials) => {
     return HttpClient.post('/auth/login', credentials);
@@ -12,21 +13,21 @@ const logout = () => {
     return HttpClient.post('/auth/logout');
 };
 
-const getProfile = () => {
-    return HttpClient.get('/users/profile');
+const getProfile = async () => {
+    return await firstValueFrom(HttpClient.get('/users/profile'));
 };
 
-const updateProfile = (userData) => {
-    return HttpClient.put('/users/profile', userData);
+const updateProfile = async (userData) => {
+    return await firstValueFrom(HttpClient.put('/users/profile', userData));
 };
 
-const changePassword = (passwordData) => {
-    return HttpClient.post('/users/change-password', passwordData);
+const changePassword = async (passwordData) => {
+    return await firstValueFrom(HttpClient.post('/users/change-password', passwordData));
 };
 
 //USER XÓA
-const deleteAccount = (password) => {
-    return HttpClient.delete('/users/account', { body: { password } });
+const deleteAccount = async (password) => {
+    return await firstValueFrom(HttpClient.delete('/users/account', { body: { password } }));
 };
 
 const AuthService = {
