@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Pencil, Trash2, X, Loader2, Search } from 'lucide-react';
 import AdminAuthorService from '../../service/AdminAuthorService';
-import Pagination from '../../components/admin/Pagination';
+import Pagination from '@/components/Pagination';
 
 export default function Authors() {
   const [authors, setAuthors] = useState([]);
@@ -281,13 +281,15 @@ export default function Authors() {
         </div>
 
         {/* Pagination */}
-        <div className="mt-4">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-          />
-        </div>
+        {totalPages > 0 && (
+          <div className="mt-6 flex justify-end border-t border-slate-100 dark:border-slate-800 pt-4">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </div>
+        )}
       </div>
 
       {/* Modal */}

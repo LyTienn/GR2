@@ -4,7 +4,7 @@ import { firstValueFrom } from "rxjs";
 const AdminSubjectService = {
   // Lấy danh sách tất cả chủ đề (có phân trang)
   async getAllSubjects(params = {}) {
-    const res = await firstValueFrom(HttpClient.get('/subjects', { params }));
+    const res = await firstValueFrom(HttpClient.get('/subjects', { search: params }));
     return res?.data || [];
   },
 

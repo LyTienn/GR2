@@ -4,7 +4,7 @@ import { firstValueFrom } from "rxjs";
 const AdminBookService = {
   // Lấy danh sách tất cả sách
   async getAllBooks(params = {}) {
-    const res = await firstValueFrom(HttpClient.get('/books', { params }));
+    const res = await firstValueFrom(HttpClient.get('/books', { search: params }));
     return res?.data || [];
   },
 

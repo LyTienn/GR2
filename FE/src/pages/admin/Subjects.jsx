@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Pencil, Trash2, Tag, Loader2, X, Search } from 'lucide-react';
 import AdminSubjectService from '../../service/AdminSubjectService';
-import Pagination from '../../components/admin/Pagination';
+import Pagination from '@/components/Pagination';
+import ConfirmModal from '@/components/admin/ConfirmModal';
+import { toast } from 'react-toastify';
 
 export default function Subjects() {
   const [subjects, setSubjects] = useState([]);
@@ -16,6 +18,9 @@ export default function Subjects() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const itemsPerPage = 12;
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [subjectToDelete, setSubjectToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -69,24 +74,41 @@ export default function Subjects() {
     try {
       if (editingSubject) {
         await AdminSubjectService.updateSubject(editingSubject.id, formData);
+        toast.success("Cập nhật chủ đề thành công");
       } else {
         await AdminSubjectService.createSubject(formData);
+        toast.success("Thêm chủ đề mới thành công");
       }
       setShowModal(false);
       fetchSubjects();
     } catch (error) {
-      alert("Lỗi: " + (error.response?.data?.message || error.message));
+      toast.error("Lỗi: " + (error.response?.data?.message || error.message));
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm("Bạn có muốn xóa chủ đề này?")) {
-      try {
-        await AdminSubjectService.deleteSubject(id);
-        fetchSubjects();
-      } catch (error) {
-        alert("Lỗi: " + (error.response?.data?.message || error.message));
-      }
+  const handleDeleteClick = (id) => {
+    setSubjectToDelete(id);
+    setIsConfirmOpen(true);
+  };
+
+  const handleCancelDelete = () => {
+    setIsConfirmOpen(false);
+    setSubjectToDelete(null);
+  };
+
+  const handleDelete = async () => {
+    if (!subjectToDelete) return;
+    try {
+      setIsDeleting(true);
+      await AdminSubjectService.deleteSubject(subjectToDelete);
+      toast.success("Xóa chủ đề thành công!");
+      fetchSubjects();
+      setIsConfirmOpen(false);
+      setSubjectToDelete(null);
+    } catch (error) {
+      toast.error("Lỗi xóa: " + (error.response?.data?.message || error.message));
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -214,7 +236,7 @@ export default function Subjects() {
                       <Pencil size={16} />
                     </button>
                     <button
-                      onClick={() => handleDelete(s.id)}
+                      onClick={() => handleDeleteClick(s.id)}
                       className="p-2 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400"
                       aria-label="Xóa"
                     >
@@ -228,13 +250,15 @@ export default function Subjects() {
         )}
 
         {/* Pagination */}
-        <div className="mt-4">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-          />
-        </div>
+        {totalPages > 0 && (
+          <div className="mt-6 flex justify-end border-t border-slate-100 dark:border-slate-800 pt-4">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </div>
+        )}
       </div>
 
       {/* Modal */}
@@ -279,6 +303,18 @@ export default function Subjects() {
           </div>
         </div>
       )}
+      {/* Confirm Modal */}
+      <ConfirmModal
+        isOpen={isConfirmOpen}
+        title="Xác nhận xóa chủ đề"
+        message="Bạn có chắc chắn muốn xóa chủ đề này? Hành động này không thể hoàn tác."
+        confirmText="Xóa"
+        cancelText="Hủy"
+        isLoading={isDeleting}
+        isDangerous={true} // Bật cờ này lên để nút chuyển sang màu đỏ cảnh báo
+        onConfirm={handleDelete}
+        onCancel={handleCancelDelete}
+      />
     </div>
   );
 }

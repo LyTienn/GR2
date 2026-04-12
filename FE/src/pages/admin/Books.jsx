@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Plus, Search, Filter, Pencil, Trash2, Loader2, X, ChevronDown, BookOpen } from 'lucide-react';
+import { toast } from 'react-toastify';
+import ConfirmModal from '@/components/admin/ConfirmModal';
 import AdminBookService from '../../service/AdminBookService';
 import AdminAuthorService from '../../service/AdminAuthorService';
 import AdminSubjectService from '../../service/AdminSubjectService';
 import AdminChapterService from '../../service/AdminChapterService';
-import Pagination from '../../components/admin/Pagination';
+import Pagination from '@/components/Pagination';
 
 
 // Custom Searchable Subject Select Component
@@ -277,7 +279,22 @@ export default function Books() {
   const [chapterLoading, setChapterLoading] = useState(false);
   const [chapterForm, setChapterForm] = useState({ title: '', content: '', chapter_number: 0 });
   // ... (rest of the file content)
-
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: null,
+    isDangerous: false
+  });
+  const showConfirm = (title, message, onConfirm, isDangerous = true) => {
+    setConfirmModal({
+      isOpen: true,
+      title,
+      message,
+      onConfirm,
+      isDangerous
+    });
+  };
 
   const itemsPerPage = 10;
 
@@ -312,7 +329,8 @@ export default function Books() {
         q: search,
         authorId: authorFilter,
         subjectId: subjectFilter,
-        type: typeFilter
+        type: typeFilter,
+        sort: 'id'
       };
 
       const booksData = await AdminBookService.getAllBooks(params);
@@ -420,7 +438,7 @@ export default function Books() {
       }
     } catch (error) {
       console.error("Failed to fetch chapters", error);
-      alert("Lỗi tải danh sách chương");
+      toast.error("Lỗi tải danh sách chương");
     } finally {
       setChapterLoading(false);
     }
@@ -450,35 +468,40 @@ export default function Books() {
       if (selectedChapter && selectedChapter.id) {
         // Update existing
         await AdminChapterService.updateChapter(selectedChapter.id, chapterForm);
-        alert("Cập nhật chương thành công!");
+        toast.success("Cập nhật chương thành công!");
       } else {
         // Create new
         await AdminChapterService.createChapter({
           ...chapterForm,
           book_id: selectedBookForChapters.id
         });
-        alert("Thêm chương mới thành công!");
+        toast.success("Thêm chương mới thành công!");
       }
       await fetchChapters(selectedBookForChapters.id); // Refresh list
     } catch (error) {
       console.error(error);
-      alert("Lỗi lưu chương: " + (error.response?.data?.message || error.message));
+      toast.error("Lỗi lưu chương: " + (error.response?.data?.message || error.message));
     }
   };
 
   const handleDeleteChapter = async (id) => {
     if (!id) return;
-    if (window.confirm("Bạn có chắc chắn muốn xóa chương này?")) {
-      try {
-        await AdminChapterService.deleteChapter(id);
-        alert("Xóa chương thành công!");
-        await fetchChapters(selectedBookForChapters.id);
-        setSelectedChapter(null);
-      } catch (error) {
-        console.error(error);
-        alert("Lỗi xóa chương");
+    showConfirm(
+      'Xóa chương',
+      'Bạn có chắc chắn muốn xóa chương này? Hành động này không thể hoàn tác.',
+      async () => {
+        try {
+          await AdminChapterService.deleteChapter(id);
+          toast.success('Xóa chương thành công!');
+          await fetchChapters(selectedBookForChapters.id);
+          setSelectedChapter(null);
+          setConfirmModal({ ...confirmModal, isOpen: false });
+        } catch (error) {
+          console.error(error);
+          toast.error('Lỗi xóa chương');
+        }
       }
-    }
+    );
   }
 
   const handleOpenModal = (book = null) => {
@@ -513,36 +536,41 @@ export default function Books() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.author_id) {
-      alert("Vui lòng chọn tác giả!");
+      toast.warning("Vui lòng chọn tác giả cho sách.");
       return;
     }
     try {
       if (editingBook) {
         await AdminBookService.updateBook(editingBook.id, formData);
-        alert('Cập nhật sách thành công!');
+        toast.success('Cập nhật sách thành công!');
       } else {
         await AdminBookService.createBook(formData);
-        alert('Thêm sách mới thành công!');
+        toast.success('Thêm sách mới thành công!');
       }
       setShowModal(false);
       fetchData(); // Refresh list
     } catch (error) {
       console.error(error);
-      alert('Có lỗi xảy ra: ' + (error.response?.data?.message || error.message));
+      toast.error('Có lỗi xảy ra: ' + (error.response?.data?.message || error.message));
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa sách này?')) {
-      try {
-        await AdminBookService.deleteBook(id);
-        alert('Xóa sách thành công!');
-        fetchData();
-      } catch (error) {
-        console.error(error);
-        alert('Có lỗi xảy ra khi xóa!');
+    showConfirm(
+      'Xóa sách',
+      'Bạn có chắc chắn muốn xóa sách này? Hành động này không thể hoàn tác.',
+      async () => {
+        try {
+          await AdminBookService.deleteBook(id);
+          toast.success('Xóa sách thành công!');
+          fetchData();
+          setConfirmModal({ ...confirmModal, isOpen: false });
+        } catch (error) {
+          console.error(error);
+          toast.error('Có lỗi xảy ra khi xóa!');
+        }
       }
-    }
+    );
   };
 
   return (
@@ -680,7 +708,16 @@ export default function Books() {
         </table>
       </div>
 
-      <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+      {/* Pagination */}
+        {totalPages > 0 && (
+          <div className="mt-6 flex justify-end border-t border-slate-100 dark:border-slate-800 pt-4">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </div>
+        )}
 
       {
         showModal && (
@@ -914,6 +951,16 @@ export default function Books() {
           </div>
         </div>
       )}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        isDangerous={confirmModal.isDangerous}
+        confirmText="Xóa"
+        cancelText="Hủy"
+        onConfirm={confirmModal.onConfirm}
+        onCancel={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+      />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { ChevronRight, List, FileText, ChevronLeft, ArrowLeft, Headphones, Sparkles, Loader2, Lock, Globe, Palette, Maximize, Minimize } from "lucide-react";
+import Pagination from "@/components/Pagination";
 import Header from "@/components/HeaderBar";
 import { toast } from "react-toastify";
 import HttpClient from "@/service/HttpClient";
@@ -62,8 +63,6 @@ export default function ReadBookPage() {
   const isRestoring = useRef(false);
   const hasMarkedCompleted = useRef(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [isEditingPage, setIsEditingPage] = useState(false);
-  const [inputPage, setInputPage] = useState("");
   const [isFullScreen, setIsFullScreen] = useState(false);
 
   const contentRef = useRef(null);
@@ -243,27 +242,6 @@ export default function ReadBookPage() {
       setInputPage(String(getCurrentChapterIndex() + 1));
     }
   }, [selectedChapter, chapters, isEditingPage]);
-
-  const handlePageJump = (e) => {
-    e?.preventDefault();
-    let targetPage = parseInt(inputPage, 10);
-    if (isNaN(targetPage) || targetPage < 1) {
-      targetPage = 1;
-    }
-    if (targetPage > chapters.length) targetPage = chapters.length;
-
-    const targetChapter = chapters[targetPage - 1];
-    if (targetChapter) {
-      if (targetChapter.isLocked || (!isUserPremium && targetChapter.isPremium)) {
-        setShowUpgradeModal(true);
-        setInputPage(String(getCurrentChapterIndex() + 1)); // Reset lại số cũ nếu bị chặn
-      } else {
-        setInitialScrollPos(0);
-        setSelectedChapter(targetChapter);
-      }
-    }
-    setIsEditingPage(false);
-  };
 
   const markBookAsCompleted = async () => {
     if (hasMarkedCompleted.current) return;
@@ -808,41 +786,23 @@ export default function ReadBookPage() {
             <div className="w-full max-w-4xl bg-white shadow-sm border border-slate-100 rounded-lg p-8 sm:p-12 h-fit">
               {selectedChapter ? (
                 <>
-                  <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-md -mx-6 sm:-mx-10 md:-mx-12 px-6 sm:px-10 md:px-12 py-3 border-b border-slate-200 flex items-center justify-between gap-2 mb-8 transition-all">
-                    <Button variant="outline" onClick={handlePrevChapter} disabled={currentIndex <= 0} className="flex gap-1 sm:gap-2 hover:bg-slate-100 h-9 px-2 sm:px-4">
-                      <ChevronLeft className="h-4 w-4" /> <span className="hidden sm:inline">Trước</span>
-                    </Button>
-
-                    <div className="text-sm text-slate-600 font-medium">
-                      {isEditingPage ? (
-                        <form onSubmit={handlePageJump} className="flex items-center gap-2">
-                          <span className="hidden sm:inline">Trang</span>
-                          <input
-                            type="number"
-                            min={1}
-                            max={chapters.length}
-                            value={inputPage}
-                            onChange={(e) => setInputPage(e.target.value)}
-                            onBlur={handlePageJump}
-                            autoFocus
-                            className="w-16 h-8 text-center border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-800"
-                          />
-                          / {chapters.length}
-                        </form>
-                      ) : (
-                        <span
-                          className="cursor-pointer hover:text-blue-600 hover:bg-blue-50 px-2 sm:px-3 py-1.5 rounded transition-all inline-block border border-transparent hover:border-blue-200 select-none"
-                          onClick={() => setIsEditingPage(true)}
-                          title="Bấm để nhập số trang"
-                        >
-                          Trang {currentIndex + 1} / {chapters.length}
-                        </span>
-                      )}
-                    </div>
-
-                    <Button variant="outline" onClick={handleNextChapter} disabled={currentIndex >= chapters.length - 1} className="flex gap-1 sm:gap-2 hover:bg-slate-100 h-9 px-2 sm:px-4">
-                      <span className="hidden sm:inline">Sau</span> <ChevronRight className="h-4 w-4" />
-                    </Button>
+                  <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-md -mx-6 sm:-mx-10 md:-mx-12 px-6 sm:px-10 md:px-12 py-3 border-b border-slate-200 mb-8 transition-all">
+                    <Pagination 
+                      currentPage={currentIndex + 1} 
+                      totalPages={chapters.length} 
+                      onPageChange={(newPage) => {
+                        // Logic xử lý khi chọn trang
+                        const targetChapter = chapters[newPage - 1];
+                        if (targetChapter) {
+                          if (targetChapter.isLocked || (!isUserPremium && targetChapter.isPremium)) {
+                            setShowUpgradeModal(true);
+                          } else {
+                            setInitialScrollPos(0);
+                            setSelectedChapter(targetChapter);
+                          }
+                        }
+                      }}
+                    />
                   </div>
                   <article className="w-full mt-8">
                     <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-slate-900 border-b pb-4 leading-tight">

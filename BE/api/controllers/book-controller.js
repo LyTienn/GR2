@@ -37,6 +37,9 @@ export const getAllBooks = async (req, res) => {
     let order = [['created_at', 'DESC']]; // Default: Newest
     if (sort) {
       switch (sort) {
+        case 'id':
+          order = [['id', 'ASC']];
+          break;
         case 'oldest':
           order = [['created_at', 'ASC']];
           break;
