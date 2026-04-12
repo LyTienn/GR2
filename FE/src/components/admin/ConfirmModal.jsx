@@ -36,7 +36,7 @@ export default function ConfirmModal({
       {/* Notification slide down */}
       <div 
         className={`fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-md z-50 transition-all duration-300 ease-out ${
-          isOpen ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
+          isOpen ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 pointer-events-none'
         }`}
       >
         <div className="bg-white dark:bg-slate-900 shadow-lg m-4 rounded-lg overflow-hidden">

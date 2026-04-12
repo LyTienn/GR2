@@ -20,7 +20,8 @@ export default function Pagination({
 
   const handlePageJump = (e) => {
     if (e && e.preventDefault) e.preventDefault();
-    
+    if (totalPages <= 0) return;
+
     let targetPage = parseInt(inputPage, 10);
     
     // Validate
