@@ -25,7 +25,7 @@ const handle401Error = (requestObj) => {
 
     // Gọi API refresh token (trình duyệt tự mang Cookie chứa refreshToken đi)
     return ajax({
-      url: `${BASE_URL}/auth/refresh-token`,
+      url: `${BASE_URL}/auth/refresh`,
       method: 'POST',
       withCredentials: true 
     }).pipe(

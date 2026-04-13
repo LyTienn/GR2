@@ -1,22 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import { Search, Loader2, CreditCard, Calendar, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import AdminSubscriptionService from '../../service/AdminSubscriptionService';
+import Pagination from '@/components/Pagination';
 
 export default function Registrations() {
   const [subscriptions, setSubscriptions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     fetchSubscriptions();
-  }, [page]);
+  }, [currentPage, search]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
 
   const fetchSubscriptions = async () => {
     try {
       setLoading(true);
-      const res = await AdminSubscriptionService.getAllSubscriptions({ page, limit: 10 });
+      const res = await AdminSubscriptionService.getAllSubscriptions({ page: currentPage, limit: 10, q: search });
       if (res && res.data) {
         setSubscriptions(res.data);
         setTotalPages(res.pagination?.pages || 1);
@@ -25,6 +30,12 @@ export default function Registrations() {
       console.error('Failed to fetch subscriptions:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
     }
   };
 
@@ -54,18 +65,18 @@ export default function Registrations() {
     }
   };
 
-  const filteredSubscriptions = subscriptions.filter(sub =>
-    sub.user?.email?.toLowerCase().includes(search.toLowerCase()) ||
-    sub.user?.full_name?.toLowerCase().includes(search.toLowerCase()) ||
-    sub.payment_transaction_id?.toLowerCase().includes(search.toLowerCase())
-  );
+  // const filteredSubscriptions = subscriptions.filter(sub =>
+  //   sub.user?.email?.toLowerCase().includes(search.toLowerCase()) ||
+  //   sub.user?.full_name?.toLowerCase().includes(search.toLowerCase()) ||
+  //   sub.payment_transaction_id?.toLowerCase().includes(search.toLowerCase())
+  // );
 
   return (
     <div className="bg-white dark:bg-card-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
       <div className="p-6 flex items-end justify-between gap-4 border-b border-slate-100 dark:border-slate-800/50">
         <div>
-          <h2 className="text-xl font-semibold">Quản lý Đăng ký (Subscriptions)</h2>
-          <p className="text-slate-500 dark:text-slate-400">Danh sách các gói đăng ký của thành viên.</p>
+          <h2 className="text-xl font-semibold">Quản lý Đăng ký</h2>
+          <p className="text-slate-500 dark:text-slate-400">Danh sách đăng ký gói hội viên</p>
         </div>
         <button
           onClick={fetchSubscriptions}
@@ -106,8 +117,8 @@ export default function Registrations() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
-                {filteredSubscriptions.length > 0 ? (
-                  filteredSubscriptions.map((sub) => (
+                {subscriptions.length > 0 ? (
+                  subscriptions.map((sub) => (
                     <tr key={sub.subscription_id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
                       <td className="px-4 py-3">
                         <div className="font-medium text-slate-900 dark:text-white">{sub.user?.full_name || 'N/A'}</div>
@@ -149,24 +160,16 @@ export default function Registrations() {
           </div>
         )}
 
-        {/* Simple Pagination */}
-        <div className="flex justify-center gap-2 mt-4">
-          <button
-            disabled={page <= 1}
-            onClick={() => setPage(p => p - 1)}
-            className="px-3 py-1 rounded border disabled:opacity-50"
-          >
-            Prev
-          </button>
-          <span className="px-3 py-1">Page {page} of {totalPages}</span>
-          <button
-            disabled={page >= totalPages}
-            onClick={() => setPage(p => p + 1)}
-            className="px-3 py-1 rounded border disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
+        {/* Pagination*/}
+        {totalPages > 0 && (
+          <div className="mt-6 flex justify-end border-t border-slate-100 dark:border-slate-800 pt-4">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </div>
+        )}
 
       </div>
     </div>

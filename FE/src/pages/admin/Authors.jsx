@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Pencil, Trash2, X, Loader2, Search } from 'lucide-react';
 import AdminAuthorService from '../../service/AdminAuthorService';
 import Pagination from '@/components/Pagination';
+import { toast } from 'react-toastify';
+import ConfirmModal from '@/components/admin/ConfirmModal';
 
 export default function Authors() {
   const [authors, setAuthors] = useState([]);
@@ -16,6 +18,10 @@ export default function Authors() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const itemsPerPage = 10;
+
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [authorToDelete, setAuthorToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -82,8 +88,10 @@ export default function Authors() {
     try {
       if (editingAuthor) {
         await AdminAuthorService.updateAuthor(editingAuthor.id, formData);
+        toast.success("Cập nhật tác giả thành công!");
       } else {
         await AdminAuthorService.createAuthor(formData);
+        toast.success("Thêm tác giả thành công!");
       }
       setShowModal(false);
       fetchAuthors();
@@ -92,14 +100,30 @@ export default function Authors() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa?")) {
-      try {
-        await AdminAuthorService.deleteAuthor(id);
-        fetchAuthors();
-      } catch (error) {
-        alert("Lỗi xóa: " + (error.response?.data?.message || error.message));
-      }
+  const handleDeleteClick = (id) => {
+    setAuthorToDelete(id);
+    setIsConfirmOpen(true);
+  };
+
+  const handleCancelDelete = () => {
+    setIsConfirmOpen(false);
+    setAuthorToDelete(null);
+  };
+
+  // 3. Xác nhận xóa -> Gọi API
+  const handleDelete = async () => {
+    if (!authorToDelete) return;
+    try {
+      setIsDeleting(true);
+      await AdminAuthorService.deleteAuthor(authorToDelete);
+      toast.success("Xóa tác giả thành công!");
+      fetchAuthors();
+      setIsConfirmOpen(false);
+      setAuthorToDelete(null);
+    } catch (error) {
+      return;
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -266,7 +290,7 @@ export default function Authors() {
                         <Pencil size={16} />
                       </button>
                       <button
-                        onClick={() => handleDelete(a.id)}
+                        onClick={() => handleDeleteClick(a.id)} // Sửa thành handleDeleteClick
                         className="p-2 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400"
                         aria-label="Xóa"
                       >
@@ -358,6 +382,17 @@ export default function Authors() {
           </div>
         </div>
       )}
+      <ConfirmModal
+        isOpen={isConfirmOpen}
+        title="Xác nhận xóa tác giả"
+        message="Bạn có chắc chắn muốn xóa tác giả này? Nếu tác giả đang có sách, hệ thống sẽ không cho phép xóa."
+        confirmText="Xóa"
+        cancelText="Hủy"
+        isLoading={isDeleting}
+        isDangerous={true}
+        onConfirm={handleDelete}
+        onCancel={handleCancelDelete}
+      />
     </div>
   );
 }

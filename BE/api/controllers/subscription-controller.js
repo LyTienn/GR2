@@ -66,20 +66,37 @@ class SubscriptionController {
     // Admin: Get all subscriptions
     static async adminGetAllSubscriptions(req, res) {
         try {
-            const { status, userId, page = 1, limit = 10 } = req.query;
+            const { status, userId, page = 1, limit = 10, q } = req.query; 
             const offset = (page - 1) * limit;
 
             const where = {};
             if (status) where.status = status;
             if (userId) where.user_id = userId;
 
+            let include = [{
+                model: (await import("../models/user-model.js")).User,
+                as: 'user',
+                attributes: ['full_name', 'email']
+            }];
+
+            if (q) {
+                include[0].where = {
+                    [Op.or]: [
+                        { full_name: { [Op.iLike]: `%${q}%` } },
+                        { email: { [Op.iLike]: `%${q}%` } }
+                    ]
+                };
+                include[0].required = true; 
+            }
+            const subscriptionWhere = { ...where };
+            if (q) {
+                subscriptionWhere[Op.or] = [
+                    { payment_transaction_id: { [Op.iLike]: `%${q}%` } }
+                ];
+            }
             const { count, rows } = await Subscription.findAndCountAll({
-                where,
-                include: [{
-                    model: (await import("../models/user-model.js")).User,
-                    as: 'user',
-                    attributes: ['full_name', 'email']
-                }],
+                where: subscriptionWhere,
+                include,
                 limit: parseInt(limit),
                 offset: parseInt(offset),
                 order: [['start_date', 'DESC']]

@@ -261,10 +261,6 @@ export default function Dashboard() {
             <Download size={18} />
             <span>Xuất báo cáo</span>
           </button>
-          <Link to="/admin/books" state={{ openAddModal: true }} className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/20 flex items-center gap-2">
-            <Plus size={18} />
-            <span>Thêm sách mới</span>
-          </Link>
         </div>
       </div>
 

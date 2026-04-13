@@ -106,7 +106,7 @@ export default function Subjects() {
       setIsConfirmOpen(false);
       setSubjectToDelete(null);
     } catch (error) {
-      toast.error("Lỗi xóa: " + (error.response?.data?.message || error.message));
+      return;
     } finally {
       setIsDeleting(false);
     }

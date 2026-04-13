@@ -4,7 +4,7 @@ import { firstValueFrom } from "rxjs";
 const AdminUserService = {
   // Lấy danh sách users (có phân trang)
   async getAllUsers(params = { page: 1, limit: 10 }) {
-    const res = await firstValueFrom(HttpClient.get('/users', { params }));
+    const res = await firstValueFrom(HttpClient.get('/users', {search: params }));
     return res?.data;
   },
 

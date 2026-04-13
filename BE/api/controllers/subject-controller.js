@@ -80,7 +80,20 @@ export const createSubject = async (req, res) => {
     if (!name) {
       return res.status(400).json({ success: false, message: "Tên chủ đề không được để trống" });
     }
-    const subject = await Subject.create({ name });
+    let subject = await Subject.findOne({ 
+      where: { name, is_deleted: 1 } 
+    });
+    
+    if (subject) {
+      // Tái kích hoạt subject đã xóa
+      await subject.update({ is_deleted: 0 });
+      return res.status(201).json({ 
+        success: true, 
+        data: subject, 
+        message: "Tạo chủ đề thành công" 
+      });
+    }
+    subject = await Subject.create({ name });
     res.status(201).json({ success: true, data: subject, message: "Tạo chủ đề thành công" });
   } catch (error) {
     res.status(500).json({ success: false, message: "Lỗi tạo chủ đề", error: error.message });
@@ -101,15 +114,26 @@ export const updateSubject = async (req, res) => {
     res.status(500).json({ success: false, message: "Lỗi cập nhật chủ đề", error: error.message });
   }
 };
-// Xóa chủ đề
+// Xóa chủ đề (chỉ cho phép xóa nếu chưa gán cho sách)
 export const deleteSubject = async (req, res) => {
   try {
     const subject = await Subject.findOne({ where: { id: req.params.id, is_deleted: 0 } });
     if (!subject) {
       return res.status(404).json({ success: false, message: "Không tìm thấy chủ đề" });
     }
-    // Xóa các liên kết trong bảng book_subjects trước (optional based on logic)
-    // await BookSubject.destroy({ where: { subject_id: req.params.id } }); // Commented out for soft delete
+
+    // Kiểm tra xem chủ đề có được gán cho sách nào không
+    const bookCount = await BookSubject.count({
+      where: { subject_id: req.params.id }
+    });
+
+    if (bookCount > 0) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Chủ đề đang được sử dụng, vui lòng xóa các cuốn sách liên quan trước",
+        booksCount: bookCount
+      });
+    }
 
     // Soft Delete
     await subject.update({ is_deleted: 1 });

@@ -1,6 +1,8 @@
 import React from 'react';
 import { Search, Filter, Pencil, Trash2, ShieldCheck } from 'lucide-react';
-import Pagination from '../../components/admin/Pagination';
+import Pagination from '@/components/Pagination';
+import ConfirmModal from '@/components/admin/ConfirmModal';
+import { toast } from 'react-toastify';
 import AdminUserService from '../../service/AdminUserService';
 
 export default function Users() {
@@ -17,6 +19,10 @@ export default function Users() {
   const [totalPages, setTotalPages] = React.useState(0);
   const [totalItems, setTotalItems] = React.useState(0);
   const itemsPerPage = 10;
+
+  const [isConfirmOpen, setIsConfirmOpen] = React.useState(false);
+  const [userToDelete, setUserToDelete] = React.useState(null);
+  const [isDeleting, setIsDeleting] = React.useState(false);
 
   const [showModal, setShowModal] = React.useState(false);
   const [editingUser, setEditingUser] = React.useState(null);
@@ -75,14 +81,29 @@ export default function Users() {
     setShowModal(true);
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa người dùng này? Hành động này không thể hoàn tác.")) {
-      try {
-        await AdminUserService.deleteUser(id);
-        fetchUsers();
-      } catch (error) {
-        alert("Không thể xóa user: " + (error.response?.data?.message || error.message));
-      }
+  const handleDeleteClick = (id) => {
+    setUserToDelete(id);
+    setIsConfirmOpen(true);
+  };
+
+  const handleCancelDelete = () => {
+    setIsConfirmOpen(false);
+    setUserToDelete(null);
+  };
+
+  const handleDelete = async () => {
+    if (!userToDelete) return;
+    try {
+      setIsDeleting(true);
+      await AdminUserService.deleteUser(userToDelete);
+      toast.success("Xóa người dùng thành công!");
+      fetchUsers();
+      setIsConfirmOpen(false);
+      setUserToDelete(null);
+    } catch (error) {
+      toast.error("Không thể xóa user: " + (error.response?.data?.message || error.message));
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -91,11 +112,12 @@ export default function Users() {
     try {
       if (editingUser) {
         await AdminUserService.updateUser(editingUser.user_id || editingUser.id, formData);
+        toast.success("Cập nhật người dùng thành công!");
         fetchUsers();
         setShowModal(false);
       }
     } catch (error) {
-      alert("Lỗi cập nhật: " + (error.response?.data?.message || error.message));
+      toast.error("Lỗi cập nhật: " + (error.response?.data?.message || error.message));
     }
   };
 
@@ -220,7 +242,7 @@ export default function Users() {
                         <Pencil size={16} />
                       </button>
                       <button
-                        onClick={() => handleDelete(u.user_id || u.id)}
+                        onClick={() => handleDeleteClick(u.user_id || u.id)}
                         className="p-2 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400"
                         aria-label="Xóa"
                         title="Xóa người dùng"
@@ -236,11 +258,15 @@ export default function Users() {
         </div>
 
         {/* Pagination Controls */}
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-        />
+        {totalPages > 0 && (
+          <div className="mt-6 flex justify-end border-t border-slate-100 dark:border-slate-800 pt-4">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </div>
+        )}
       </div>
 
       {/* Edit Modal */}
@@ -312,6 +338,17 @@ export default function Users() {
           </div>
         </div>
       )}
+      <ConfirmModal
+        isOpen={isConfirmOpen}
+        title="Xác nhận xóa người dùng"
+        message="Bạn có chắc chắn muốn xóa người dùng này? Hành động này không thể hoàn tác và mọi dữ liệu liên quan sẽ bị mất."
+        confirmText="Xóa tài khoản"
+        cancelText="Hủy"
+        isLoading={isDeleting}
+        isDangerous={true}
+        onConfirm={handleDelete}
+        onCancel={handleCancelDelete}
+      />
     </div>
   );
 }
