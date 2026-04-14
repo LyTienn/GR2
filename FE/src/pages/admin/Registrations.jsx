@@ -11,12 +11,11 @@ export default function Registrations() {
   const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
-    fetchSubscriptions();
+    const timer = setTimeout(() => {
+      fetchSubscriptions();
+    }, 300);
+    return () => clearTimeout(timer);
   }, [currentPage, search]);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [search]);
 
   const fetchSubscriptions = async () => {
     try {
@@ -94,7 +93,10 @@ export default function Registrations() {
             className="w-full h-10 pl-10 pr-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm"
             placeholder="Tìm theo email, tên hoặc mã giao dịch..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1);
+            }}
             aria-label="Tìm kiếm đăng ký"
           />
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />

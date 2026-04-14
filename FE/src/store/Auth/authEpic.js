@@ -8,7 +8,7 @@ import {
     logoutStart, logoutSuccess, logoutFailure,
     registerStart, registerSuccess, registerFailure,
     fetchProfileStart, fetchProfileSuccess, fetchProfileFailure
-} from './AuthSlice';
+} from './authSlice';
 
 export const loginEpic = action$ => action$.pipe(
     ofType(loginStart.type),

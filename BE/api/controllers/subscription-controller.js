@@ -1,5 +1,5 @@
 import Subscription from "../models/subscription-model.js";
-
+import { User } from "../models/user-model.js";
 import { Op } from "sequelize";
 
 class SubscriptionController {
@@ -69,37 +69,28 @@ class SubscriptionController {
             const { status, userId, page = 1, limit = 10, q } = req.query; 
             const offset = (page - 1) * limit;
 
-            const where = {};
-            if (status) where.status = status;
-            if (userId) where.user_id = userId;
+            const subscriptionWhere = {};
+            if (status) subscriptionWhere.status = status;
+            if (userId) subscriptionWhere.user_id = userId;
 
-            let include = [{
-                model: (await import("../models/user-model.js")).User,
-                as: 'user',
-                attributes: ['full_name', 'email']
-            }];
-
-            if (q) {
-                include[0].where = {
-                    [Op.or]: [
-                        { full_name: { [Op.iLike]: `%${q}%` } },
-                        { email: { [Op.iLike]: `%${q}%` } }
-                    ]
-                };
-                include[0].required = true; 
-            }
-            const subscriptionWhere = { ...where };
             if (q) {
                 subscriptionWhere[Op.or] = [
-                    { payment_transaction_id: { [Op.iLike]: `%${q}%` } }
+                    { payment_transaction_id: { [Op.iLike]: `%${q}%` } },
+                    { '$user.full_name$': { [Op.iLike]: `%${q}%` } },
+                    { '$user.email$': { [Op.iLike]: `%${q}%` } }
                 ];
             }
             const { count, rows } = await Subscription.findAndCountAll({
                 where: subscriptionWhere,
-                include,
+                include: [{
+                    model: User,
+                    as: 'user',
+                    attributes: ['full_name', 'email']
+                }],
                 limit: parseInt(limit),
                 offset: parseInt(offset),
-                order: [['start_date', 'DESC']]
+                order: [['start_date', 'DESC']],
+                subQuery: false 
             });
 
             res.status(200).json({
