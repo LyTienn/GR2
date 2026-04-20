@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -16,6 +16,8 @@ import {
   X
 } from 'lucide-react';
 import AuthService from '../../service/AuthService';
+import { useDispatch, useSelector } from 'react-redux';  // ✅ Thêm useSelector
+import { logoutStart, selectIsAuthenticated } from '@/store/Auth';
 
 function SidebarLink({ to, icon, label, onClick }) {
   return (
@@ -94,20 +96,22 @@ export default function AdminLayout() {
   const navigate = useNavigate();
   const [isDocumentsOpen, setIsDocumentsOpen] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const dispatch = useDispatch();
+  const isAuthenticated = useSelector(selectIsAuthenticated);
 
-  const handleLogout = async () => {
-    try {
-      await AuthService.logout();
-      navigate('/login');
-    } catch (error) {
-      console.error('Logout failed:', error);
-      navigate('/login');
-    }
+  const handleLogout = () => {
+    dispatch(logoutStart());
   };
 
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
   };
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, navigate]);
 
   return (
     <div className="font-display bg-slate-50 dark:bg-[#0B1218] text-slate-900 dark:text-white transition-colors duration-200">

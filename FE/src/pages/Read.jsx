@@ -237,12 +237,6 @@ export default function ReadBookPage() {
     }
   }, [selectedChapter?.id, selectedChapter?.content, initialScrollPos]);
 
-  useEffect(() => {
-    if (!isEditingPage) {
-      setInputPage(String(getCurrentChapterIndex() + 1));
-    }
-  }, [selectedChapter, chapters, isEditingPage]);
-
   const markBookAsCompleted = async () => {
     if (hasMarkedCompleted.current) return;
     hasMarkedCompleted.current = true;
@@ -300,24 +294,15 @@ export default function ReadBookPage() {
     // }
   };
 
-  const handlePrevChapter = () => {
-    const idx = getCurrentChapterIndex();
-    if (idx > 0) {
-      setInitialScrollPos(0);
-      setSelectedChapter(chapters[idx - 1]);
-    }
-  };
-
-  const handleNextChapter = () => {
-    const idx = getCurrentChapterIndex();
-    if (idx >= 0 && idx < chapters.length - 1) {
-      const nextChapter = chapters[idx + 1];
-      if (nextChapter.isLocked) {
+  const handlePageChange = (newPage) => {
+    const targetChapter = chapters[newPage - 1];
+    if (targetChapter) {
+      if (targetChapter.isLocked || (!isUserPremium && targetChapter.isPremium)) {
         setShowUpgradeModal(true);
-        return;
+      } else {
+        setInitialScrollPos(0);
+        setSelectedChapter(targetChapter);
       }
-      setInitialScrollPos(0);
-      setSelectedChapter(nextChapter);
     }
   };
 
@@ -790,18 +775,7 @@ export default function ReadBookPage() {
                     <Pagination 
                       currentPage={currentIndex + 1} 
                       totalPages={chapters.length} 
-                      onPageChange={(newPage) => {
-                        // Logic xử lý khi chọn trang
-                        const targetChapter = chapters[newPage - 1];
-                        if (targetChapter) {
-                          if (targetChapter.isLocked || (!isUserPremium && targetChapter.isPremium)) {
-                            setShowUpgradeModal(true);
-                          } else {
-                            setInitialScrollPos(0);
-                            setSelectedChapter(targetChapter);
-                          }
-                        }
-                      }}
+                      onPageChange={handlePageChange}
                     />
                   </div>
                   <article className="w-full mt-8">
@@ -812,16 +786,6 @@ export default function ReadBookPage() {
                       {selectedChapter.content}
                     </div>
                   </article>
-
-                  {/* <div className="mt-12 pt-8 border-t border-slate-200 flex items-center justify-between gap-4">
-                    <Button variant="outline" onClick={handlePrevChapter} disabled={currentIndex <= 0} className="flex gap-2 hover:bg-gray-100">
-                      <ChevronLeft className="h-4 w-4" /> Trước
-                    </Button>
-                    <div className="text-sm text-slate-500">Trang {currentIndex + 1} / {chapters.length}</div>
-                    <Button variant="outline" onClick={handleNextChapter} disabled={currentIndex >= chapters.length - 1} className="flex gap-2 hover:bg-gray-100">
-                      Sau <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </div> */}
                 </>
               ) : <div className="text-center text-slate-400 py-20">Vui lòng chọn chương</div>}
             </div>
