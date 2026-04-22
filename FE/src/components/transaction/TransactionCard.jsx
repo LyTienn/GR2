@@ -17,6 +17,18 @@ import {
 } from "lucide-react";
 
 export default function TransactionCard({ transaction }) {
+  const { 
+    payment_transaction_id, 
+    package_details, 
+    start_date, 
+    expiry_date, 
+    status,
+    created_at,
+    createdAt
+  } = transaction;
+
+  const transactionDate = created_at || createdAt || start_date;
+
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
     const date = new Date(dateString);
@@ -43,6 +55,11 @@ export default function TransactionCard({ transaction }) {
       "12_THANG": "Gói 12 tháng",
     };
     return map[pkg] || pkg;
+  };
+
+  const getPackagePrice = (pkg) => {
+    const prices = { "3_THANG": 99000, "6_THANG": 179000, "12_THANG": 299000 };
+    return prices[pkg] || 0;
   };
 
   const getStatusConfig = (status) => {
@@ -81,12 +98,12 @@ export default function TransactionCard({ transaction }) {
           <div className="flex-1">
             <CardTitle className="text-lg flex items-center gap-2">
               <Package className="h-5 w-5 text-primary" />
-              {formatPackageName(transaction.package)}
+              {formatPackageName(package_details)}
             </CardTitle>
             <CardDescription className="mt-1 flex items-center gap-1.5">
               <CreditCard className="h-3.5 w-3.5" />
               Mã GD:{" "}
-              <span className="font-mono">{transaction.transactionId}</span>
+              <span className="font-mono">{payment_transaction_id || "Không có mã"}</span>
             </CardDescription>
           </div>
 
@@ -95,7 +112,7 @@ export default function TransactionCard({ transaction }) {
             className={`${statusConfig.color} gap-1.5 px-3 py-1.5 font-medium`}
           >
             <StatusIcon className={`h-4 w-4 ${statusConfig.iconColor}`} />
-            {transaction.statusText}
+            {statusConfig.statusText}
           </Badge>
         </div>
       </CardHeader>
@@ -106,49 +123,50 @@ export default function TransactionCard({ transaction }) {
           <div className="flex flex-col gap-1">
             <span className="text-muted-foreground">Số tiền thanh toán</span>
             <span className="text-lg font-bold text-primary">
-              {formatCurrency(transaction.amount)}
+              {formatCurrency(getPackagePrice(package_details))}
             </span>
           </div>
 
           {/* Ngày bắt đầu */}
-          {transaction.startDate && (
+          {transactionDate && (
             <div className="flex flex-col gap-1">
               <span className="text-muted-foreground flex items-center gap-1">
-                <Calendar className="h-3.5 w-3.5" />
-                Ngày bắt đầu
+                <Calendar className="h-3.5 w-3.5" /> Ngày giao dịch
               </span>
-              <span className="font-medium">
-                {formatDate(transaction.startDate)}
-              </span>
+              <span className="font-medium">{formatDate(transactionDate)}</span>
             </div>
           )}
 
           {/* Ngày hết hạn */}
-          {transaction.expiryDate && (
+          {(status === "ACTIVE" || status === "EXPIRED") && expiry_date && (
             <div className="flex flex-col gap-1">
               <span className="text-muted-foreground flex items-center gap-1">
-                <Calendar className="h-3.5 w-3.5" />
-                Ngày hết hạn
+                <Calendar className="h-3.5 w-3.5" /> Ngày hết hạn
               </span>
-              <span className="font-medium">
-                {formatDate(transaction.expiryDate)}
-              </span>
+              <span className="font-medium">{formatDate(expiry_date)}</span>
             </div>
           )}
         </div>
 
         {/* Ghi chú */}
-        {transaction.status === "PENDING" && (
+        {status === "PENDING" && (
           <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
             <AlertCircle className="h-4 w-4 inline mr-2" />
             Giao dịch đang chờ xử lý. Vui lòng hoàn tất thanh toán.
           </div>
         )}
 
-        {transaction.status === "CANCELLED" && (
+        {status === "CANCELLED" && (
           <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800">
             <XCircle className="h-4 w-4 inline mr-2" />
             Giao dịch đã bị hủy hoặc thanh toán không thành công.
+          </div>
+        )}
+
+        {status === "EXPIRED" && (
+          <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-800">
+            <AlertCircle className="h-4 w-4 inline mr-2" />
+            Giao dịch đã hết hạn.
           </div>
         )}
       </CardContent>

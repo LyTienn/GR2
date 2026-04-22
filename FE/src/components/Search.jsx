@@ -4,8 +4,10 @@ import { useNavigate, Link } from "react-router-dom";
 import { debounce } from "lodash";
 import HttpClient from "@/service/HttpClient";
 import { Subject, debounceTime, switchMap, catchError, of, tap } from 'rxjs';
+import { useTranslation } from "react-i18next";
 
 const Search = ({ variant = "dynamic", className = "" }) => {
+    const { t } = useTranslation();
     const [isOpen, setIsOpen] = useState(variant === "static");
     const [keyword, setKeyword] = useState("");
     const [suggestions, setSuggestions] = useState([]);
@@ -146,8 +148,8 @@ const Search = ({ variant = "dynamic", className = "" }) => {
                     onChange={handleChange}
                     onKeyDown={handleKeyDown}
                     onFocus={() => keyword && setShowDropdown(true)}
-                    placeholder="Tìm kiếm sách, tác giả..."
-                    aria-label="Tìm kiếm sách"
+                    placeholder={t("layout.header.search_placeholder")}
+                    aria-label={t("layout.header.search_ariaLabel")}
                     className={inputClasses}
                 />
 
@@ -167,7 +169,7 @@ const Search = ({ variant = "dynamic", className = "" }) => {
                 <div className="absolute top-full mt-2 w-80 right-0 bg-white rounded-lg shadow-xl border border-slate-100 overflow-hidden">
                     {loading ? (
                         <div className="p-4 text-center text-slate-400 flex justify-center items-center gap-2">
-                            <Loader2 className="animate-spin h-4 w-4" /> Đang tìm...
+                            <Loader2 className="animate-spin h-4 w-4" /> {t("layout.header.search_dropDown.loading")}
                         </div>
                     ) : suggestions.length > 0 ? (
                         <ul>
@@ -177,7 +179,7 @@ const Search = ({ variant = "dynamic", className = "" }) => {
                                     <Link
                                         to={`/book/${book.id}`}
                                         className="px-4 py-3 hover:bg-slate-50 transition flex items-start gap-3"
-                                        onClick={() => setOpen(false)}
+                                        onClick={() => setIsOpen(false)}
                                     >
                                         <div className="w-10 h-14 bg-slate-200 rounded shrink-0 overflow-hidden">
                                             <img src={book.image_url} className="w-full h-full object-cover" />
@@ -195,13 +197,13 @@ const Search = ({ variant = "dynamic", className = "" }) => {
                                     onClick={goToSearchPage}
                                     className="text-sm text-blue-600 font-medium hover:underline w-full py-1"
                                 >
-                                    Xem tất cả kết quả cho "{keyword}"
+                                    {t("layout.header.search_dropDown.getResult")} "{keyword}"
                                 </button>
                             </li>
                         </ul>
                     ) : (
                         <div className="p-4 text-center text-slate-500 text-sm">
-                            Không tìm thấy sách nào.
+                            {t("layout.header.search_dropDown.noResult")}
                         </div>
                     )}
                 </div>

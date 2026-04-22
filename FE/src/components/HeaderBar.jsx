@@ -16,8 +16,11 @@ import { toast } from 'react-toastify';
 import { logoutStart } from '@/store/Auth';
 import PaymentService from '@/service/PaymentService';
 import { selectAuthUser, selectIsAuthenticated, selectAuthLoading, selectAuthError } from '@/store/Auth/authSelector';
+import i18n from '../i18n.js';
+import { useTranslation } from 'react-i18next';
 
 const HeaderBar = () => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -30,6 +33,22 @@ const HeaderBar = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const isLoading = useSelector(selectAuthLoading);
   const error = useSelector(selectAuthError);
+  
+  const FlagVI = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className="w-5 h-4 rounded-sm shadow-xs">
+    <rect width="512" height="512" fill="#da251d"/>
+    <polygon fill="#ff0" points="256,114 300,248 442,248 327,331 371,465 256,382 141,465 185,331 70,248 212,248"/>
+  </svg>
+);
+
+const FlagEN = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 30" className="w-5 h-4 rounded-sm shadow-xs">
+    <clipPath id="a"><path d="M0 0h60v30H0z"/></clipPath>
+    <g clipPath="url(#a)"><path d="M0 0h60v30H0z" fill="#012169"/>
+    <path d="m0 0 60 30M60 0 0 30" stroke="#fff" strokeWidth="6"/><path d="m0 0 60 30M60 0 0 30" stroke="#c8102e" strokeWidth="4"/>
+    <path d="M30 0v30M0 15h60" stroke="#fff" strokeWidth="10"/><path d="M30 0v30M0 15h60" stroke="#c8102e" strokeWidth="6"/></g>
+  </svg>
+);
 
   useEffect(() => {
     const fetchSubscription = async () => {
@@ -73,12 +92,12 @@ const HeaderBar = () => {
     if (user.role === "ADMIN") return "Quản trị viên";
     if (user.subscription && !user.isExpired) {
       const pkg = user.subscription.package_details;
-      if (pkg === "3_THANG") return "Hội viên 3 tháng";
-      if (pkg === "6_THANG") return "Hội viên 6 tháng";
-      if (pkg === "12_THANG") return "Hội viên 1 năm";
-      return "Hội viên Premium";
+      if (pkg === "3_THANG") return t("layout.header.modal_header.package.3m");
+      if (pkg === "6_THANG") return t("layout.header.modal_header.package.6m");
+      if (pkg === "12_THANG") return t("layout.header.modal_header.package.12m");
+      return t("layout.header.modal_header.package.current");
     }
-    return "Gói thường";
+    return t("layout.header.modal_header.package.current");
   };
 
   return (
@@ -92,7 +111,7 @@ const HeaderBar = () => {
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-blue-600 to-indigo-600 text-white transition-transform group-hover:scale-105 shadow-md shadow-blue-200">
             <BookOpen className='h-5 w-5' />
           </div>
-          <span className='hidden font-serif text-xl font-bold text-slate-800 sm:block'>Thư Viện Sách</span>
+          <span className='hidden font-serif text-xl font-bold text-slate-800 sm:block'>{t("layout.header.title")}</span>
         </Link>
 
         {/* SEARCH BAR - DESKTOP */}
@@ -100,14 +119,41 @@ const HeaderBar = () => {
           <Search variant="static" />
         </div>
 
-        {/* NAVIGATION - DESKTOP */}
+        {/* NAV/TRANS - DESKTOP */}
         <nav className="hidden md:flex items-center gap-2">
+            <div className="flex items-center bg-slate-200/60 p-1 rounded-lg border border-slate-300/50 mr-4">
+            {/* Nút Tiếng Việt */}
+            <button
+              onClick={() => i18n.changeLanguage('vi')}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all duration-200 ${
+                i18n.language === 'vi' 
+                  ? 'bg-white text-slate-900 shadow-sm' 
+                  : 'text-slate-500 hover:text-slate-700 hover:bg-slate-300/30' 
+              }`}
+            >
+              <FlagVI />
+              <span className="text-xs font-bold tracking-tight">VI</span>
+            </button>
+
+            {/* Nút Tiếng Anh */}
+            <button
+              onClick={() => i18n.changeLanguage('en')}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all duration-200 ${
+                i18n.language?.startsWith('en') 
+                  ? 'bg-white text-slate-900 shadow-sm' 
+                  : 'text-slate-500 hover:text-slate-700 hover:bg-slate-300/30'
+              }`}
+            >
+              <FlagEN />
+              <span className="text-xs font-bold tracking-tight">EN</span>
+            </button>
+          </div>
           <Button variant="ghost" onClick={() => navigate('/search')} className={`transition-colors ${
               location.pathname === '/search' 
-                ? "bg-slate-100 text-slate-600 font-semibold" // Màu khi đang ở trang Khám phá
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100" // Màu mặc định
+                ? "bg-slate-100 text-slate-600 font-semibold" 
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100" 
             }`}>
-            Khám phá
+            {t("layout.header.explore")}
           </Button>
 
           {/* Show Premium Button if not premium or guest */}
@@ -147,7 +193,7 @@ const HeaderBar = () => {
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-9 pl-2 pr-2 hover:bg-slate-100 flex items-center gap-2 rounded-full border border-transparent hover:border-slate-200">
+                  <Button variant="ghost" size="sm" className="h-9 pl-2 pr-2 hover:bg-slate-100 flex items-center gap-2 border border-transparent hover:border-slate-200">
                     <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600">
                       <User className="h-4 w-4" />
                     </div>
@@ -161,7 +207,7 @@ const HeaderBar = () => {
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent align="end" className="w-56 mt-2">
-                  <DropdownMenuLabel>Tài khoản của tôi</DropdownMenuLabel>
+                  <DropdownMenuLabel>{t("layout.header.modal_header.my_account")}</DropdownMenuLabel>
                   <DropdownMenuSeparator />
 
                   <DropdownMenuItem disabled>
@@ -174,20 +220,20 @@ const HeaderBar = () => {
                   {user?.role !== "admin" && (
                     <DropdownMenuItem onClick={() => navigate("/bookshelf")} className="cursor-pointer hover:bg-slate-100">
                       <Library className="h-4 w-4 mr-2" />
-                      Tủ sách
+                      {t("layout.header.modal_header.bookshelf")}
                     </DropdownMenuItem>
                   )}
 
                   <DropdownMenuItem onClick={() => navigate("/profile")} className="cursor-pointer hover:bg-slate-100">
                     <Settings className="h-4 w-4 mr-2" />
-                    Quản lý tài khoản
+                    {t("layout.header.modal_header.setting")}
                   </DropdownMenuItem>
 
                   <DropdownMenuSeparator />
 
                   <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer">
                     <LogOut className="h-4 w-4 mr-2" />
-                    Đăng xuất
+                    {t("layout.header.modal_header.logout")}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -195,10 +241,10 @@ const HeaderBar = () => {
           ) : (
             <>
               <Button variant="ghost" onClick={() => navigate('/login')} className="hover:bg-slate-100">
-                Đăng nhập
+                {t("layout.header.login")}
               </Button>
               <Button onClick={() => navigate('/register')} className="bg-slate-900 text-white hover:bg-slate-800 shadow-lg shadow-slate-200 hover:shadow-xl transition-all">
-                Đăng ký
+                {t("layout.header.register")}
               </Button>
             </>
           )}
@@ -227,7 +273,7 @@ const HeaderBar = () => {
 
           <nav className="flex flex-col gap-2">
             <Button variant="ghost" className="justify-start" onClick={() => { navigate('/search'); setIsMenuOpen(false); }}>
-              <BookOpen className="mr-2 h-4 w-4" /> Khám phá
+              <BookOpen className="mr-2 h-4 w-4" /> {t("layout.header.explore")}
             </Button>
 
             {isAuthenticated ? (
@@ -236,16 +282,16 @@ const HeaderBar = () => {
                   <User className="mr-2 h-4 w-4" /> Tài khoản: {user?.fullName || "User"}
                 </Button>
                 <Button variant="ghost" className="justify-start text-red-600 hover:text-red-700 hover:bg-red-50" onClick={handleLogout}>
-                  <LogOut className="mr-2 h-4 w-4" /> Đăng xuất
+                  <LogOut className="mr-2 h-4 w-4" /> {t("layout.header.modal_header.logout")}
                 </Button>
               </>
             ) : (
               <>
                 <Button variant="outline" className="justify-start" onClick={() => { navigate('/login'); setIsMenuOpen(false); }}>
-                  <User className="mr-2 h-4 w-4" /> Đăng nhập
+                  <User className="mr-2 h-4 w-4" /> {t("layout.header.login")}
                 </Button>
                 <Button className="justify-start bg-slate-900 text-white" onClick={() => { navigate('/register'); setIsMenuOpen(false); }}>
-                  Đăng ký ngay
+                  {t("layout.header.register")}
                 </Button>
               </>
             )}

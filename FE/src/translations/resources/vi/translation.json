@@ -1,0 +1,34 @@
+{
+  "layout": {
+    "header": {
+      "title": "Thư viện sách",
+      "explore": "Khám phá",
+      "search_placeholder": "Tìm kiếm sách, tác giả,...",
+      "search_ariaLabel": "Tìm kiếm sách",
+      "search_dropDown": {
+        "loading": "Đang tìm...",
+        "getResult": "Xem tất cả kết quả cho ",
+        "noResult": "Không tìm thấy sách nào"
+      },
+      "premium_default": "Premium",
+      "premium_3m": "Hội viên 3 tháng",
+      "premium_6m": "Hội viên 6 tháng",
+      "premium_12m": "Hội viên 12 tháng",
+      "modal_header": {
+        "my_account": "Tài khoản của tôi",
+        "package": {
+            "current": "Gói thường",
+            "premium": "Hội viên Premium",
+            "3m": "Hội viên 3 tháng",
+            "6m": "Hội viên 6 tháng",
+            "12m": "Hội viên 1 năm"
+        },
+        "bookshelf": "Tủ sách",
+        "setting": "Quản lý tài khoản",
+        "logout": "Đăng xuất"
+      },
+      "login": "Đăng nhập",
+      "register": "Đăng ký"
+    }
+  }
+}

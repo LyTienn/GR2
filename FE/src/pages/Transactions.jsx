@@ -60,9 +60,9 @@ export default function Transactions() {
       }
       const res = await PaymentService.getPaymentHistory();
 
-      if (res.success && res.data?.history) {
-        console.log("✅ History Data:", res.data.history);
-        setAllHistory(res.data.history);
+      if (res.success && Array.isArray(res.data)) {
+        console.log("✅ History Data:", res.data);
+        setAllHistory(res.data);
       } else {
         console.warn("⚠️ No history in response:", res);
         setAllHistory([]);
@@ -81,9 +81,14 @@ export default function Transactions() {
 
     // Filter by search (transaction ID)
     if (filters.search.trim()) {
-      result = result.filter((t) =>
-        t.transactionId?.toLowerCase().includes(filters.search.toLowerCase())
-      );
+      const searchKey = filters.search.trim().toLowerCase();
+      result = result.filter((t) => {
+        // Ép kiểu về chuỗi một cách an toàn và tìm kiếm
+        const payId = String(t.payment_transaction_id || "").toLowerCase();
+        const subId = String(t.subscription_id || "").toLowerCase(); // Tìm cả mã sub dự phòng
+        
+        return payId.includes(searchKey) || subId.includes(searchKey);
+      });
     }
 
     // Filter by status
@@ -93,7 +98,7 @@ export default function Transactions() {
 
     // Filter by package
     if (filters.package !== "ALL") {
-      result = result.filter((t) => t.package === filters.package);
+      result = result.filter((t) => t.package_details === filters.package);
     }
 
     // Filter by time range
@@ -117,7 +122,7 @@ export default function Transactions() {
       }
 
       result = result.filter((t) => {
-        const createdAt = t.startDate || t.createdAt;
+        const createdAt = t.start_date || t.createdAt;
         return createdAt && new Date(createdAt) >= filterDate;
       });
     }
@@ -233,7 +238,7 @@ export default function Transactions() {
                 <div className="space-y-4 mb-8">
                   {filteredHistory.map((transaction) => (
                     <TransactionCard
-                      key={transaction.id}
+                      key={transaction.subcription_id}
                       transaction={transaction}
                     />
                   ))}
