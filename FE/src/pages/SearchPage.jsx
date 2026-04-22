@@ -4,6 +4,7 @@ import HttpClient from "@/service/HttpClient";
 import { firstValueFrom } from 'rxjs';
 import BookCard from "@/components/BookCard";
 import Header from "@/components/HeaderBar";
+import Pagination from "@/components/Pagination";
 import {
     Loader2,
     Search,
@@ -217,23 +218,25 @@ const SearchPage = () => {
     };
 
     return (
-        <div className='min-h-screen bg-slate-50'>
-            <Header /> {/* Reusing existing Header but we also have local search bar */}
+        <div className='h-screen flex flex-col bg-slate-50 overflow-hidden'>
+            <div className="shrink-0 z-40">
+                <Header />
+            </div>
 
-            <main className='container mx-auto px-4 py-8'>
+            <main className='flex-1 overflow-hidden max-w-screen-2xl mx-auto px-8 pt-2 flex flex-col'>
                 {/* Mobile Filter Toggle */}
-                <div className="lg:hidden mb-4 flex justify-between items-center">
+                <div className="lg:hidden shrink-0 mb-4 flex justify-between items-center">
                     <Button variant="outline" onClick={() => setIsMobileFilterOpen(true)} className="flex items-center gap-2">
                         <Filter className="w-4 h-4" /> Bộ lọc
                     </Button>
                     <span className="text-sm text-slate-500">{totalResults} kết quả</span>
                 </div>
 
-                <div className="flex flex-col lg:flex-row gap-8">
-                    {/* Sidebar / Filters */}
+                <div className="flex-1 overflow-hidden flex flex-col lg:flex-row gap-8">
                     <aside className={`
                         fixed inset-0 z-50 bg-white p-6 transition-transform duration-300 transform
                         lg:relative lg:translate-x-0 lg:z-0 lg:w-72 lg:block lg:bg-transparent lg:p-0
+                        lg:h-full lg:overflow-y-auto hover-scrollbar lg:pb-8 lg:pr-2
                         ${isMobileFilterOpen ? 'translate-x-0' : '-translate-x-full'}
                     `}>
                         <div className="flex justify-between items-center mb-6 lg:hidden">
@@ -243,7 +246,6 @@ const SearchPage = () => {
                             </Button>
                         </div>
 
-                        {/* Search Input (Local) */}
                         <form onSubmit={handleSearch} className="mb-8 block lg:hidden">
                             <div className="relative">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
@@ -345,171 +347,136 @@ const SearchPage = () => {
                     )}
 
                     {/* Main Content */}
-                    <div className="flex-1">
-                        {/* Top Bar */}
-                        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-                            <form onSubmit={handleSearch} className="relative w-full sm:max-w-md hidden lg:block">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-                                <input
-                                    type="text"
-                                    value={searchInput}
-                                    onChange={(e) => setSearchInput(e.target.value)}
-                                    placeholder="Tìm kiếm sách, tác giả..."
-                                    className="w-full pl-10 pr-4 py-2 rounded-lg bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
-                                />
-                            </form>
-
-                            <div className="flex items-center gap-3 w-full sm:w-auto">
-                                <div className="flex items-center gap-2 text-sm text-slate-500 whitespace-nowrap">
-                                    <SortAsc className="w-4 h-4" />
-                                    <span className="hidden sm:inline">Sắp xếp:</span>
+                    <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+                        
+                        {/* ========================================= */}
+                        {/* CỤM ĐIỀU KHIỂN CỐ ĐỊNH (Không dùng sticky nữa) */}
+                        {/* ========================================= */}
+                        <div className="shrink-0 bg-slate-50 pb-2 z-10">
+                            {/* Top Bar */}
+                            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm mb-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+                                <div className="flex items-center gap-3 w-full sm:w-auto">
+                                    <div className="flex items-center gap-2 text-sm text-slate-500 whitespace-nowrap">
+                                        <SortAsc className="w-4 h-4" />
+                                        <span className="hidden sm:inline">Sắp xếp:</span>
+                                    </div>
+                                    <select
+                                        value={sortBy}
+                                        onChange={(e) => updateFilter('sort', e.target.value)}
+                                        className="bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                    >
+                                        <option value="newest">Mới nhất</option>
+                                        <option value="oldest">Cũ nhất</option>
+                                        <option value="a-z">Tên (A-Z)</option>
+                                        <option value="z-a">Tên (Z-A)</option>
+                                        <option value="views">Phổ biến nhất</option>
+                                    </select>
                                 </div>
-                                <select
-                                    value={sortBy}
-                                    onChange={(e) => updateFilter('sort', e.target.value)}
-                                    className="bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+
+                                <Button 
+                                    onClick={clearFilters} 
+                                    variant="outline"
+                                    className="w-full sm:w-auto text-slate-600 hover:text-slate-900 border-slate-300 hover:bg-slate-50"
                                 >
-                                    <option value="newest">Mới nhất</option>
-                                    <option value="oldest">Cũ nhất</option>
-                                    <option value="a-z">Tên (A-Z)</option>
-                                    <option value="z-a">Tên (Z-A)</option>
-                                    <option value="views">Phổ biến nhất</option>
-                                </select>
+                                    <span>↺</span> Đặt lại
+                                </Button>
                             </div>
+
+                            {/* Search Query Indicator */}
+                            {query && (
+                                <div className="mb-4">
+                                    <h1 className='text-2xl font-bold text-slate-800'>
+                                        Kết quả tìm kiếm cho: <span className='text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-indigo-600'>"{query}"</span>
+                                    </h1>
+                                    <p className='text-slate-500 mt-1'>
+                                        Tìm thấy {totalResults} kết quả phù hợp.
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Active Filters Display */}
+                            {(selectedSubject || selectedAuthor || selectedType) && (
+                                <div className="flex flex-wrap gap-2 mb-4">
+                                    {selectedType && (
+                                        <Badge variant="secondary" className="px-3 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 flex items-center gap-1">
+                                            {selectedType === 'FREE' ? 'Miễn phí' : 'Premium'}
+                                            <X className="w-3 h-3 cursor-pointer" onClick={() => updateFilter('type', '')} />
+                                        </Badge>
+                                    )}
+                                    {selectedSubject && (
+                                        <Badge variant="secondary" className="px-3 py-1 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 flex items-center gap-1">
+                                            {subjects.find(s => String(s.id) === selectedSubject)?.name || 'Chủ đề'}
+                                            <X className="w-3 h-3 cursor-pointer" onClick={() => updateFilter('subjectId', '')} />
+                                        </Badge>
+                                    )}
+                                    {selectedAuthor && (
+                                        <Badge variant="secondary" className="px-3 py-1 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 flex items-center gap-1">
+                                            {authors.find(a => String(a.id) === selectedAuthor)?.name || 'Tác giả'}
+                                            <X className="w-3 h-3 cursor-pointer" onClick={() => updateFilter('authorId', '')} />
+                                        </Badge>
+                                    )}
+                                    <button onClick={clearFilters} className="text-xs text-slate-500 hover:text-red-500 underline ml-2">
+                                        Xóa bộ lọc
+                                    </button>
+                                </div>
+                            )}
+
+                            {totalPages > 0 && !loading && books.length > 0 && (
+                                <div className="flex justify-end p-2.5">
+                                    <Pagination
+                                        currentPage={currentPage}
+                                        totalPages={totalPages}
+                                        onPageChange={handlePageChange}
+                                        className="w-full justify-between"
+                                    />
+                                </div>
+                            )}
                         </div>
 
-                        {/* Search Query Indicator */}
-                        {query && (
-                            <div className="mb-6">
-                                <h1 className='text-2xl font-bold text-slate-800'>
-                                    Kết quả tìm kiếm cho: <span className='text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-indigo-600'>"{query}"</span>
-                                </h1>
-                                <p className='text-slate-500 mt-1'>
-                                    Tìm thấy {totalResults} kết quả phù hợp.
-                                </p>
-                            </div>
-                        )}
-
-                        {/* Active Filters Display */}
-                        {(selectedSubject || selectedAuthor || selectedType) && (
-                            <div className="flex flex-wrap gap-2 mb-6">
-                                {selectedType && (
-                                    <Badge variant="secondary" className="px-3 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 flex items-center gap-1">
-                                        {selectedType === 'FREE' ? 'Miễn phí' : 'Premium'}
-                                        <X className="w-3 h-3 cursor-pointer" onClick={() => updateFilter('type', '')} />
-                                    </Badge>
-                                )}
-                                {selectedSubject && (
-                                    <Badge variant="secondary" className="px-3 py-1 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 flex items-center gap-1">
-                                        {subjects.find(s => String(s.id) === selectedSubject)?.name || 'Chủ đề'}
-                                        <X className="w-3 h-3 cursor-pointer" onClick={() => updateFilter('subjectId', '')} />
-                                    </Badge>
-                                )}
-                                {selectedAuthor && (
-                                    <Badge variant="secondary" className="px-3 py-1 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 flex items-center gap-1">
-                                        {authors.find(a => String(a.id) === selectedAuthor)?.name || 'Tác giả'}
-                                        <X className="w-3 h-3 cursor-pointer" onClick={() => updateFilter('authorId', '')} />
-                                    </Badge>
-                                )}
-                                <button onClick={clearFilters} className="text-xs text-slate-500 hover:text-red-500 underline ml-2">
-                                    Xóa bộ lọc
-                                </button>
-                            </div>
-                        )}
-
-                        {/* Results Grid */}
-                        {loading ? (
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                                {[...Array(8)].map((_, i) => (
-                                    <div key={i} className="bg-white rounded-xl h-80 animate-pulse border border-slate-100">
-                                        <div className="h-48 bg-slate-200 rounded-t-xl" />
-                                        <div className="p-4 space-y-3">
-                                            <div className="h-4 bg-slate-200 rounded w-3/4" />
-                                            <div className="h-3 bg-slate-200 rounded w-1/2" />
-                                            <div className="h-8 bg-slate-200 rounded w-full mt-4" />
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <>
-                                {books.length > 0 ? (
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                                        {books.map((book) => (
-                                            <div key={book.id} className="cursor-pointer transition-transform hover:-translate-y-1">
-                                                <BookCard book={book} />
+                        <div className="flex-1 overflow-y-auto hover-scrollbar pb-20 pr-2 pt-2">
+                            {/* Results Grid */}
+                            {loading ? (
+                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                                    {[...Array(8)].map((_, i) => (
+                                        <div key={i} className="bg-white rounded-xl h-80 animate-pulse border border-slate-100">
+                                            <div className="h-48 bg-slate-200 rounded-t-xl" />
+                                            <div className="p-4 space-y-3">
+                                                <div className="h-4 bg-slate-200 rounded w-3/4" />
+                                                <div className="h-3 bg-slate-200 rounded w-1/2" />
+                                                <div className="h-8 bg-slate-200 rounded w-full mt-4" />
                                             </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-dashed border-slate-200">
-                                        <div className="bg-slate-50 p-6 rounded-full mb-4">
-                                            <Search className="w-12 h-12 text-slate-300" />
                                         </div>
-                                        <h3 className="text-xl font-bold text-slate-900">Không tìm thấy kết quả</h3>
-                                        <p className="text-slate-500 max-w-md text-center mt-2 mb-6">
-                                            Thử thay đổi từ khóa hoặc bộ lọc để tìm kiếm kết quả phù hợp hơn.
-                                        </p>
-                                        <Button onClick={clearFilters} variant="outline" className="text-blue-600 border-blue-200 hover:bg-blue-50">
-                                            Xóa bộ lọc & thử lại
-                                        </Button>
-                                    </div>
-                                )}
-                            </>
-                        )}
-
-                        {/* Pagination */}
-                        {totalPages > 1 && (
-                            <div className="flex justify-center items-center gap-2 mt-12 mb-8">
-                                <Button
-                                    variant="outline"
-                                    size="icon"
-                                    onClick={() => handlePageChange(currentPage - 1)}
-                                    disabled={currentPage === 1}
-                                    className="h-10 w-10"
-                                >
-                                    <ChevronLeft className="h-4 w-4" />
-                                </Button>
-
-                                <div className="flex items-center gap-1 mx-2">
-                                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                                        let pageNum;
-                                        if (totalPages <= 5) {
-                                            pageNum = i + 1;
-                                        } else if (currentPage <= 3) {
-                                            pageNum = i + 1;
-                                        } else if (currentPage >= totalPages - 2) {
-                                            pageNum = totalPages - 4 + i;
-                                        } else {
-                                            pageNum = currentPage - 2 + i;
-                                        }
-
-                                        return (
-                                            <Button
-                                                key={pageNum}
-                                                variant={currentPage === pageNum ? "default" : "ghost"}
-                                                onClick={() => handlePageChange(pageNum)}
-                                                className={`h-10 w-10 ${currentPage === pageNum ? 'bg-yellow-500' : 'hover:bg-yellow-400'}`}
-                                            >
-                                                {pageNum}
-                                            </Button>
-                                        );
-                                    })}
+                                    ))}
                                 </div>
-
-                                <Button
-                                    variant="outline"
-                                    size="icon"
-                                    onClick={() => handlePageChange(currentPage + 1)}
-                                    disabled={currentPage === totalPages}
-                                    className="h-10 w-10"
-                                >
-                                    <ChevronRight className="h-4 w-4" />
-                                </Button>
-                            </div>
-                        )}
+                            ) : (
+                                <>
+                                    {books.length > 0 ? (
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                                            {books.map((book) => (
+                                                <div key={book.id} className="cursor-pointer transition-transform hover:-translate-y-1">
+                                                    <BookCard book={book} />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-dashed border-slate-200">
+                                            <div className="bg-slate-50 p-6 rounded-full mb-4">
+                                                <Search className="w-12 h-12 text-slate-300" />
+                                            </div>
+                                            <h3 className="text-xl font-bold text-slate-900">Không tìm thấy kết quả</h3>
+                                            <p className="text-slate-500 max-w-md text-center mt-2 mb-6">
+                                                Thử thay đổi từ khóa hoặc bộ lọc để tìm kiếm kết quả phù hợp hơn.
+                                            </p>
+                                            <Button onClick={clearFilters} variant="outline" className="text-blue-600 border-blue-200 hover:bg-blue-50">
+                                                Xóa bộ lọc & thử lại
+                                            </Button>
+                                        </div>
+                                    )}
+                                </>
+                            )}
                     </div>
                 </div>
+            </div>
             </main >
         </div >
     );

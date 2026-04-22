@@ -86,7 +86,7 @@ const HeaderBar = () => {
       className={`border-b sticky top-0 z-50 w-full transition-all duration-300 ${isScrolled ? "bg-white/80 backdrop-blur-md border-slate-200" : "bg-white/50 backdrop-blur-sm border-transparent"
         }`}
     >
-      <div className='container mx-auto h-16 px-4 flex items-center justify-between'>
+      <div className='max-w-screen-2xl mx-auto h-16 px-6 flex items-center justify-between'>
         {/* LOGO */}
         <Link to="/" className='flex items-center gap-2 group'>
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-blue-600 to-indigo-600 text-white transition-transform group-hover:scale-105 shadow-md shadow-blue-200">

@@ -112,7 +112,7 @@ export default function IntroHero() {
                     loop
                     playsInline
                 >
-                    <source src="https://de-puydt.b-cdn.net/de-puydt-moodfilm-compressed.mp4" type="video/mp4" />
+                    <source src="/videos/19063789-hd_1920_1080_30fps.mp4" type="video/mp4" />
                 </video>
             </div>
 
