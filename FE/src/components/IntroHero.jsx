@@ -2,8 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ArrowRight, Crown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export default function IntroHero() {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const headingRef = useRef(null);
     const videoContainerRef = useRef(null);
@@ -93,8 +95,8 @@ export default function IntroHero() {
                 className="absolute z-10 flex items-center justify-center gap-2 uppercase font-light text-slate-900 pointer-events-none"
                 style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}
             >
-                <h2 ref={textLeftRef} className='whitespace-nowrap'>Thư Viện</h2>
-                <h2 ref={textRightRef} className='whitespace-nowrap'>Sách</h2>
+                <h2 ref={textLeftRef} className='whitespace-nowrap'>{t("layout.intro.textLeft")}</h2>
+                <h2 ref={textRightRef} className='whitespace-nowrap'>{t("layout.intro.textRight")}</h2>
             </div>
 
             {/* Video Container */}
@@ -124,18 +126,18 @@ export default function IntroHero() {
                 <div className="max-w-3xl pt-20">
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/90 text-sm font-medium mb-6">
                         <Crown className="h-4 w-4 text-yellow-400" />
-                        <span className="uppercase tracking-wider">Trải nghiệm tương lai</span>
+                        <span className="uppercase tracking-wider">{t("layout.intro.mini_title")}</span>
                     </div>
 
                     <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-                        Khám phá <br />
+                        {t("layout.intro.description1")} <br />
                         <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-indigo-300">
-                            Tri thức nhân loại
+                            {t("layout.intro.description2")}
                         </span>
                     </h1>
 
                     <p className="text-lg md:text-xl text-white/80 mb-8 max-w-xl leading-relaxed">
-                        Nền tảng đọc sách tiên tiến nhất.
+                        {t("layout.intro.description3")}
                     </p>
 
                     <div className="flex flex-wrap gap-4">
@@ -143,7 +145,7 @@ export default function IntroHero() {
                             onClick={() => document.getElementById('books-section')?.scrollIntoView({ behavior: 'smooth' })}
                             className="group inline-flex items-center gap-2 px-8 py-4 bg-white text-slate-900 font-semibold rounded-full hover:bg-blue-50 transition-all hover:scale-105"
                         >
-                            Bắt đầu ngay
+                            {t("layout.intro.startBtn")}
                             <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                         </button>
 
@@ -151,7 +153,7 @@ export default function IntroHero() {
                             onClick={() => navigate('/search')}
                             className="inline-flex items-center gap-2 px-8 py-4 bg-transparent border border-white/30 text-white font-semibold rounded-full hover:bg-white/10 backdrop-blur-sm transition-all"
                         >
-                            Tìm sách
+                            {t("layout.intro.findBooksBtn")}
                         </button>
                     </div>
                 </div>

@@ -1,5 +1,6 @@
 {
   "layout": {
+    "loading": "Loading...",
     "header": {
       "title": "Book System",
       "explore": "Explore",
@@ -29,6 +30,35 @@
       },
       "login": "Login",
       "register": "Register"
+    },
+    "intro": {
+      "textLeft": "Book",
+      "textRight": "System",
+      "mini_title": "Experience the future",
+      "description1": "Explore",
+      "description2": "Human knowledge",
+      "description3": "The most advanced book reading platform",
+      "startBtn": "Start Now",
+      "findBooksBtn": "Find Books"
+    },
+    "homepage": {
+      "section": {
+        "library": "Books",
+        "user": "Users",
+        "star": "Ratings",
+        "trendingUp": "Downloads"
+      },
+      "description": "Discover an endless treasure trove of knowledge with thousands of books across diverse genres, from classic literature to the latest specialized publications",
+      "newBooksUpdate": "New Books Update",
+      "noBooksFallback": "No books in the library yet",
+      "premiumNote1": "Upgrade your experience",
+      "premiumNote2": "Exclusive Membership",
+      "premiumNote3": "Unlock the entire exclusive book collection and enjoy no-ads reading experience",
+      "premiumBtn": "View Membership Packages",
+      "registerBtn": "Create a Free Account"
+    },
+    "footer": {
+      "title_description": "Smart digital reading platform"
     }
   }
 }

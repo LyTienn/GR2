@@ -6,6 +6,7 @@ import HeaderBar from '../components/HeaderBar';
 import HttpClient from '@/service/HttpClient';
 import { firstValueFrom } from 'rxjs';
 import { useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   BookOpen,
   Sparkles,
@@ -23,11 +24,46 @@ import IntroHero from '../components/IntroHero';
 gsap.registerPlugin(ScrollTrigger);
 
 const HomePage = () => {
+  const { t } = useTranslation();
   const [allBooks, setAllBooks] = useState([]);
   const [filteredBooks, setFilteredBooks] = useState([]);
   const [premiumBooks, setPremiumBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ books: 0, authors: 0, users: 0 });
+  // Newsletter state
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [newsletterMsg, setNewsletterMsg] = useState("");
+    // Dummy helper for newsletter subscription
+    async function subscribeToNewsletter(email) {
+      // Replace with real API call
+      // Example: await HttpClient.post('/newsletter/subscribe', { email });
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          if (email.endsWith("@gmail.com")) resolve({ success: true });
+          else reject(new Error("Chỉ chấp nhận email @gmail.com (demo)"));
+        }, 1000);
+      });
+    }
+
+    const handleSubscribe = async (event) => {
+      event.preventDefault();
+      setNewsletterMsg("");
+      if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+        setNewsletterMsg("Vui lòng nhập email hợp lệ.");
+        return;
+      }
+      setIsSubmitting(true);
+      try {
+        await subscribeToNewsletter(email);
+        setNewsletterMsg("Đăng ký thành công! Hãy kiểm tra email của bạn.");
+        setEmail("");
+      } catch (err) {
+        setNewsletterMsg(err.message || "Đăng ký thất bại. Vui lòng thử lại.");
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -226,7 +262,7 @@ const HomePage = () => {
             <BookOpen className="h-16 w-16 text-blue-600 animate-pulse mx-auto" />
             <div className="absolute inset-0 h-16 w-16 border-4 border-blue-200 rounded-full animate-ping mx-auto" />
           </div>
-          <p className="mt-4 text-lg text-slate-600 font-medium">Đang tải thư viện...</p>
+          <p className="mt-4 text-lg text-slate-600 font-medium">{t("layout.loading")}</p>
         </div>
       </div>
     );
@@ -244,10 +280,10 @@ const HomePage = () => {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             {[
-              { icon: <Library className="h-6 w-6" />, value: stats.books, label: "Đầu sách" },
-              { icon: <Users className="h-6 w-6" />, value: stats.users, label: "Người dùng" },
-              { icon: <Star className="h-6 w-6" />, value: stats.avgRating || "4.5", label: "Đánh giá" },
-              { icon: <TrendingUp className="h-6 w-6" />, value: stats.totalReads, label: "Lượt tải" },
+              { icon: <Library className="h-6 w-6" />, value: stats.books, label: t("layout.homepage.section.library") },
+              { icon: <Users className="h-6 w-6" />, value: stats.users, label: t("layout.homepage.section.user") },
+              { icon: <Star className="h-6 w-6" />, value: stats.avgRating || "4.5", label: t("layout.homepage.section.star") },
+              { icon: <TrendingUp className="h-6 w-6" />, value: stats.totalReads, label: t("layout.homepage.section.trendingUp") },
             ].map((stat, index) => {
               const formatNumber = (num) => {
                 if (!num) return "0";
@@ -364,8 +400,8 @@ const HomePage = () => {
       {/* All Books Section */}
       <main id="books-section" className="container mx-auto px-4 py-16">
         <div className="mb-8 gsap-all-books-header text-center">
-          <h2 className="text-3xl font-bold text-slate-900 mb-2">Thư viện sách</h2>
-          <p className="text-slate-600 max-w-2xl mx-auto">Khám phá kho tàng tri thức vô tận với hàng ngàn đầu sách đa dạng thể loại, từ văn học kinh điển đến sách chuyên ngành cập nhật mới nhất.</p>
+          <h2 className="text-3xl font-bold text-slate-900 mb-2">{t("layout.header.title")}</h2>
+          <p className="text-slate-600 italic max-w-2xl mx-auto">{t("layout.homepage.description")}</p>
         </div>
         <ListSection books={filteredBooks} onSelectBook={handleSelectBook} />
       </main>
@@ -392,15 +428,14 @@ const HomePage = () => {
               </div>
 
               <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-                Nâng cấp trải nghiệm <br className="hidden md:block" />
+                {t("layout.homepage.premiumNote1")} <br className="hidden md:block" />
                 <span className="text-transparent bg-clip-text bg-linear-to-r from-yellow-200 via-amber-200 to-yellow-200 animate-gradient">
-                  Premium Member
+                  {t("layout.homepage.premiumNote2")}
                 </span>
               </h2>
 
               <p className="text-lg text-slate-300 mb-10 max-w-2xl mx-auto leading-relaxed">
-                Mở khóa toàn bộ kho sách AI, tính năng Text-to-Speech không giới hạn
-                và trải nghiệm đọc sách không quảng cáo.
+                {t("layout.homepage.premiumNote3")}
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -409,13 +444,13 @@ const HomePage = () => {
                   className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 bg-linear-to-r from-yellow-400 to-amber-600 text-white font-bold rounded-xl shadow-xl shadow-amber-500/20 hover:shadow-amber-500/40 hover:-translate-y-1 transition-all duration-300"
                 >
                   <Crown className="h-5 w-5" />
-                  Xem các gói Premium
+                  {t("layout.homepage.premiumBtn")}
                 </Link>
                 <Link
                   to="/register"
                   className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/5 text-white font-semibold rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-300 backdrop-blur-sm"
                 >
-                  Tạo tài khoản miễn phí
+                  {t("layout.homepage.registerBtn")}
                 </Link>
               </div>
 
@@ -430,16 +465,33 @@ const HomePage = () => {
       {/* Footer */}
       <footer className="bg-slate-900 text-white py-12">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-8 mb-8">
-            <div className="col-span-2 md:col-span-1">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            {/* Logo & mô tả */}
+            <div>
               <div className="flex items-center gap-2 mb-4">
                 <BookOpen className="h-8 w-8 text-blue-400" />
-                <span className="text-xl font-bold">Thư Viện Sách</span>
+                <span className="text-xl font-bold">{t("layout.header.title")}</span>
               </div>
               <p className="text-slate-400 text-sm leading-relaxed">
-                Nền tảng đọc sách số thông minh
+                {t("layout.footer.title_description")}
               </p>
+              {/* Social icons */}
+              <div className="flex gap-3 mt-4">
+                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-blue-500">
+                  {/* Facebook SVG */}
+                  <svg width="24" height="24" fill="currentColor"><path d="M22 12c0-5.522-4.477-10-10-10S2 6.478 2 12c0 4.991 3.657 9.128 8.438 9.877v-6.987h-2.54v-2.89h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.242 0-1.632.771-1.632 1.562v1.875h2.773l-.443 2.89h-2.33v6.987C18.343 21.128 22 16.991 22 12"></path></svg>
+                </a>
+                <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="hover:text-red-500">
+                  {/* YouTube SVG */}
+                  <svg width="24" height="24" fill="currentColor"><path d="M21.8 8.001a2.75 2.75 0 0 0-1.936-1.946C18.077 6 12 6 12 6s-6.077 0-7.864.055A2.75 2.75 0 0 0 2.2 8.001 28.6 28.6 0 0 0 2 12a28.6 28.6 0 0 0 .2 3.999 2.75 2.75 0 0 0 1.936 1.946C5.923 18 12 18 12 18s6.077 0 7.864-.055a2.75 2.75 0 0 0 1.936-1.946A28.6 28.6 0 0 0 22 12a28.6 28.6 0 0 0-.2-3.999zM10 15V9l6 3-6 3z"></path></svg>
+                </a>
+                <a href="https://zalo.me" target="_blank" rel="noopener noreferrer" className="hover:text-cyan-400">
+                  {/* Zalo SVG (simple chat bubble) */}
+                  <svg width="24" height="24" fill="currentColor"><path d="M4 4h16v12H5.17L4 17.17V4zm0-2a2 2 0 0 0-2 2v20l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H4z"></path></svg>
+                </a>
+              </div>
             </div>
+            {/* Khám phá */}
             <div>
               <h4 className="font-semibold mb-4">Khám phá</h4>
               <ul className="space-y-2 text-sm text-slate-400">
@@ -448,6 +500,7 @@ const HomePage = () => {
                 <li><span onClick={() => navigate('/search')} className="hover:text-white transition-colors cursor-pointer">Tác giả</span></li>
               </ul>
             </div>
+            {/* Tài khoản */}
             <div>
               <h4 className="font-semibold mb-4">Tài khoản</h4>
               <ul className="space-y-2 text-sm text-slate-400">
@@ -456,9 +509,44 @@ const HomePage = () => {
                 <li><Link to="/membership" className="hover:text-white transition-colors">Gói Premium</Link></li>
               </ul>
             </div>
+            {/* Đăng ký nhận tin */}
+            <div>
+              <h4 className="font-semibold mb-4">Nhận thông báo sách mới</h4>
+              <form className="flex flex-col gap-2" onSubmit={handleSubscribe}>
+                <label htmlFor="newsletter-email" className="text-sm font-medium text-slate-200">Email của bạn</label>
+                <input
+                  id="newsletter-email"
+                  type="email"
+                  placeholder="Nhập email của bạn"
+                  className="rounded px-3 py-2 text-white bg-slate-800 placeholder:text-slate-400"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  disabled={isSubmitting}
+                  required
+                  aria-label="Email của bạn"
+                />
+                <button
+                  type="submit"
+                  className="bg-blue-500 hover:bg-blue-600 text-white rounded px-3 py-2 disabled:opacity-60"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Đang gửi..." : "Đăng ký"}
+                </button>
+                {newsletterMsg && (
+                  <div className="text-xs mt-1" style={{ color: newsletterMsg.includes("thành công") ? '#22c55e' : '#f87171' }}>{newsletterMsg}</div>
+                )}
+              </form>
+              <p className="text-xs text-slate-400 mt-2">Nhận thông báo về sách mới, ưu đãi và tin tức từ Thư Viện Sách.</p>
+            </div>
           </div>
           <div className="border-t border-slate-800 pt-8 text-center text-sm text-slate-500">
             <p>© 2026 Thư Viện Sách. All rights reserved.</p>
+            {/* <div className="flex justify-center gap-4 mt-2">
+             
+              <img src="/visa.png" alt="Visa" className="h-6" />
+              <img src="/momo.png" alt="Momo" className="h-6" />
+             
+            </div> */}
           </div>
         </div>
       </footer>

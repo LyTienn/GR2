@@ -1,5 +1,6 @@
 {
   "layout": {
+    "loading": "Đang tải thư viện...",
     "header": {
       "title": "Thư viện sách",
       "explore": "Khám phá",
@@ -29,6 +30,35 @@
       },
       "login": "Đăng nhập",
       "register": "Đăng ký"
+    },
+    "intro": {
+      "textLeft": "Thư viện",
+      "textRight": "Sách",
+      "mini_title": "Trải nghiệm tương lai",
+      "description1": "Khám phá",
+      "description2": "Tri thức nhân loại",
+      "description3": "Nền tảng đọc sách tiên tiến nhất",
+      "startBtn": "Bắt đầu ngay",
+      "findBooksBtn": "Tìm sách"
+    },
+    "homepage": {
+      "section": {
+        "library": "Đầu sách",
+        "user": "Người dùng",
+        "star": "Đánh giá",
+        "trendingUp": "Lượt tải"
+      },
+      "description": "Khám phá kho tàng tri thức vô tận với hàng ngàn đầu sách đa dạng thể loại, từ văn học kinh điển đến sách chuyên ngành cập nhật mới nhất",
+      "newBooksUpdate": "Sách mới cập nhật",
+      "noBooksFallback": "Chưa có cuốn sách nào trong thư viện",
+      "premiumNote1": "Nâng cấp trải nghiệm",
+      "premiumNote2": "Hội viên độc quyền",
+      "premiumNote3": "Mở khóa toàn bộ kho sách độc quyền duy nhất và trải nghiệm đọc sách không quảng cáo",
+      "premiumBtn": "Xem các gói hội viên",
+      "registerBtn": "Tạo tài khoản miễn phí"
+    },
+    "footer": {
+      "title_description": "Nền tảng đọc sách số thông minh"
     }
   }
 }

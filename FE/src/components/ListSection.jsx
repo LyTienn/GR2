@@ -2,6 +2,7 @@ import BookCard from "@/components/BookCard";
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay } from 'swiper/modules';
 import 'swiper/css';
+import { useTranslation } from "react-i18next";
 
 const Slider = ({ category, onSelectBook, index }) => {
   const isReverse = index % 2 !== 0; // Hàng lẻ chạy ngược (phải -> trái)
@@ -40,6 +41,7 @@ const Slider = ({ category, onSelectBook, index }) => {
 };
 
 export default function ListSection({ books = [], onSelectBook }) {
+  const { t } = useTranslation();
   // Gom nhóm sách theo Subject (Category)
   const getCategorizedBooks = () => {
     const groupedData = {};
@@ -66,13 +68,13 @@ export default function ListSection({ books = [], onSelectBook }) {
     // Add 'Sách mới' (New Books) at the beginning containing first 10 books
     if (books.length > 0) {
       categoryList.unshift({
-        categoryTitle: 'Sách mới cập nhật',
+        categoryTitle: t("layout.homepage.newBooksUpdate"),
         books: books.slice(0, 10)
       });
     }
 
     return categoryList.filter(cat =>
-      cat.categoryTitle === 'Sách mới cập nhật' || cat.books.length >= 5
+      cat.categoryTitle === t("layout.homepage.newBooksUpdate") || cat.books.length >= 5
     );
   };
 
@@ -81,7 +83,7 @@ export default function ListSection({ books = [], onSelectBook }) {
   if (!books || books.length === 0) {
     return (
       <div className="flex min-h-[300px] justify-center items-center">
-        <p className="text-slate-500">Chưa có cuốn sách nào trong thư viện.</p>
+        <p className="text-slate-500">{t("layout.homepage.noBooksFallback")}</p>
       </div>
     );
   }
