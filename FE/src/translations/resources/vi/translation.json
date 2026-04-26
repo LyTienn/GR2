@@ -2,7 +2,7 @@
   "layout": {
     "loading": "Đang tải thư viện...",
     "header": {
-      "title": "Thư viện sách",
+      "title": "Lybrary",
       "explore": "Khám phá",
       "search_placeholder": "Tìm kiếm sách, tác giả,...",
       "search_ariaLabel": "Tìm kiếm sách",
@@ -59,6 +59,26 @@
     },
     "footer": {
       "title_description": "Nền tảng đọc sách số thông minh"
+    },
+    "searchpage": {
+      "sidebar": {
+        "title": "Tìm kiếm & Bộ lọc",
+        "filter": "Bộ lọc",
+        "collapseText": "Thu gọn",
+        "showmoreText": "Xem thêm",
+        "sectionText": "mục",
+        "deleteAllBtn": "Xóa tất cả",
+        "filterSection": {
+          "bookType": "Loại sách",
+          "bookTypeChoice": {
+            "all": "Tất cả",
+            "free": "Miễn phí",
+            "premium": "Độc quyền"
+          },
+          "subject": "Chủ đề",
+          "author": "Tác giả"
+        }
+      }
     }
   }
 }

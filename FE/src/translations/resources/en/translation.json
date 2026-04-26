@@ -2,7 +2,7 @@
   "layout": {
     "loading": "Loading...",
     "header": {
-      "title": "Book System",
+      "title": "Lybrary",
       "explore": "Explore",
       "search_placeholder": "Search for books, authors,...",
       "search_ariaLabel": "Search books",
@@ -59,6 +59,26 @@
     },
     "footer": {
       "title_description": "Smart digital reading platform"
+    },
+    "searchpage": {
+      "sidebar": {
+        "title": "Search & Filter",
+        "filter": "Filter",
+        "collapseText": "Collapse",
+        "showmoreText": "Show more",
+        "sectionText": "section",
+        "deleteAllBtn": "Delete All",
+        "filterSection": {
+          "bookType": "Book Type",
+          "bookTypeChoice": {
+            "all": "All",
+            "free": "Free",
+            "premium": "Premium"
+          },
+          "subject": "Subject",
+          "author": "Author"
+        }
+      }
     }
   }
 }

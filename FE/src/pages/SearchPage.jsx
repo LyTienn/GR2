@@ -5,6 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import BookCard from "@/components/BookCard";
 import Header from "@/components/HeaderBar";
 import Pagination from "@/components/Pagination";
+import SearchComponent from "@/components/Search";
 import {
     Loader2,
     Search,
@@ -21,8 +22,10 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from 'react-i18next';
 
 const SearchPage = () => {
+    const { t } = useTranslation();
     const [searchParams, setSearchParams] = useSearchParams();
     const navigate = useNavigate();
 
@@ -207,9 +210,9 @@ const SearchPage = () => {
                         className="text-xs text-blue-600 hover:text-blue-800 font-medium mt-2 flex items-center gap-1"
                     >
                         {isExpanded ? (
-                            <>Thu gọn <ChevronDown className="w-3 h-3 rotate-180" /></>
+                            <>{t("layout.searchpage.sidebar.collapseText")} <ChevronDown className="w-3 h-3 rotate-180" /></>
                         ) : (
-                            <>Xem thêm {totalItems - INITIAL_ITEMS} mục <ChevronDown className="w-3 h-3" /></>
+                            <>{t("layout.searchpage.sidebar.showmoreText")} {totalItems - INITIAL_ITEMS} {t("layout.searchpage.sidebar.sectionText")} <ChevronDown className="w-3 h-3" /></>
                         )}
                     </button>
                 )}
@@ -227,115 +230,108 @@ const SearchPage = () => {
                 {/* Mobile Filter Toggle */}
                 <div className="lg:hidden shrink-0 mb-4 flex justify-between items-center">
                     <Button variant="outline" onClick={() => setIsMobileFilterOpen(true)} className="flex items-center gap-2">
-                        <Filter className="w-4 h-4" /> Bộ lọc
+                        <Filter className="w-4 h-4" /> {t("layout.searchpage.sidebar.filter")}
                     </Button>
-                    <span className="text-sm text-slate-500">{totalResults} kết quả</span>
                 </div>
 
                 <div className="flex-1 overflow-hidden flex flex-col lg:flex-row gap-8">
                     <aside className={`
-                        fixed inset-0 z-50 bg-white p-6 transition-transform duration-300 transform
+                        fixed inset-0 z-50 bg-white transition-transform duration-300 transform flex flex-col
                         lg:relative lg:translate-x-0 lg:z-0 lg:w-72 lg:block lg:bg-transparent lg:p-0
                         lg:h-full lg:overflow-y-auto hover-scrollbar lg:pb-8 lg:pr-2
                         ${isMobileFilterOpen ? 'translate-x-0' : '-translate-x-full'}
                     `}>
-                        <div className="flex justify-between items-center mb-6 lg:hidden">
-                            <h2 className="text-xl font-bold">Bộ lọc tìm kiếm</h2>
+                        <div className="flex justify-between items-center p-6 border-b border-slate-100 lg:hidden shrink-0">
+                            <h2 className="text-xl font-bold">{t("layout.searchpage.sidebar.title")}</h2>
                             <Button variant="ghost" size="icon" onClick={() => setIsMobileFilterOpen(false)}>
                                 <X className="w-6 h-6" />
                             </Button>
                         </div>
 
-                        <form onSubmit={handleSearch} className="mb-8 block lg:hidden">
-                            <div className="relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-                                <input
-                                    type="text"
-                                    value={searchInput}
-                                    onChange={(e) => setSearchInput(e.target.value)}
-                                    placeholder="Tìm kiếm sách, tác giả..."
-                                    className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        <div className="flex-1 overflow-y-auto p-6 lg:p-0 custom-scrollbar">
+                            <div className='mb-8 block lg:hidden'>
+                                <SearchComponent
+                                    variant="static"
                                 />
                             </div>
-                        </form>
+                            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 lg:sticky lg:top-24">
+                                <div className="flex items-center justify-between mb-6">
+                                    <h2 className="font-bold text-slate-800 flex items-center gap-2">
+                                        <SlidersHorizontal className="w-5 h-5" />
+                                        {t("layout.searchpage.sidebar.filter")}
+                                    </h2>
+                                    {(selectedSubject || selectedAuthor || selectedType) && (
+                                        <button onClick={clearFilters} className="text-xs text-red-500 hover:underline font-medium">
+                                            {t("layout.searchpage.sidebar.deleteAllBtn")}
+                                        </button>
+                                    )}
+                                </div>
 
-                        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 sticky top-24">
-                            <div className="flex items-center justify-between mb-6">
-                                <h2 className="font-bold text-slate-800 flex items-center gap-2">
-                                    <SlidersHorizontal className="w-5 h-5" />
-                                    Bộ lọc
-                                </h2>
-                                {(selectedSubject || selectedAuthor || selectedType) && (
-                                    <button onClick={clearFilters} className="text-xs text-red-500 hover:underline font-medium">
-                                        Xóa tất cả
-                                    </button>
-                                )}
+                                {/* Type Filter */}
+                                <FilterSection title={t("layout.searchpage.sidebar.filterSection.bookType")} icon={Tag} totalItems={3}>
+                                    <label className="flex items-center gap-3 cursor-pointer group">
+                                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${selectedType === '' ? 'border-blue-600 bg-blue-600' : 'border-slate-300 group-hover:border-blue-400'}`}>
+                                            {selectedType === '' && <div className="w-2 h-2 rounded-full bg-white" />}
+                                        </div>
+                                        <input type="radio" name="type" className="hidden" checked={selectedType === ''} onChange={() => updateFilter('type', '')} />
+                                        <span className={`text-sm ${selectedType === '' ? 'text-slate-900 font-medium' : 'text-slate-600'}`}>{t("layout.searchpage.sidebar.filterSection.bookTypeChoice.all")}</span>
+                                    </label>
+                                    <label className="flex items-center gap-3 cursor-pointer group">
+                                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${selectedType === 'FREE' ? 'border-blue-600 bg-blue-600' : 'border-slate-300 group-hover:border-blue-400'}`}>
+                                            {selectedType === 'FREE' && <div className="w-2 h-2 rounded-full bg-white" />}
+                                        </div>
+                                        <input type="radio" name="type" className="hidden" checked={selectedType === 'FREE'} onChange={() => updateFilter('type', 'FREE')} />
+                                        <span className={`text-sm ${selectedType === 'FREE' ? 'text-slate-900 font-medium' : 'text-slate-600'}`}>{t("layout.searchpage.sidebar.filterSection.bookTypeChoice.free")}</span>
+                                    </label>
+                                    <label className="flex items-center gap-3 cursor-pointer group">
+                                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${selectedType === 'PREMIUM' ? 'border-blue-600 bg-blue-600' : 'border-slate-300 group-hover:border-blue-400'}`}>
+                                            {selectedType === 'PREMIUM' && <div className="w-2 h-2 rounded-full bg-white" />}
+                                        </div>
+                                        <input type="radio" name="type" className="hidden" checked={selectedType === 'PREMIUM'} onChange={() => updateFilter('type', 'PREMIUM')} />
+                                        <span className={`text-sm ${selectedType === 'PREMIUM' ? 'text-slate-900 font-medium' : 'text-slate-600'}`}>{t("layout.searchpage.sidebar.filterSection.bookTypeChoice.premium")}</span>
+                                    </label>
+                                </FilterSection>
+
+                                <div className="h-px bg-slate-100 my-4" />
+
+                                {/* Subjects Filter */}
+                                <FilterSection title={t("layout.searchpage.sidebar.filterSection.subject")} icon={BookOpen} totalItems={sortedSubjects.length}>
+                                    {Array.isArray(sortedSubjects) && sortedSubjects.map(subject => (
+                                        <label key={subject.id} className="flex items-start gap-3 cursor-pointer group">
+                                            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors shrink-0 mt-0.5 ${selectedSubject === String(subject.id) ? 'border-blue-600 bg-blue-600' : 'border-slate-300 group-hover:border-blue-400'}`}>
+                                                {selectedSubject === String(subject.id) && <CheckIcon />}
+                                            </div>
+                                            <input
+                                                type="checkbox"
+                                                className="hidden"
+                                                checked={selectedSubject === String(subject.id)}
+                                                onChange={() => updateFilter('subjectId', String(subject.id))}
+                                            />
+                                            <span className={`text-sm ${selectedSubject === String(subject.id) ? 'text-slate-900 font-medium' : 'text-slate-600'}`}>{subject.name}</span>
+                                        </label>
+                                    ))}
+                                </FilterSection>
+
+                                <div className="h-px bg-slate-100 my-4" />
+
+                                {/* Authors Filter */}
+                                <FilterSection title={t("layout.searchpage.sidebar.filterSection.author")} icon={Users} totalItems={sortedAuthors.length}>
+                                    {Array.isArray(sortedAuthors) && sortedAuthors.map(author => (
+                                        <label key={author.id} className="flex items-start gap-3 cursor-pointer group">
+                                            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors shrink-0 mt-0.5 ${selectedAuthor === String(author.id) ? 'border-blue-600 bg-blue-600' : 'border-slate-300 group-hover:border-blue-400'}`}>
+                                                {selectedAuthor === String(author.id) && <CheckIcon />}
+                                            </div>
+                                            <input
+                                                type="checkbox"
+                                                className="hidden"
+                                                checked={selectedAuthor === String(author.id)}
+                                                onChange={() => updateFilter('authorId', String(author.id))}
+                                            />
+                                            <span className={`text-sm ${selectedAuthor === String(author.id) ? 'text-slate-900 font-medium' : 'text-slate-600'}`}>{author.name}</span>
+                                        </label>
+                                    ))}
+                                </FilterSection>
                             </div>
-
-                            {/* Type Filter */}
-                            <FilterSection title="Loại sách" icon={Tag} totalItems={3}>
-                                <label className="flex items-center gap-3 cursor-pointer group">
-                                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${selectedType === '' ? 'border-blue-600 bg-blue-600' : 'border-slate-300 group-hover:border-blue-400'}`}>
-                                        {selectedType === '' && <div className="w-2 h-2 rounded-full bg-white" />}
-                                    </div>
-                                    <input type="radio" name="type" className="hidden" checked={selectedType === ''} onChange={() => updateFilter('type', '')} />
-                                    <span className={`text-sm ${selectedType === '' ? 'text-slate-900 font-medium' : 'text-slate-600'}`}>Tất cả</span>
-                                </label>
-                                <label className="flex items-center gap-3 cursor-pointer group">
-                                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${selectedType === 'FREE' ? 'border-blue-600 bg-blue-600' : 'border-slate-300 group-hover:border-blue-400'}`}>
-                                        {selectedType === 'FREE' && <div className="w-2 h-2 rounded-full bg-white" />}
-                                    </div>
-                                    <input type="radio" name="type" className="hidden" checked={selectedType === 'FREE'} onChange={() => updateFilter('type', 'FREE')} />
-                                    <span className={`text-sm ${selectedType === 'FREE' ? 'text-slate-900 font-medium' : 'text-slate-600'}`}>Miễn phí</span>
-                                </label>
-                                <label className="flex items-center gap-3 cursor-pointer group">
-                                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${selectedType === 'PREMIUM' ? 'border-blue-600 bg-blue-600' : 'border-slate-300 group-hover:border-blue-400'}`}>
-                                        {selectedType === 'PREMIUM' && <div className="w-2 h-2 rounded-full bg-white" />}
-                                    </div>
-                                    <input type="radio" name="type" className="hidden" checked={selectedType === 'PREMIUM'} onChange={() => updateFilter('type', 'PREMIUM')} />
-                                    <span className={`text-sm ${selectedType === 'PREMIUM' ? 'text-slate-900 font-medium' : 'text-slate-600'}`}>Premium</span>
-                                </label>
-                            </FilterSection>
-
-                            <div className="h-px bg-slate-100 my-4" />
-
-                            {/* Subjects Filter */}
-                            <FilterSection title="Chủ đề" icon={BookOpen} totalItems={sortedSubjects.length}>
-                                {Array.isArray(sortedSubjects) && sortedSubjects.map(subject => (
-                                    <label key={subject.id} className="flex items-start gap-3 cursor-pointer group">
-                                        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors shrink-0 mt-0.5 ${selectedSubject === String(subject.id) ? 'border-blue-600 bg-blue-600' : 'border-slate-300 group-hover:border-blue-400'}`}>
-                                            {selectedSubject === String(subject.id) && <CheckIcon />}
-                                        </div>
-                                        <input
-                                            type="checkbox"
-                                            className="hidden"
-                                            checked={selectedSubject === String(subject.id)}
-                                            onChange={() => updateFilter('subjectId', String(subject.id))}
-                                        />
-                                        <span className={`text-sm ${selectedSubject === String(subject.id) ? 'text-slate-900 font-medium' : 'text-slate-600'}`}>{subject.name}</span>
-                                    </label>
-                                ))}
-                            </FilterSection>
-
-                            <div className="h-px bg-slate-100 my-4" />
-
-                            {/* Authors Filter */}
-                            <FilterSection title="Tác giả" icon={Users} totalItems={sortedAuthors.length}>
-                                {Array.isArray(sortedAuthors) && sortedAuthors.map(author => (
-                                    <label key={author.id} className="flex items-start gap-3 cursor-pointer group">
-                                        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors shrink-0 mt-0.5 ${selectedAuthor === String(author.id) ? 'border-blue-600 bg-blue-600' : 'border-slate-300 group-hover:border-blue-400'}`}>
-                                            {selectedAuthor === String(author.id) && <CheckIcon />}
-                                        </div>
-                                        <input
-                                            type="checkbox"
-                                            className="hidden"
-                                            checked={selectedAuthor === String(author.id)}
-                                            onChange={() => updateFilter('authorId', String(author.id))}
-                                        />
-                                        <span className={`text-sm ${selectedAuthor === String(author.id) ? 'text-slate-900 font-medium' : 'text-slate-600'}`}>{author.name}</span>
-                                    </label>
-                                ))}
-                            </FilterSection>
                         </div>
                     </aside>
 

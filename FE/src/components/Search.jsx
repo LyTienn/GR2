@@ -1,7 +1,6 @@
 import { Search as SearchIcon, Loader2, X } from "lucide-react";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { debounce } from "lodash";
 import HttpClient from "@/service/HttpClient";
 import { Subject, debounceTime, switchMap, catchError, of, tap } from 'rxjs';
 import { useTranslation } from "react-i18next";
@@ -28,15 +27,14 @@ const Search = ({ variant = "dynamic", className = "" }) => {
 
     useEffect(() => {
         const subscription = searchSubject.pipe(
-            debounceTime(400), // Đợi 400ms sau khi ngừng gõ
+            debounceTime(400), 
             switchMap((term) => {
                 if (!term.trim()) {
                     setLoading(false);
-                    return of(null); // Trả về null ngay nếu chuỗi rỗng
+                    return of(null); 
                 }
                 
                 setLoading(true);
-                // switchMap tự động HỦY request trước đó nếu có request mới bắn vào
                 return HttpClient.get(`/books?keyword=${encodeURIComponent(term)}`).pipe(
                     catchError((error) => {
                         console.error("Live search error:", error);
@@ -54,7 +52,6 @@ const Search = ({ variant = "dynamic", className = "" }) => {
             }
         });
 
-        // Dọn dẹp (Tránh Memory Leak khi unmount component)
         return () => subscription.unsubscribe();
     }, []);
 
@@ -70,8 +67,6 @@ const Search = ({ variant = "dynamic", className = "" }) => {
             setShowDropdown(false);
             if (variant === "dynamic") setIsOpen(false);
         }
-
-        // Bắn từ khóa vào luồng RxJS thay vì gọi API trực tiếp
         searchSubject.next(term);
     };
 
@@ -105,7 +100,6 @@ const Search = ({ variant = "dynamic", className = "" }) => {
         }
     };
 
-    // Click ra ngoài thì đóng dropdown
     useEffect(() => {
         function handleClickOutside(event) {
             if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {

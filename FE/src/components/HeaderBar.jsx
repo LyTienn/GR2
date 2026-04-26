@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import Search from './Search';
@@ -33,6 +33,7 @@ const HeaderBar = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const isLoading = useSelector(selectAuthLoading);
   const error = useSelector(selectAuthError);
+  const wasAuthenticated = useRef(isAuthenticated);
   
   const FlagVI = () => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className="w-5 h-4 rounded-sm shadow-xs">
@@ -65,14 +66,18 @@ const FlagEN = () => (
   }, []);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      // Đăng xuất thành công
-      toast.success('Đăng xuất thành công!');
+    if (wasAuthenticated.current && !isAuthenticated) {
+      toast.success('Đăng xuất thành công!', {
+        toastId: 'logout-success-toast' 
+      });
       navigate('/homepage');
     }
     if (error) {
-      toast.error(error);
+      toast.error(error, {
+        toastId: 'auth-error-toast'
+      });
     }
+    wasAuthenticated.current = isAuthenticated;
   }, [isAuthenticated, error, navigate]);
 
   const handleLogout = () => {
@@ -212,7 +217,7 @@ const FlagEN = () => (
 
                   <DropdownMenuItem disabled>
                     <span className="text-sm text-muted-foreground">
-                      Gói: <span className="font-medium text-slate-700">{getSubscriptionText()}</span>
+                      <span className="font-medium text-slate-700">{getSubscriptionText()}</span>
                     </span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -267,19 +272,60 @@ const FlagEN = () => (
       {/* MOBILE MENU DRAWER */}
       {isMenuOpen && (
         <div className="border-t border-slate-100 bg-white/95 backdrop-blur-xl md:hidden absolute top-16 left-0 right-0 shadow-xl animate-in slide-in-from-top-2 p-4 flex flex-col gap-4">
-          <div className="relative">
+          {/* <div className="relative">
             <Search variant="static" className="w-full" />
-          </div>
+          </div> */}
 
           <nav className="flex flex-col gap-2">
-            <Button variant="ghost" className="justify-start" onClick={() => { navigate('/search'); setIsMenuOpen(false); }}>
+            <div className="flex items-center w-fit bg-slate-200/60 p-1 rounded-lg border border-slate-300/50 mb-2">
+            {/* Nút Tiếng Việt */}
+            <button
+              onClick={() => i18n.changeLanguage('vi')}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all duration-200 ${
+                i18n.language === 'vi' 
+                  ? 'bg-white text-slate-900 shadow-sm' 
+                  : 'text-slate-500 hover:text-slate-700 hover:bg-slate-300/30' 
+              }`}
+            >
+              <FlagVI />
+              <span className="text-xs font-bold tracking-tight">VI</span>
+            </button>
+
+            {/* Nút Tiếng Anh */}
+            <button
+              onClick={() => i18n.changeLanguage('en')}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all duration-200 ${
+                i18n.language?.startsWith('en') 
+                  ? 'bg-white text-slate-900 shadow-sm' 
+                  : 'text-slate-500 hover:text-slate-700 hover:bg-slate-300/30'
+              }`}
+            >
+              <FlagEN />
+              <span className="text-xs font-bold tracking-tight">EN</span>
+            </button>
+          </div>
+            <Button variant="ghost" onClick={() => { navigate('/search'); setIsMenuOpen(false); }} className={`transition-colors ${
+              location.pathname === '/search' 
+                ? "bg-slate-100 text-slate-600 font-semibold justify-start" 
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 justify-start" 
+            }`}>
               <BookOpen className="mr-2 h-4 w-4" /> {t("layout.header.explore")}
             </Button>
+            {(!isAuthenticated || (user && user.tier !== "PREMIUM" && user.role !== "ADMIN")) && (
+            <Button
+              variant="ghost"
+              onClick={() => { navigate('/membership'); setIsMenuOpen(false); }}
+              className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 justify-start"
+            >
+              <Zap className="h-4 w-4 mr-2" />
+              Premium
+            </Button>
+          )}
 
             {isAuthenticated ? (
               <>
-                <Button variant="ghost" className="justify-start" onClick={() => { navigate('/profile'); setIsMenuOpen(false); }}>
-                  <User className="mr-2 h-4 w-4" /> Tài khoản: {user?.fullName || "User"}
+                <Button variant="ghost" className="justify-start text-slate-600 hover:text-slate-900 hover:bg-slate-100 active:bg-slate-200" onClick={() => { navigate('/profile'); setIsMenuOpen(false); }}>
+                  <User className="mr-2 h-4 w-4" /> {user?.fullName || "User"}
                 </Button>
                 <Button variant="ghost" className="justify-start text-red-600 hover:text-red-700 hover:bg-red-50" onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" /> {t("layout.header.modal_header.logout")}
