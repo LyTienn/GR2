@@ -88,10 +88,13 @@ const Search = ({ variant = "dynamic", className = "" }) => {
 
     const handleIconClick = () => {
         if (variant === "static") {
-            inputRef.current?.focus();
+            if (keyword.trim()) {
+                goToSearchPage();
+            } else {
+                inputRef.current?.focus();
+            }
             return;
         }
-
         if (isOpen && keyword) {
             goToSearchPage();
         } else {
@@ -159,7 +162,7 @@ const Search = ({ variant = "dynamic", className = "" }) => {
             </div>
 
             {/* DROPDOWN LIVE SEARCH */}
-            {open && keyword && (
+            {showDropdown && keyword && (
                 <div className="absolute top-full mt-2 w-80 right-0 bg-white rounded-lg shadow-xl border border-slate-100 overflow-hidden">
                     {loading ? (
                         <div className="p-4 text-center text-slate-400 flex justify-center items-center gap-2">

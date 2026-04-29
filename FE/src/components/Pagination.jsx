@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { useTranslation } from 'react-i18next';
 
 export default function Pagination({ 
   currentPage, 
@@ -10,6 +11,7 @@ export default function Pagination({
 }) {
   const [isEditingPage, setIsEditingPage] = useState(false);
   const [inputPage, setInputPage] = useState(String(currentPage));
+  const { t } = useTranslation();
 
   // Cập nhật giá trị input khi trang thay đổi từ bên ngoài
   useEffect(() => {
@@ -58,13 +60,13 @@ export default function Pagination({
         disabled={currentPage <= 1} 
         className="flex gap-1 sm:gap-2 hover:bg-slate-100 h-9 px-2 sm:px-4"
       >
-        <ChevronLeft className="h-4 w-4" /> <span className="hidden sm:inline">Trước</span>
+        <ChevronLeft className="h-4 w-4" /> <span className="hidden sm:inline">{t("components.pagination.previous")}</span>
       </Button>
 
       <div className="text-sm text-slate-600 font-medium">
         {isEditingPage ? (
           <form onSubmit={handlePageJump} className="flex items-center gap-2">
-            <span className="hidden sm:inline">Trang</span>
+            <span className="hidden sm:inline">{t("components.pagination.page")}</span>
             <input
               type="number"
               min={1}
@@ -83,7 +85,7 @@ export default function Pagination({
             onClick={() => setIsEditingPage(true)}
             title="Bấm để nhập số trang"
           >
-            Trang {currentPage} / {totalPages}
+            {t("components.pagination.page")} {currentPage} / {totalPages}
           </span>
         )}
       </div>
@@ -94,7 +96,7 @@ export default function Pagination({
         disabled={currentPage >= totalPages} 
         className="flex gap-1 sm:gap-2 hover:bg-slate-100 h-9 px-2 sm:px-4"
       >
-        <span className="hidden sm:inline">Sau</span> <ChevronRight className="h-4 w-4" />
+        <span className="hidden sm:inline">{t("components.pagination.next")}</span> <ChevronRight className="h-4 w-4" />
       </Button>
     </div>
   );

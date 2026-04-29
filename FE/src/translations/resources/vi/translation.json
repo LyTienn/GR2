@@ -68,6 +68,7 @@
         "showmoreText": "Xem thêm",
         "sectionText": "mục",
         "deleteAllBtn": "Xóa tất cả",
+        "deleteFilterBtn": "Xóa bộ lọc",
         "filterSection": {
           "bookType": "Loại sách",
           "bookTypeChoice": {
@@ -78,7 +79,31 @@
           "subject": "Chủ đề",
           "author": "Tác giả"
         }
+      },
+      "filterBar": {
+        "title": "Sắp xếp",
+        "option": {
+          "newest": "Mới nhất",
+          "oldest": "Cũ nhất",
+          "mostPopular": "Phổ biến nhất",
+          "nameAZ": "Tên A-Z",
+          "nameZA": "Tên Z-A"
+        },
+        "resetBtn": "Đặt lại"
       }
+    },
+    "resultpage": {
+      "restext": "Kết quả tìm kiếm cho:",
+      "textleft": "Tìm thấy",
+      "textright": "Kết quả phù hợp",
+      "changeSearchText": "Thử thay đổi từ khóa hoặc bộ lọc để tìm kiếm kết quả phù hợp hơn"
+    }
+  },
+  "components": {
+    "pagination": {
+      "previous": "Trước",
+      "next": "Sau",
+      "page": "Trang"
     }
   }
 }

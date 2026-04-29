@@ -1,4 +1,4 @@
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -6,6 +6,8 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { ProgressProvider } from './contexts/ProgressContext';
 import GlobalProgressTracker from './components/GlobalProgressTracker';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchProfileStart, selectIsAuthenticated } from './store/Auth';
 // import Chatbot from './components/Chatbot/Chatbot';
 // Admin imports
 import AdminLayout from './components/admin/AdminLayout';
@@ -74,6 +76,13 @@ function AppContent() {
 }
 
 function App() {
+  const dispatch = useDispatch();
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  useEffect(() => {
+    if (isAuthenticated) {
+      dispatch(fetchProfileStart());
+    }
+  }, [dispatch, isAuthenticated]);
   return (
     <ProgressProvider>
       <AppContent />

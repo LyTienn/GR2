@@ -68,6 +68,7 @@
         "showmoreText": "Show more",
         "sectionText": "section",
         "deleteAllBtn": "Delete All",
+        "deleteFilterBtn": "Delete Filter",
         "filterSection": {
           "bookType": "Book Type",
           "bookTypeChoice": {
@@ -78,7 +79,31 @@
           "subject": "Subject",
           "author": "Author"
         }
+      },
+      "filterBar": {
+        "title": "Sort by",
+        "option": {
+          "newest": "Newest",
+          "oldest": "Oldest",
+          "mostPopular": "Most Popular",
+          "nameAZ": "Name A-Z",
+          "nameZA": "Name Z-A"
+        },
+        "resetBtn": "Reset"
       }
+    },
+    "resultpage": {
+      "restext": "Search results for:",
+      "textleft": "Found",
+      "textright": "matching results",
+      "changeSearchText": "Try changing the search keyword or filters to find more relevant results"
+    }
+  },
+  "components": {
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page"
     }
   }
 }
