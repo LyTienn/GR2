@@ -14,8 +14,10 @@ import { toast } from "react-toastify";
 import { Star, StarHalf, MessageCircle } from "lucide-react";
 import { firstValueFrom } from "rxjs";
 import HttpClient from "@/service/HttpClient";
+import { useTranslation } from "react-i18next";
 
 const ReviewDialog = ({ bookId, onReviewAdded }) => {
+    const { t } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
     const [rating, setRating] = useState(0);
     const [comment, setComment] = useState("");
@@ -26,7 +28,7 @@ const ReviewDialog = ({ bookId, onReviewAdded }) => {
 
     const handleSubmit = async () => {
         if (!isAuthenticated) {
-            toast.error("Vui lòng đăng nhập để gửi đánh giá.");
+            toast.error(t("layout.bookdetailpage.loginToAssess"));
             return;
         }
 
@@ -67,21 +69,21 @@ const ReviewDialog = ({ bookId, onReviewAdded }) => {
             <DialogTrigger asChild>
                 <Button variant="outline" className="w-50% gap-2 hover:bg-gray-100" size="lg">
                     <MessageCircle className="h-4 w-4" />
-                    Viết đánh giá
+                    {t("components.reviewdialog.reviewBtn")}
                 </Button>
             </DialogTrigger>
 
             <DialogContent className="max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Đánh giá sách</DialogTitle>
+                    <DialogTitle>{t("components.reviewdialog.dialogTitle")}</DialogTitle>
                     <DialogDescription>
-                        Chia sẻ suy nghĩ của bạn về cuốn sách này để giúp cộng đồng đọc sách tốt hơn.
+                        {t("components.reviewdialog.dialogDescription")}
                     </DialogDescription>
                 </DialogHeader>
 
                 <div className="space-y-6 py-4">
                     <div className="space-y-2 flex flex-col items-center">
-                        <span className="text-sm font-medium text-muted-foreground">Chọn mức độ hài lòng</span>
+                        <span className="text-sm font-medium text-muted-foreground">{t("components.reviewdialog.selectRating")}</span>
                         <div className="flex gap-2">
                             {[1, 2, 3, 4, 5].map((star) => (
                                 <button
@@ -103,18 +105,18 @@ const ReviewDialog = ({ bookId, onReviewAdded }) => {
                             ))}
                         </div>
                         <div className="h-5 text-sm font-medium text-yellow-600">
-                            { hoverRating === 1 && "Tệ" }
-                            { hoverRating === 2 && "Trung bình" }
-                            { hoverRating === 3 && "Bình thường" }
-                            { hoverRating === 4 && "Tốt" }
-                            { hoverRating === 5 && "Tuyệt vời" }
+                            { hoverRating === 1 && t("components.reviewdialog.hoverRating.1") }
+                            { hoverRating === 2 && t("components.reviewdialog.hoverRating.2") }
+                            { hoverRating === 3 && t("components.reviewdialog.hoverRating.3") }
+                            { hoverRating === 4 && t("components.reviewdialog.hoverRating.4") }
+                            { hoverRating === 5 && t("components.reviewdialog.hoverRating.5") }
                         </div>
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">Nội dung bình luận</label>
+                        <label className="text-sm font-medium">{t("components.reviewdialog.labelComment")}</label>
                         <Textarea
-                            placeholder="Sách hay ở điểm nào ? Có điều gì bạn muốn chia sẻ ? ..."
+                            placeholder={t("components.reviewdialog.placeholderComment")}
                             value={comment}
                             onChange={(e) => setComment(e.target.value)}
                             rows={4}
@@ -127,7 +129,7 @@ const ReviewDialog = ({ bookId, onReviewAdded }) => {
                         disabled={rating === 0 || submitting} 
                         className="w-full"
                     >
-                        {submitting ? "Đang gửi..." : "Gửi đánh giá"}
+                        {submitting ? t("components.reviewdialog.submitLoading") : t("components.reviewdialog.submitBtn")}
                     </Button>
                 </div>
             </DialogContent>

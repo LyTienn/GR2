@@ -12,9 +12,9 @@ let isRefreshing = false;
 const refreshTokenSubject = new BehaviorSubject(null); 
 
 const logoutAndRedirect = () => {
-  toast.error("Phiên đăng nhập hết hạn, vui lòng đăng nhập lại!");
+  // toast.error("Phiên đăng nhập hết hạn, vui lòng đăng nhập lại!");
   store.dispatch(logoutSuccess());
-  window.location.href = '/login';
+  // window.location.href = '/login';
   return throwError(() => new Error('Session Expired'));
 };
 

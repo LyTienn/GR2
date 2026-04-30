@@ -97,6 +97,24 @@
       "textleft": "Tìm thấy",
       "textright": "Kết quả phù hợp",
       "changeSearchText": "Thử thay đổi từ khóa hoặc bộ lọc để tìm kiếm kết quả phù hợp hơn"
+    },
+    "bookdetailpage": {
+      "breadcrumb": {
+        "home": "Trang chủ"
+      },
+      "readBtn": "Đọc sách",
+      "showSummaryBtn": "Xem thêm",
+      "hideSummaryBtn": "Thu gọn",
+      "dialogShare": {
+        "title": "Chia sẻ sách",
+        "titleleft": "Chia sẻ",
+        "titleright": "với bạn bè của bạn",
+        "copyLinkBtn": "Sao chép liên kết",
+        "shareFacebookBtn": "Chia sẻ lên Facebook",
+        "shareTwitterBtn": "Chia sẻ lên Twitter",
+        "shareZaloBtn": "Chia sẻ lên Zalo"
+      },
+      "loginToAssess": "Vui lòng đăng nhập để đánh giá"
     }
   },
   "components": {
@@ -104,6 +122,39 @@
       "previous": "Trước",
       "next": "Sau",
       "page": "Trang"
+    },
+    "reviewdialog": {
+      "reviewBtn": "Viết đánh giá",
+      "dialogTitle": "Đánh giá sách",
+      "dialogDescription": "Chia sẻ suy nghĩ của bạn về cuốn sách này để giúp cộng đồng đọc sách tốt hơn.",
+      "selectRating": "Chọn mức độ hài lòng",
+      "hoverRating": {
+        "1": "Rất không hài lòng",
+        "2": "Không hài lòng",
+        "3": "Bình thường",
+        "4": "Hài lòng",
+        "5": "Rất hài lòng"
+      },
+      "labelComment": "Nội dung đánh giá",
+      "placeholderComment": "Sách hay ở điểm nào? Có điều gì bạn muốn chia sẻ? ...",
+      "submitLoading": "Đang gửi đánh giá...",
+      "submitBtn": "Gửi đánh giá"
+    },
+    "reviewsection": {
+      "loading": "Đang tải đánh giá...",
+      "noReview": "Chưa có đánh giá nào cho cuốn sách này",
+      "reviewCount": "đánh giá",
+      "reviewsTitle": "Các đánh giá từ người dùng",
+      "mentionUser": "(bạn)",
+      "diaglogTitleEdit": "Chỉnh sửa đánh giá",
+      "dialogLabelEdit": "Nội dung",
+      "starLabel": "Số sao (1-5)",
+      "cancelBtn": "Hủy",
+      "saveBtn": "Lưu",
+      "submitDeleteTitle": "Xác nhận xóa đánh giá",
+      "submitDeleteDescription": "Bạn có chắc chắn muốn xóa đánh giá này không? Hành động này không thể hoàn tác",
+      "deleteBtn": "Xóa",
+      "editBtn": "Sửa"
     }
   }
 }

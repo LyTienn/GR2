@@ -5,6 +5,7 @@ import HttpClient from "@/service/HttpClient";
 import { firstValueFrom } from "rxjs";
 import { toast } from "react-toastify";
 import CommentMenu from "./CommentMenu";
+import { useTranslation } from "react-i18next";
 import {
   Dialog,
   DialogContent,
@@ -17,6 +18,7 @@ import {
 } from "@/components/ui/dialog";
 
 export function ReviewsSection({ bookId, refreshKey }) {
+  const { t } = useTranslation();
   const [reviews, setReviews] = useState([]);
   const [averageRating, setAverageRating] = useState(0);
   const [totalComments, setTotalComments] = useState(0);
@@ -152,7 +154,7 @@ export function ReviewsSection({ bookId, refreshKey }) {
   if (loading) {
     return (
       <div className="text-center py-12 text-muted-foreground">
-        <p>Đang tải đánh giá...</p>
+        <p>{t("components.reviewsection.loading")}</p>
       </div>
     );
   }
@@ -160,7 +162,7 @@ export function ReviewsSection({ bookId, refreshKey }) {
   if (reviews.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground">
-        <p>Chưa có đánh giá nào cho cuốn sách này</p>
+        <p>{t("components.reviewsection.noReview")}</p>
       </div>
     );
   }
@@ -182,7 +184,7 @@ export function ReviewsSection({ bookId, refreshKey }) {
               ))}
             </div>
             <div className="text-sm text-muted-foreground mt-2">
-              ({totalComments} đánh giá)
+              ({totalComments} {t("components.reviewsection.reviewCount")})
             </div>
           </div>
         </div>
@@ -190,7 +192,7 @@ export function ReviewsSection({ bookId, refreshKey }) {
 
       {/* Individual Reviews */}
       <div className="space-y-4">
-        <h3 className="font-semibold text-lg">Các đánh giá từ người dùng</h3>
+        <h3 className="font-semibold text-lg">{t("components.reviewsection.reviewsTitle")}</h3>
         {reviews.map((review) => {
           const currentUserId = user?.userId || user?.user_id;
           const isCurrentUser = user && (String(review.userId) === String(currentUserId));
@@ -199,17 +201,17 @@ export function ReviewsSection({ bookId, refreshKey }) {
             : review.userName;
 
           return (
-            <div key={review.id} className={`border rounded-lg p-4 ${review.status === 'PENDING' ? 'opacity-60 bg-gray-50 dark:bg-gray-800/50 grayscale-[0.5]' : ''}`}>
+            <div key={review.id} className="border rounded-lg p-4">
               <div className="flex items-start justify-between mb-2">
                 <div>
                   <p className="font-medium flex items-center gap-2">
                     {displayName}
-                    {isCurrentUser && " (bạn)"}
-                    {review.status === 'PENDING' && (
+                    {isCurrentUser && ` ${t("components.reviewsection.mentionUser")}`}
+                    {/* {review.status === 'PENDING' && (
                       <span className="text-[10px] bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full border border-yellow-200 font-normal">
                         Đang chờ duyệt
                       </span>
-                    )}
+                    )} */}
                   </p>
                   <div className="flex gap-1 mt-1">
                     {[...Array(5)].map((_, i) => (
@@ -247,10 +249,10 @@ export function ReviewsSection({ bookId, refreshKey }) {
         <DialogContent>
           <form onSubmit={handleEditSubmit} className="space-y-4">
             <DialogHeader>
-              <DialogTitle>Chỉnh sửa đánh giá</DialogTitle>
+              <DialogTitle>{t("components.reviewsection.dialogTitleEdit")}</DialogTitle>
             </DialogHeader>
             <div>
-              <label className="block text-sm mb-1">Nội dung</label>
+              <label className="block text-sm mb-1">{t("components.reviewsection.dialogLabelEdit")}</label>
               <textarea
                 id="edit-comment-content"
                 name="content"
@@ -262,7 +264,7 @@ export function ReviewsSection({ bookId, refreshKey }) {
               />
             </div>
             <div>
-              <label className="block text-sm mb-1">Số sao (1-5)</label>
+              <label className="block text-sm mb-1">{t("components.reviewsection.starLabel")}</label>
               <input
                 id="edit-comment-rating"
                 name="rating"
@@ -282,14 +284,14 @@ export function ReviewsSection({ bookId, refreshKey }) {
                   className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300"
                   onClick={() => setEditModal({ open: false, commentId: null, content: "", rating: 1 })}
                 >
-                  Hủy
+                  {t("components.reviewsection.cancelBtn")}
                 </button>
               </DialogClose>
               <button
                 type="submit"
                 className="px-3 py-1 rounded bg-blue-600 text-white hover:bg-blue-700"
               >
-                Lưu
+                {t("components.reviewsection.saveBtn")}
               </button>
             </DialogFooter>
           </form>
@@ -299,10 +301,10 @@ export function ReviewsSection({ bookId, refreshKey }) {
         <DialogContent>
           <form onSubmit={handleDeleteSubmit} className="space-y-4">
             <DialogHeader>
-              <DialogTitle>Xác nhận xóa đánh giá</DialogTitle>
+              <DialogTitle>{t("components.reviewsection.submitDeleteTitle")}</DialogTitle>
             </DialogHeader>
             <DialogDescription>
-              Bạn có chắc chắn muốn xóa đánh giá này không? Hành động này không thể hoàn tác.
+              {t("components.reviewsection.submitDeleteDescription")}
             </DialogDescription>
             <DialogFooter>
               <DialogClose asChild>
@@ -311,14 +313,14 @@ export function ReviewsSection({ bookId, refreshKey }) {
                   className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300"
                   onClick={() => setDeleteModal({ open: false, commentId: null })}
                 >
-                  Hủy
+                  {t("components.reviewsection.cancelBtn")}
                 </button>
               </DialogClose>
               <button
                 type="submit"
                 className="px-3 py-1 rounded bg-red-600 text-white hover:bg-red-700"
               >
-                Xóa
+                {t("components.reviewsection.deleteBtn")}
               </button>
             </DialogFooter>
           </form>

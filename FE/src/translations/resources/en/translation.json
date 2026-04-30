@@ -97,6 +97,24 @@
       "textleft": "Found",
       "textright": "matching results",
       "changeSearchText": "Try changing the search keyword or filters to find more relevant results"
+    },
+    "bookdetailpage": {
+      "breadcrumb": {
+        "home": "Home"
+      },
+      "readBtn": "Read Book",
+      "showSummaryBtn": "See more",
+      "hideSummaryBtn": "Show less",
+      "dialogShare": {
+        "title": "Share this book",
+        "titleleft": "Share",
+        "titleright": "with your friends",
+        "copyLinkBtn": "Copy Link",
+        "shareFacebookBtn": "Share on Facebook",
+        "shareTwitterBtn": "Share on Twitter",
+        "shareZaloBtn": "Share on Zalo"
+      },
+      "loginToAssess": "Please log in to leave a review"
     }
   },
   "components": {
@@ -104,6 +122,39 @@
       "previous": "Previous",
       "next": "Next",
       "page": "Page"
+    },
+    "reviewdialog": {
+      "reviewBtn": "Write a Review",
+      "dialogTitle": "Book Review",
+      "dialogDescription": "Share your thoughts about this book to help the reading community",
+      "selectRating": "Select your satisfaction level",
+      "hoverRating": {
+        "1": "Very Dissatisfied",
+        "2": "Dissatisfied",
+        "3": "Neutral",
+        "4": "Satisfied",
+        "5": "Very Satisfied"
+      },
+      "labelComment": "Your review",
+      "placeholderComment": "What do you like about this book? Any thoughts you want to share? ...",
+      "submitLoading": "Submitting...",
+      "submitBtn": "Submit Review"
+    },
+    "reviewsection": {
+      "loading": "Loading reviews...",
+      "noReview": "No reviews yet for this book",
+      "reviewCount": "reviews",
+      "reviewsTitle": "Reviews from Users",
+      "mentionUser": "(you)",
+      "dialogTitleEdit": "Edit Review",
+      "dialogLabelEdit": "Review Content",
+      "starLabel": "Star Rating (1-5)",
+      "cancelBtn": "Cancel",
+      "saveBtn": "Save",
+      "submitDeleteTitle": "Confirm delete review",
+      "submitDeleteDescription": "Are you sure you want to delete this review? This action cannot be undone",
+      "deleteBtn": "Delete",
+      "editBtn": "Edit"
     }
   }
 }

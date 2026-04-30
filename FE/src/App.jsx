@@ -25,7 +25,7 @@ import Settings from './pages/admin/Settings';
 
 const HomePage = lazy(() => import('./pages/HomePage'));
 const Read = lazy(() => import('./pages/Read'));
-const BookSection = lazy(() => import('./components/BookSection'));
+const BookSection = lazy(() => import('./pages/BookSection'));
 const BookShelf = lazy(() => import('./pages/BookShelf'));
 const Profile = lazy(() => import('./pages/Profile'));
 const SearchPage = lazy(() => import('./pages/SearchPage'));
