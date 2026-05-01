@@ -9,7 +9,7 @@ const CommentMenu = ({ commentId, onEdit, onDelete }) => {
   return (
     <div className="relative">
       <button onClick={() => setOpen((v) => !v)}>
-        <MoreVertical className="w-5 h-5" />
+        <MoreVertical className="w-5 h-5 cursor-pointer hover:text-gray-950" />
       </button>
       <div
         className={`

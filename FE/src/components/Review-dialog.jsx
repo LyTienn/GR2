@@ -127,7 +127,7 @@ const ReviewDialog = ({ bookId, onReviewAdded }) => {
                     <Button 
                         onClick={handleSubmit} 
                         disabled={rating === 0 || submitting} 
-                        className="w-full"
+                        className="w-full hover:bg-slate-100"
                     >
                         {submitting ? t("components.reviewdialog.submitLoading") : t("components.reviewdialog.submitBtn")}
                     </Button>

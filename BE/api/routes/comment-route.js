@@ -143,4 +143,11 @@ router.get(
 
 // Moderation routes moved to top
 
+// Like/Dislike comment
+router.post(
+  "/:commentId/react",
+  authenticate,
+  CommentController.reactToComment
+);
+
 export default router;

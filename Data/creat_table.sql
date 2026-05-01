@@ -32,6 +32,12 @@ DO $$ BEGIN
   END IF;
 END $$;
 
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'comment_reaction_type_enum') THEN
+    CREATE TYPE comment_reaction_type_enum AS ENUM ('LIKE', 'DISLIKE');
+  END IF;
+END $$;
+
 -- =============================
 -- Tables
 -- =============================
@@ -164,6 +170,16 @@ CREATE TABLE IF NOT EXISTS user_bookshelf (
   CONSTRAINT fk_user_bookshelf_book FOREIGN KEY (book_id) REFERENCES books(id)
 );
 
+CREATE TABLE IF NOT EXISTS comment_reactions (
+  user_id UUID NOT NULL,
+  comment_id UUID NOT NULL,
+  type comment_reaction_type_enum NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (user_id, comment_id),
+  CONSTRAINT fk_comment_reactions_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+  CONSTRAINT fk_comment_reactions_comment FOREIGN KEY (comment_id) REFERENCES comments(comment_id) ON DELETE CASCADE
+);
+
 -- =============================
 -- Indexes (optional but recommended for FK lookups)
 -- =============================
@@ -178,3 +194,5 @@ CREATE INDEX IF NOT EXISTS idx_book_bookshelves_shelf_id ON book_bookshelves(boo
 CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_bookshelf_user_id ON user_bookshelf(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_bookshelf_book_id ON user_bookshelf(book_id);
+CREATE INDEX IF NOT EXISTS idx_comment_reactions_user_id ON comment_reactions(user_id);
+CREATE INDEX IF NOT EXISTS idx_comment_reactions_comment_id ON comment_reactions(comment_id);

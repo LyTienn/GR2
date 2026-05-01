@@ -1,10 +1,12 @@
 import Comment from "../models/comment-model.js";
+import CommentReaction from "../models/comment-reaction-model.js";
 import sequelize from "../config/db-config.js";
 import Book from "../models/book-model.js";
 import { User } from "../models/index.js";
 import { Op } from "sequelize";
 import SystemSettings from "../models/system-settings-model.js";
 import { checkSpam } from "../services/comment-ai-service.js";
+import { Transaction } from "sequelize";
 
 class CommentController {
   // Tạo comment mới
@@ -113,6 +115,57 @@ class CommentController {
     }
   }
 
+  static async reactToComment(req, res) {
+    const transaction = await sequelize.transaction();
+    try {
+      const { commentId } = req.params;
+      const { type } = req.body;
+      const userId = req.user.userId;
+
+      if (!['LIKE', 'DISLIKE'].includes(type)) {
+        await transaction.rollback();
+        return res.status(400).json({ success: false, message: "Invalid reaction type" });
+      }
+
+      const comment = await Comment.findByPk(commentId);
+      if (!comment) {
+        await transaction.rollback();
+        return res.status(404).json({ success: false, message: "Comment not found" });
+      }
+
+      const existingReaction = await CommentReaction.findOne({
+        where: { user_id: userId, comment_id: commentId },
+        transaction,
+        lock: Transaction.LOCK.UPDATE
+      });
+
+      if (existingReaction) {
+        if (existingReaction.type === type) {
+          await existingReaction.destroy({ transaction });
+          await transaction.commit();
+          return res.status(200).json({ success: true, message: "Reaction removed", action: "removed" });
+        } else {
+          existingReaction.type = type;
+          await existingReaction.save({ transaction });
+          await transaction.commit();
+          return res.status(200).json({ success: true, message: "Reaction updated", action: "updated" });
+        }
+      } else {
+        await CommentReaction.create({
+          user_id: userId,
+          comment_id: commentId,
+          type: type
+        }, { transaction });
+        await transaction.commit();
+        return res.status(201).json({ success: true, message: "Reaction added", action: "added" });
+      }
+    } catch (error) {
+      await transaction.rollback();
+      console.error("React to comment error:", error);
+      res.status(500).json({ success: false, message: "Server error" });
+    }
+  }
+
   // Lấy tất cả comments của một sách
   static async getBookComments(req, res) {
     try {
@@ -165,11 +218,40 @@ class CommentController {
           ? allComments.reduce((sum, c) => sum + c.rating, 0) /
           allComments.length
           : 0;
+      
+      const commentIds = rows.map(c => c.comment_id);
+
+      let reactions = [];
+      if (commentIds.length > 0) {
+        reactions = await CommentReaction.findAll({
+          where: { comment_id: commentIds }
+        });
+      }
+
+      // Map số lượng Like/Dislike vào từng comment
+      const commentsWithReactions = rows.map(comment => {
+        const commentReactions = reactions.filter(r => r.comment_id === comment.comment_id);
+        const likeCount = commentReactions.filter(r => r.type === 'LIKE').length;
+        const dislikeCount = commentReactions.filter(r => r.type === 'DISLIKE').length;
+        let userReaction = null;
+        
+        if (userId) {
+           const userAction = commentReactions.find(r => r.user_id === userId);
+           if (userAction) userReaction = userAction.type;
+        }
+
+        return {
+           ...comment.toJSON(),
+           likeCount,
+           dislikeCount,
+           userReaction
+        };
+      });
 
       res.status(200).json({
         success: true,
         data: {
-          comments: rows,
+          comments: commentsWithReactions,
           pagination: {
             total: count,
             page: parseInt(page),

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Star } from "lucide-react";
+import { Star, ThumbsUp } from "lucide-react";
 import { useSelector } from "react-redux";
 import HttpClient from "@/service/HttpClient";
 import { firstValueFrom } from "rxjs";
@@ -120,6 +120,36 @@ export function ReviewsSection({ bookId, refreshKey }) {
     }
   };
 
+  const handleLike = async (commentId) => {
+    if (!user) {
+      toast.info("Vui lòng đăng nhập để thao tác!");
+      return;
+    }
+    try {
+      await firstValueFrom(
+        HttpClient.post(`/comments/${commentId}/react`, { type: 'LIKE' })
+      );
+      
+      // Load lại danh sách comment để cập nhật số Like mới nhất
+      const res = await firstValueFrom(HttpClient.get(`/comments/books/${bookId}/comments`));
+      const d = res.data;
+      setReviews(
+        (d?.comments || []).map((item) => ({
+          id: item.comment_id,
+          userId: item.user?.user_id,
+          userName: item.user?.full_name || "Ẩn danh",
+          rating: item.rating,
+          comment: item.content,
+          createdAt: item.created_at,
+          likeCount: item.likeCount, // Map thêm từ API
+          userReaction: item.userReaction // Map thêm từ API
+        }))
+      );
+    } catch (err) {
+      console.error("Lỗi thả tim:", err);
+    }
+  };
+
   const handleDeleteSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -191,8 +221,9 @@ export function ReviewsSection({ bookId, refreshKey }) {
       </div>
 
       {/* Individual Reviews */}
-      <div className="space-y-4">
+      <div className="space-y-4 bg-slate-50 dark:bg-zinc-900/50 p-4 sm:p-6 rounded-xl">
         <h3 className="font-semibold text-lg">{t("components.reviewsection.reviewsTitle")}</h3>
+        <hr className="my-2 border-gray-300 dark:border-zinc-700" />
         {reviews.map((review) => {
           const currentUserId = user?.userId || user?.user_id;
           const isCurrentUser = user && (String(review.userId) === String(currentUserId));
@@ -201,17 +232,12 @@ export function ReviewsSection({ bookId, refreshKey }) {
             : review.userName;
 
           return (
-            <div key={review.id} className="border rounded-lg p-4">
+            <div key={review.id} className="py-4 border-b last:border-b-0 border-gray-200 dark:border-zinc-800">
               <div className="flex items-start justify-between mb-2">
                 <div>
                   <p className="font-medium flex items-center gap-2">
                     {displayName}
                     {isCurrentUser && ` ${t("components.reviewsection.mentionUser")}`}
-                    {/* {review.status === 'PENDING' && (
-                      <span className="text-[10px] bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full border border-yellow-200 font-normal">
-                        Đang chờ duyệt
-                      </span>
-                    )} */}
                   </p>
                   <div className="flex gap-1 mt-1">
                     {[...Array(5)].map((_, i) => (
@@ -241,6 +267,17 @@ export function ReviewsSection({ bookId, refreshKey }) {
               {review.comment && (
                 <p className="text-sm text-foreground mt-2">{review.comment}</p>
               )}
+              <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
+                <button 
+                  onClick={() => handleLike(review.id)}
+                  className={`flex items-center gap-1 transition-colors ${
+                    review.userReaction === 'LIKE' ? 'text-blue-600' : 'hover:text-blue-600'
+                  }`}
+                >
+                  <ThumbsUp className={`h-4 w-4 ${review.userReaction === 'LIKE' ? 'fill-current' : ''}`} />
+                  <span> ({review.likeCount || 0})</span>
+                </button>
+              </div>
             </div>
           );
         })}
