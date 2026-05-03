@@ -115,13 +115,19 @@
         "shareZaloBtn": "Chia sẻ lên Zalo"
       },
       "loginToAssess": "Vui lòng đăng nhập để đánh giá"
+    },
+    "readpage": {
+      "tableOfContents": "Mục lục",
+      "fullscreenOn": "Toàn màn hình",
+      "fullscreenOff": "Thoát toàn màn hình"
     }
   },
   "components": {
     "pagination": {
       "previous": "Trước",
       "next": "Sau",
-      "page": "Trang"
+      "page": "Trang",
+      "title": "Nhập số trang"
     },
     "reviewdialog": {
       "reviewBtn": "Viết đánh giá",
@@ -155,6 +161,18 @@
       "submitDeleteDescription": "Bạn có chắc chắn muốn xóa đánh giá này không? Hành động này không thể hoàn tác",
       "deleteBtn": "Xóa",
       "editBtn": "Sửa"
+    }
+  },
+  "toasts": {
+    "success": {
+
+    },
+    "error": {
+      "authenticatedToRead": "Bạn cần đăng nhập để đọc sách",
+      "saveProgress": "Lỗi lưu tiến độ: "
+    },
+    "info": {
+      "continueReading": "Đọc tiếp: "
     }
   }
 }

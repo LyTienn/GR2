@@ -5,6 +5,7 @@ import HttpClient from "@/service/HttpClient";
 import { firstValueFrom } from "rxjs";
 import { toast } from "react-toastify";
 import CommentMenu from "./CommentMenu";
+import Pagination from "./Pagination";
 import { useTranslation } from "react-i18next";
 import {
   Dialog,
@@ -24,6 +25,9 @@ export function ReviewsSection({ bookId, refreshKey }) {
   const [totalComments, setTotalComments] = useState(0);
   const [loading, setLoading] = useState(true);
   const { user } = useSelector((state) => state.auth);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const LIMIT = 5;
   const [editModal, setEditModal] = useState({
     open: false,
     commentId: null,
@@ -57,7 +61,9 @@ export function ReviewsSection({ bookId, refreshKey }) {
       setLoading(true);
       try {
         const res = await firstValueFrom(
-          HttpClient.get(`/comments/books/${bookId}/comments`)
+          HttpClient.get(`/comments/books/${bookId}/comments`, {
+            search: { page: currentPage, limit: LIMIT } 
+          })
         );
         const d = res.data;
         setReviews(
@@ -69,10 +75,13 @@ export function ReviewsSection({ bookId, refreshKey }) {
             comment: item.content,
             createdAt: item.created_at,
             status: item.status,
+            likeCount: item.likeCount,
+            userReaction: item.userReaction
           }))
         );
         setAverageRating(Number(d?.averageRating || 0));
         setTotalComments(d?.totalComments || 0);
+        setTotalPages(d?.pagination?.totalPages || Math.ceil((d?.totalComments || 0) / LIMIT));
       } catch (error) {
         console.error("Lỗi load đánh giá:", error);
         setReviews([]);
@@ -84,7 +93,7 @@ export function ReviewsSection({ bookId, refreshKey }) {
     };
 
     loadReviews();
-  }, [bookId, refreshKey]);
+  }, [bookId, refreshKey, currentPage]);
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
@@ -130,7 +139,6 @@ export function ReviewsSection({ bookId, refreshKey }) {
         HttpClient.post(`/comments/${commentId}/react`, { type: 'LIKE' })
       );
       
-      // Load lại danh sách comment để cập nhật số Like mới nhất
       const res = await firstValueFrom(HttpClient.get(`/comments/books/${bookId}/comments`));
       const d = res.data;
       setReviews(
@@ -141,8 +149,8 @@ export function ReviewsSection({ bookId, refreshKey }) {
           rating: item.rating,
           comment: item.content,
           createdAt: item.created_at,
-          likeCount: item.likeCount, // Map thêm từ API
-          userReaction: item.userReaction // Map thêm từ API
+          likeCount: item.likeCount,
+          userReaction: item.userReaction
         }))
       );
     } catch (err) {
@@ -181,7 +189,7 @@ export function ReviewsSection({ bookId, refreshKey }) {
     }
   };
 
-  if (loading) {
+  if (loading && reviews.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground">
         <p>{t("components.reviewsection.loading")}</p>
@@ -189,7 +197,7 @@ export function ReviewsSection({ bookId, refreshKey }) {
     );
   }
 
-  if (reviews.length === 0) {
+  if (!loading && reviews.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground">
         <p>{t("components.reviewsection.noReview")}</p>
@@ -281,6 +289,15 @@ export function ReviewsSection({ bookId, refreshKey }) {
             </div>
           );
         })}
+        {totalPages > 1 && (
+        <div className="flex justify-center mt-6">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={(page) => setCurrentPage(page)}
+          />
+        </div>
+      )}
       </div>
       <Dialog open={editModal.open} onOpenChange={open => setEditModal(m => ({ ...m, open }))}>
         <DialogContent>

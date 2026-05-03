@@ -122,7 +122,7 @@ class CommentController {
       const { type } = req.body;
       const userId = req.user.userId;
 
-      if (!['LIKE', 'DISLIKE'].includes(type)) {
+      if (type !== 'LIKE') {
         await transaction.rollback();
         return res.status(400).json({ success: false, message: "Invalid reaction type" });
       }
@@ -224,26 +224,24 @@ class CommentController {
       let reactions = [];
       if (commentIds.length > 0) {
         reactions = await CommentReaction.findAll({
-          where: { comment_id: commentIds }
+          where: { comment_id: commentIds, type: 'LIKE' }
         });
       }
 
       // Map số lượng Like/Dislike vào từng comment
       const commentsWithReactions = rows.map(comment => {
         const commentReactions = reactions.filter(r => r.comment_id === comment.comment_id);
-        const likeCount = commentReactions.filter(r => r.type === 'LIKE').length;
-        const dislikeCount = commentReactions.filter(r => r.type === 'DISLIKE').length;
+        const likeCount = commentReactions.length;
         let userReaction = null;
         
         if (userId) {
            const userAction = commentReactions.find(r => r.user_id === userId);
-           if (userAction) userReaction = userAction.type;
+           if (userAction) userReaction = 'LIKE';
         }
 
         return {
            ...comment.toJSON(),
            likeCount,
-           dislikeCount,
            userReaction
         };
       });

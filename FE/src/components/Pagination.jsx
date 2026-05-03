@@ -83,7 +83,7 @@ export default function Pagination({
           <span
             className="cursor-pointer hover:text-blue-600 hover:bg-blue-50 px-2 sm:px-3 py-1.5 rounded transition-all inline-block border border-transparent hover:border-blue-200 select-none"
             onClick={() => setIsEditingPage(true)}
-            title="Bấm để nhập số trang"
+            title={t("components.pagination.title")}
           >
             {t("components.pagination.page")} {currentPage} / {totalPages}
           </span>

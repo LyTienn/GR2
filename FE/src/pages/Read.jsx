@@ -10,6 +10,7 @@ import { toast } from "react-toastify";
 import HttpClient from "@/service/HttpClient";
 import { firstValueFrom } from "rxjs";
 import { debounce } from "lodash";
+import { useTranslation } from "react-i18next";
 // import AudioPlayer from "@/components/AudioPlayer";
 // import ComicReader from "@/components/ComicReader";
 // import { useProgress } from "@/contexts/ProgressContext";
@@ -30,6 +31,7 @@ import {
 } from "@/components/ui/select";
 
 export default function ReadBookPage() {
+  const { t } = useTranslation();
   const { id: bookId } = useParams();
   const navigate = useNavigate();
   const { isAuthenticated, user } = useSelector((state) => state.auth);
@@ -64,7 +66,7 @@ export default function ReadBookPage() {
   const hasMarkedCompleted = useRef(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
-
+  const activeChapterRef = useRef(null);
   const contentRef = useRef(null);
   // const { addTask, updateTask, removeTask } = useProgress();
 
@@ -91,7 +93,7 @@ export default function ReadBookPage() {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      toast.error("Bạn cần đăng nhập để đọc sách.");
+      toast.error(t("toasts.error.authenticatedToRead"));
       navigate("/login");
     }
   }, [isAuthenticated, navigate]);
@@ -181,7 +183,7 @@ export default function ReadBookPage() {
         setInitialScrollPos(scrollPosToLoad);
 
         if (chapterToLoad && resProgress?.data?.lastChapterId) {
-          toast.info(`Đọc tiếp: ${chapterToLoad.title}`, {
+          toast.info(`${t("toasts.info.continueReading")} ${chapterToLoad.title}`, {
             autoClose: 2000,
             toastId: 'resume-toast'
           });
@@ -202,40 +204,33 @@ export default function ReadBookPage() {
     if (selectedChapter?.id && selectedChapter?.content && contentRef.current) {
       if (initialScrollPos > 0) {
         isRestoring.current = true;
-        let attempts = 0;
-        const maxAttempts = 20;
-        const tryRestoringScroll = () => {
-          const element = contentRef.current;
-          if (!element) return;
-          const scrollHeight = element.scrollHeight;
-          const clientHeight = element.clientHeight;
-          if (scrollHeight <= clientHeight && attempts < maxAttempts) {
-            attempts++;
-            requestAnimationFrame(tryRestoringScroll);
-            return;
-          }
-          const targetPixel = (initialScrollPos / 100) * (scrollHeight - clientHeight);
-
-          if (targetPixel > 0) {
-            element.scrollTo({ top: targetPixel, behavior: 'auto' });
-            if (Math.abs(element.scrollTop - targetPixel) < 20) {
-              setTimeout(() => { isRestoring.current = false; }, 500);
-            } else if (attempts < maxAttempts) {
-              attempts++;
-              setTimeout(tryRestoringScroll, 50);
-            } else {
-              isRestoring.current = false;
-            }
-          } else {
-            isRestoring.current = false;
-          }
-        };
-        tryRestoringScroll();
+        setTimeout(() => {
+            const element = contentRef.current;
+            if (!element) return;
+            
+            const scrollHeight = element.scrollHeight;
+            const clientHeight = element.clientHeight;
+            const maxScroll = scrollHeight - clientHeight;
+            const targetPixel = (initialScrollPos / 100) * maxScroll;
+            
+            element.scrollTo({ top: targetPixel, behavior: 'smooth' });
+            
+            setTimeout(() => { isRestoring.current = false; }, 600);
+        }, 100); 
       } else {
-        contentRef.current.scrollTo({ top: 0, behavior: 'auto' });
+        contentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
   }, [selectedChapter?.id, selectedChapter?.content, initialScrollPos]);
+
+  useEffect(() => {
+    if (sidebarOpen && activeChapterRef.current) {
+      activeChapterRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center'
+      });
+    }
+  }, [selectedChapter?.id, sidebarOpen]);
 
   const markBookAsCompleted = async () => {
     if (hasMarkedCompleted.current) return;
@@ -626,7 +621,7 @@ export default function ReadBookPage() {
           {sidebarOpen ? (
             <>
               <h2 className="font-bold text-slate-800 flex items-center gap-2 truncate">
-                <FileText className="h-4 w-4" /> Mục lục
+                <FileText className="h-4 w-4" /> {t("layout.readpage.tableOfContents")}
               </h2>
               <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(false)}>
                 <List className="h-5 w-5 text-slate-600" />
@@ -646,6 +641,7 @@ export default function ReadBookPage() {
             {chapters.map((ch, index) => (
               <button
                 key={ch.id || index}
+                ref={selectedChapter?.id === ch.id  ? activeChapterRef : null}
                 onClick={() => handleSelectChapter(ch)}
                 className={`w-full text-left px-4 py-3 text-sm rounded-md transition-colors duration-200 mb-1 ${selectedChapter?.id === ch.id ? 'bg-blue-50 text-blue-700 font-semibold border-l-4 border-blue-600' : 'text-slate-600 hover:bg-slate-100 border-l-4 border-transparent'}`}
               >
@@ -669,7 +665,7 @@ export default function ReadBookPage() {
               size="sm" 
               onClick={toggleFullScreen}
               className="text-slate-500 hover:text-slate-900"
-              title={isFullScreen ? "Thoát toàn màn hình" : "Toàn màn hình"}
+              title={isFullScreen ? t("layout.readpage.fullscreenOff") : t("layout.readpage.fullscreenOn")}
             >
               {isFullScreen ? (
                 <Minimize className="h-8 w-8" />
@@ -771,13 +767,6 @@ export default function ReadBookPage() {
             <div className="w-full max-w-4xl bg-white shadow-sm border border-slate-100 rounded-lg p-8 sm:p-12 h-fit">
               {selectedChapter ? (
                 <>
-                  <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-md -mx-6 sm:-mx-10 md:-mx-12 px-6 sm:px-10 md:px-12 py-3 border-b border-slate-200 mb-8 transition-all">
-                    <Pagination 
-                      currentPage={currentIndex + 1} 
-                      totalPages={chapters.length} 
-                      onPageChange={handlePageChange}
-                    />
-                  </div>
                   <article className="w-full mt-8">
                     <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-slate-900 border-b pb-4 leading-tight">
                       {selectedChapter.title}
@@ -785,13 +774,19 @@ export default function ReadBookPage() {
                     <div className="mx-16 max-w-3xl whitespace-pre-line text-slate-700 leading-relaxed text-justify font-serif text-xl sm:px-4">
                       {selectedChapter.content}
                     </div>
+                    <div className="sticky bottom-0 z-40 bg-white/95 backdrop-blur-md -mx-6 sm:-mx-10 md:-mx-12 px-6 sm:px-10 md:px-12 py-3 border-t border-slate-200 mt-8 transition-all">
+                      <Pagination 
+                        currentPage={currentIndex + 1} 
+                        totalPages={chapters.length} 
+                        onPageChange={handlePageChange}
+                      />
+                    </div>
                   </article>
                 </>
               ) : <div className="text-center text-slate-400 py-20">Vui lòng chọn chương</div>}
             </div>
           </div>
         </div>
-
 
         {/* {showAudioPlayer && selectedChapter && (
           <AudioPlayer
@@ -809,7 +804,6 @@ export default function ReadBookPage() {
           onClose={() => setShowComicReader(false)}
           comicData={comicData}
         /> */}
-
 
       </main >
       <Dialog open={showUpgradeModal} onOpenChange={setShowUpgradeModal}>

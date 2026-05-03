@@ -51,8 +51,6 @@ class BookshelfController {
             return res.status(409).json({ success: false, message: "Book already in reading list" });
           }
           item.is_reading = true;
-          // Ensure we initialize tracking info if it wasn't there? (e.g. if it was only favorite before)
-          // But defaults should handle it or it stays null until saveReadingProgress is called.
         }
         await item.save();
       }
@@ -485,10 +483,8 @@ class BookshelfController {
         where: {
           user_id: userId,
           book_id: bookId,
-          // Removed status: 'READING' check to allow getting progress even if not explicitly in "list" 
-          // (though saving it adds it to list, so practically same)
         },
-        attributes: ['last_read_chapter_id', 'last_read_at']
+        attributes: ['last_read_chapter_id', 'last_read_at', 'last_read_scroll_position'] 
       });
 
       if (!item || !item.last_read_chapter_id) {
@@ -502,7 +498,8 @@ class BookshelfController {
         success: true,
         data: {
           lastChapterId: item.last_read_chapter_id,
-          lastReadAt: item.last_read_at
+          lastReadAt: item.last_read_at,
+          lastReadScrollPosition: item.last_read_scroll_position 
         }
       });
 
