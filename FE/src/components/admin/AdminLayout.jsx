@@ -74,7 +74,7 @@ function SidebarContent({ isDocumentsOpen, setIsDocumentsOpen, handleLogout, clo
           </div>
           <SidebarLink to="/admin/users" icon={{ node: <UsersIcon size={16} /> }} label="Quản lý Người dùng" onClick={closeMobileMenu} />
           <SidebarLink to="/admin/registrations" icon={{ node: <UserCheck size={16} /> }} label="Quản lý Đăng ký" onClick={closeMobileMenu} />
-          <SidebarLink to="/admin/comments" icon={{ node: <MessageSquareMore size={16} /> }} label="Kiểm duyệt Bình luận" onClick={closeMobileMenu} />
+          <SidebarLink to="/admin/comments" icon={{ node: <MessageSquareMore size={16} /> }} label="Quản lý Bình luận" onClick={closeMobileMenu} />
           <SidebarLink to="/admin/analytics" icon={{ node: <BarChart3 size={16} /> }} label="Bình luận theo Sách" onClick={closeMobileMenu} />
           <SidebarLink to="/admin/settings" icon={{ node: <SettingsIcon size={16} /> }} label="Cài đặt" onClick={closeMobileMenu} />
         </nav>

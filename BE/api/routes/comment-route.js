@@ -13,22 +13,6 @@ router.get(
   CommentController.getAllComments
 );
 
-// Get Moderation Mode
-router.get(
-  "/moderation-mode",
-  authenticate,
-  authorizeRoles("ADMIN"),
-  CommentController.getModerationMode
-);
-
-// Update Moderation Mode
-router.put(
-  "/moderation-mode",
-  authenticate,
-  authorizeRoles("ADMIN"),
-  CommentController.updateModerationMode
-);
-
 // Tạo comment cho sách
 router.post(
   "/books/:bookId/comments",
@@ -69,68 +53,12 @@ router.delete(
   CommentController.deleteComment
 );
 
-// Duyệt comment
-router.patch(
-  "/:commentId/approve",
-  authenticate,
-  authorizeRoles("ADMIN"),
-  CommentController.approveComment
-);
-
-// Từ chối comment
-router.patch(
-  "/:commentId/reject",
-  authenticate,
-  authorizeRoles("ADMIN"),
-  CommentController.rejectComment
-);
-
-// Change Status
-router.patch(
-  "/:commentId/status",
-  authenticate,
-  authorizeRoles("ADMIN"),
-  CommentController.changeCommentStatus
-);
-
-// Bulk Check Pending (triggered by Admin)
-router.post(
-  "/bulk-check-pending",
-  authenticate,
-  authorizeRoles("ADMIN"),
-  CommentController.bulkCheckPendingComments
-);
-
-// Bulk Approve (Manual)
-router.post(
-  "/bulk-approve",
-  authenticate,
-  authorizeRoles("ADMIN"),
-  CommentController.bulkApprove
-);
-
-// Bulk Reject (Manual)
-router.post(
-  "/bulk-reject",
-  authenticate,
-  authorizeRoles("ADMIN"),
-  CommentController.bulkReject
-);
-
 // Get Sentiment Stats
 router.get(
   "/sentiment-stats",
   authenticate,
   authorizeRoles("ADMIN"),
   CommentController.getSentimentStats
-);
-
-// Bulk Classify (Manual Trigger)
-router.post(
-  "/bulk-classify",
-  authenticate,
-  authorizeRoles("ADMIN"),
-  CommentController.bulkClassifySentiment
 );
 
 // Get Books with Comments (Admin Filter)
