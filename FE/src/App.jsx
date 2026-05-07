@@ -20,7 +20,6 @@ import Bookshelves from './pages/admin/Bookshelves';
 import Users from './pages/admin/Users';
 import Registrations from './pages/admin/Registrations';
 import CommentsModeration from './pages/admin/CommentsModeration';
-import BookAnalytics from './pages/admin/BookAnalytics';
 import Settings from './pages/admin/Settings';
 
 const HomePage = lazy(() => import('./pages/HomePage'));
@@ -67,7 +66,6 @@ function AppContent() {
         <Route path='users' element={<Users />} />
         <Route path='registrations' element={<Registrations />} />
         <Route path='comments' element={<CommentsModeration />} />
-        <Route path='analytics' element={<BookAnalytics />} />
         <Route path='settings' element={<Settings />} />
       </Route>
       <Route path='/*' element={<MainLayout />} />

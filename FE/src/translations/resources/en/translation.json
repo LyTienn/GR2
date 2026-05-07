@@ -119,7 +119,26 @@
     "readpage": {
       "tableOfContents": "Chapter List",
       "fullscreenOn": "Fullscreen",
-      "fullscreenOff": "Exit Fullscreen"
+      "fullscreenOff": "Exit Fullscreen",
+      "showSetting": {
+        "label": "Customize Interface",
+        "title": "Reading Settings",
+        "fontSize": "Font Size",
+        "fontStyle": "Font Style",
+        "bgColor": "Background Color",
+        "lightBtn": "Light",
+        "sepiaBtn": "Sepia",
+        "darkBtn": "Dark"
+      },
+      "showUpgradeModal": {
+        "dialogTitle": "Content for Members",
+        "dialogDes1": "You have read all the free preview chapters of this book.",
+        "dialogDes2": "Please upgrade to the",
+        "dialogDes3": "Premium",
+        "dialogDes4": "plan to unlock the entire content and enjoy an ad-free reading experience!",
+        "laterBtn": "Later",
+        "upgradeBtn": "Upgrade Now"
+      }
     }
   },
   "components": {
@@ -169,7 +188,9 @@
     },
     "error": {
       "authenticatedToRead": "You need to log in to read the book",
-      "saveProgress": "Error saving progress: "
+      "saveProgress": "Error saving progress: ",
+      "fullScreenFailed": "Failed to enable fullscreen mode",
+      "loadBookData": "Error loading book data."
     },
     "info": {
       "continueReading": "Continue reading: "

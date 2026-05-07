@@ -119,7 +119,26 @@
     "readpage": {
       "tableOfContents": "Mục lục",
       "fullscreenOn": "Toàn màn hình",
-      "fullscreenOff": "Thoát toàn màn hình"
+      "fullscreenOff": "Thoát toàn màn hình",
+      "showSetting": {
+        "label": "Tùy chỉnh giao diện",
+        "title": "Giao diện đọc",
+        "fontSize": "Cỡ chữ",
+        "fontStyle": "Kiểu chữ",
+        "bgColor": "Màu nền",
+        "lightBtn": "Sáng",
+        "sepiaBtn": "Màu ấm (Sepia)",
+        "darkBtn": "Tối"
+      },
+      "showUpgradeModal": {
+        "dialogTitle": "Nội dung dành cho hội viên",
+        "dialogDes1": "Bạn đã đọc hết các chương đọc thử miễn phí của cuốn sách này.",
+        "dialogDes2": "Hãy nâng cấp lên gói",
+        "dialogDes3": "Premium",
+        "dialogDes4": "để mở khóa toàn bộ nội dung và tận hưởng kho sách không giới hạn!",
+        "laterBtn": "Để sau",
+        "upgradeBtn": "Nâng cấp ngay"
+      }
     }
   },
   "components": {
@@ -169,7 +188,9 @@
     },
     "error": {
       "authenticatedToRead": "Bạn cần đăng nhập để đọc sách",
-      "saveProgress": "Lỗi lưu tiến độ: "
+      "saveProgress": "Lỗi lưu tiến độ: ",
+      "fullScreenFailed": "Không thể bật toàn màn hình",
+      "loadBookData": "Lỗi khi tải dữ liệu sách."
     },
     "info": {
       "continueReading": "Đọc tiếp: "
