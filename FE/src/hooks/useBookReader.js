@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react';        toast.error(t("toasts.error.loadBookData"));import { firstValueFrom } from 'rxjs';
+import { useState, useEffect, useRef } from 'react';        
+import { firstValueFrom } from 'rxjs';
 import HttpClient from "@/service/HttpClient"; 
 import { toast } from "react-toastify";
 import { useTranslation } from 'react-i18next';
