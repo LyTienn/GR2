@@ -2,10 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { firstValueFrom } from 'rxjs';
 import HttpClient from "@/service/HttpClient"; 
 import { toast } from "react-toastify";
-import { useTranslation } from 'react-i18next';
 
 export default function useBookReader(bookId, isAuthenticated, t) {
-  const { t } = useTranslation();
   const [book, setBook] = useState(null);
   const [chapters, setChapters] = useState([]);
   const [selectedChapter, setSelectedChapter] = useState(null);
