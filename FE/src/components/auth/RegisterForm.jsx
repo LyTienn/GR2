@@ -7,8 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { registerStart, clearAuthError } from "@/store/Auth";
+import { useTranslation } from "react-i18next";
 
 const RegisterForm = () => {
+    const { t } = useTranslation();
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -21,14 +23,14 @@ const RegisterForm = () => {
         e.preventDefault();
         
         if (password !== confirmPassword) {
-            toast.error("Mật khẩu xác nhận không khớp");
+            toast.error(t("toasts.error.confirmPassword"));
             return;
         }
 
         dispatch(registerStart({
             userData: { email, password, fullName: name },
             onSuccess: () => {
-                toast.success("Đăng ký thành công. Vui lòng đăng nhập.");
+                toast.success(t("toasts.success.registerSuccess"));
                 navigate("/login");
             },
             onError: (errorMessage) => {
@@ -40,17 +42,17 @@ const RegisterForm = () => {
     return (
         <Card className="w-full max-w-md">
             <CardHeader>
-                <CardTitle>Đăng ký</CardTitle>
-                <CardDescription>Đăng ký tài khoản mới</CardDescription>
+                <CardTitle>{t("layout.register.title")}</CardTitle>
+                <CardDescription>{t("layout.register.description")}</CardDescription>
             </CardHeader>
             <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
-                        <Label htmlFor="name">Họ tên</Label>
+                        <Label htmlFor="name">{t("layout.register.labelName")}</Label>
                         <Input
                             id="name"
                             type="text"
-                            placeholder="Nhập họ tên"
+                            placeholder={t("layout.register.placeholderName")}
                             required
                             value={name}
                             onChange={(e) => setName(e.target.value)}
@@ -68,7 +70,7 @@ const RegisterForm = () => {
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="password">Mật khẩu</Label>
+                        <Label htmlFor="password">{t("layout.register.password")}</Label>
                         <Input
                             id="password"
                             type="password"
@@ -79,7 +81,7 @@ const RegisterForm = () => {
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="confirmPassword">Nhập lại mật khẩu</Label>
+                        <Label htmlFor="confirmPassword">{t("layout.register.confirmPassword")}</Label>
                         <Input
                             id="confirmPassword"
                             type="password"
@@ -89,7 +91,7 @@ const RegisterForm = () => {
                             minLength={8}
                         />
                     </div>
-                    <Button type="submit" className="w-full hover:shadow-gray-400">Đăng ký</Button>
+                    <Button type="submit" className="w-full hover:shadow-gray-400">{t("layout.register.submitButton")}</Button>
                 </form>
             </CardContent>
         </Card>

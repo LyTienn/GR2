@@ -1,5 +1,28 @@
 {
   "layout": {
+    "register": {
+      "title": "Đăng ký",
+      "description": "Đăng ký tài khoản mới",
+      "labelName": "Họ tên",
+      "placeholderName": "Nhập họ tên",
+      "password": "Mật khẩu",
+      "confirmPassword": "Xác nhận mật khẩu",
+      "submitButton": "Đăng ký",
+      "haveAccount": "Đã có tài khoản? ",
+      "login": "Đăng nhập"
+    },
+    "login": {
+      "title": "Đăng nhập",
+      "description": "Đăng nhập vào tài khoản của bạn",
+      "email": "Email",
+      "emailPlaceholder": "abc@example.com",
+      "password": "Mật khẩu",
+      "forgotPassword": "Quên mật khẩu?",
+      "processing": "Đang xử lý...",
+      "submitButton": "Đăng nhập",
+      "haventAccount": "Chưa có tài khoản? ",
+      "register": "Đăng ký ngay"
+    },
     "loading": "Đang tải thư viện...",
     "header": {
       "title": "Lybrary",
@@ -184,14 +207,19 @@
   },
   "toasts": {
     "success": {
-
+      "loginSuccess": "Đăng nhập thành công. Chào mừng bạn quay trở lại!",
+      "logoutSuccess": "Đăng xuất thành công!",
+      "registerSuccess": "Đăng ký thành công. Vui lòng đăng nhập."
     },
     "error": {
+      "confirmPassword": "Mật khẩu xác nhận không khớp",
       "authenticatedToRead": "Bạn cần đăng nhập để đọc sách",
       "saveProgress": "Lỗi lưu tiến độ: ",
       "fullScreenFailed": "Không thể bật toàn màn hình",
       "loadBookData": "Lỗi khi tải dữ liệu sách."
     },
+    "warn": {
+      "missingFields": "Vui lòng điền đầy đủ thông tin"    },
     "info": {
       "continueReading": "Đọc tiếp: "
     }

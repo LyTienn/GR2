@@ -1,5 +1,28 @@
 {
   "layout": {
+    "register": {
+      "title": "Register",
+      "description": "Register a new account",
+      "labelName": "Full Name",
+      "placeholderName": "Enter your full name",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "submitButton": "Register",
+      "haveAccount": "Already have an account? ",
+      "login": "Login"
+    },
+    "login": {
+      "title": "Login",
+      "description": "Log in to your account",
+      "email": "Email",
+      "emailPlaceholder": "abc@example.com",
+      "password": "Password",
+      "forgotPassword": "Forgot password?",
+      "processing": "Processing...",
+      "submitButton": "Login",
+      "haventAccount": "Don't have an account? ",
+      "register": "Register now"
+    },
     "loading": "Loading...",
     "header": {
       "title": "Lybrary",
@@ -184,14 +207,19 @@
   },
   "toasts": {
     "success": {
-
+      "loginSuccess": "Logged in successfully. Welcome back!",
+      "logoutSuccess": "Logged out successfully!",
+      "registerSuccess": "Registered successfully. Please log in."
     },
     "error": {
+      "confirmPassword": "Confirm password does not match",
       "authenticatedToRead": "You need to log in to read the book",
       "saveProgress": "Error saving progress: ",
       "fullScreenFailed": "Failed to enable fullscreen mode",
       "loadBookData": "Error loading book data."
     },
+    "warn": {
+      "missingFields": "Please fill in all required fields"    },
     "info": {
       "continueReading": "Continue reading: "
     }

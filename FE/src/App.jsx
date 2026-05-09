@@ -2,6 +2,7 @@ import { Suspense, lazy, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import AuthLayout from './components/auth/AuthLayout';
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { ProgressProvider } from './contexts/ProgressContext';
@@ -54,8 +55,10 @@ const MainLayout = () => {
 function AppContent() {
   return (
     <Routes>
-      <Route path='/register' element={<Register />} />
-      <Route path='/login' element={<Login />} />
+      <Route element={<AuthLayout />}>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+      </Route>
       {/* Admin routes */}
       <Route path='/admin' element={<RequireAdmin><AdminLayout /></RequireAdmin>}>
         <Route index element={<Dashboard />} />
