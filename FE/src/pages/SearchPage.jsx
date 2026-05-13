@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import HttpClient from "@/service/HttpClient";
 import { firstValueFrom } from 'rxjs';
@@ -28,6 +28,7 @@ const SearchPage = () => {
     const { t } = useTranslation();
     const [searchParams, setSearchParams] = useSearchParams();
     const navigate = useNavigate();
+    const scrollRef = useRef(null);
 
     // Core search params
     const query = searchParams.get('q') || '';
@@ -173,7 +174,9 @@ const SearchPage = () => {
         const params = new URLSearchParams(searchParams);
         params.set('page', newPage);
         setSearchParams(params);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (scrollRef.current) {
+            scrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+        }
     };
 
     const clearFilters = () => {
@@ -412,7 +415,7 @@ const SearchPage = () => {
                             )}
                         </div>
 
-                        <div className="flex-1 overflow-y-auto hover-scrollbar pb-20 pr-2 pt-2 flex flex-col">
+                        <div className="flex-1 overflow-y-auto hover-scrollbar pb-20 pr-2 pt-2 flex flex-col" ref={scrollRef}>
                             {/* Results Grid */}
                             {loading ? (
                                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">

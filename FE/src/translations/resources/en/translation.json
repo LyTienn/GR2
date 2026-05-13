@@ -161,6 +161,24 @@
         "dialogDes4": "plan to unlock the entire content and enjoy an ad-free reading experience!",
         "laterBtn": "Later",
         "upgradeBtn": "Upgrade Now"
+      },
+      "note": {
+        "saveSuccess": "Note saved successfully!",
+        "updateSuccess": "Note updated successfully!",
+        "deleteSuccess": "Note deleted successfully!",
+        "addNote": "Add Note",
+        "addNoteTitle": "Add New Note",
+        "editNoteTitle": "Edit Note",
+        "viewNoteTitle": "View Note",
+        "notePlaceholder": "What are you thinking about this section?",
+        "deleteNote": "Delete",
+        "editNote": "Edit",
+        "updateNote": "Update",
+        "saveNote": "Save Note",
+        "confirmDeleteNote": "Are you sure you want to delete this note?",
+        "colorLabel": "Color:",
+        "emptyNote": "No note content.",
+        "cancelBtn": "Cancel"
       }
     }
   },

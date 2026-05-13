@@ -21,6 +21,7 @@ import translationRoutes from "./routes/translation-route.js";
 import comicRoutes from "./routes/comic-route.js";
 import subscriptionRoutes from "./routes/subscription-route.js";
 import chapterRoutes from "./routes/chapter-route.js";
+import chapterNoteRoutes from "./routes/chapterNote-route.js";
 import { initializeVectorStore } from "./services/rag-service.js";
 import cron from "node-cron";
 import PaymentController from "./controllers/payment-controller.js";
@@ -69,7 +70,7 @@ app.use("/api/translate", translationRoutes);
 app.use("/api/comic", comicRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);
 app.use("/api/chapters", chapterRoutes);
-
+app.use("/api/chapter-notes", chapterNoteRoutes);
 // Public stats route (no auth required)
 import StatsController from "./controllers/stats-controller.js";
 app.get("/api/public/stats", StatsController.getPublicStats);

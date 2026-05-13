@@ -161,6 +161,24 @@
         "dialogDes4": "để mở khóa toàn bộ nội dung và tận hưởng kho sách không giới hạn!",
         "laterBtn": "Để sau",
         "upgradeBtn": "Nâng cấp ngay"
+      },
+      "note": {
+        "saveSuccess": "Đã lưu ghi chú thành công!",
+        "updateSuccess": "Đã cập nhật ghi chú thành công!",
+        "deleteSuccess": "Đã xóa ghi chú thành công!",
+        "addNote": "Thêm ghi chú",
+        "addNoteTitle": "Thêm ghi chú mới",
+        "editNoteTitle": "Sửa ghi chú",
+        "viewNoteTitle": "Chi tiết ghi chú",
+        "notePlaceholder": "Bạn đang nghĩ gì về đoạn này?...",
+        "deleteNote": "Xóa",
+        "editNote": "Chỉnh sửa",
+        "updateNote": "Cập nhật",
+        "saveNote": "Lưu ghi chú",
+        "confirmDeleteNote": "Bạn có chắc chắn muốn xóa ghi chú này không?",
+        "colorLabel": "Màu sắc:",
+        "emptyNote": "Không có nội dung ghi chú.",
+        "cancelBtn": "Hủy"
       }
     }
   },

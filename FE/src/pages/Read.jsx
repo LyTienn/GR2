@@ -12,6 +12,7 @@ import { debounce } from "lodash";
 import { useTranslation } from "react-i18next";
 import useReaderSettings from "@/hooks/useReaderSetting";
 import useBookReader from "@/hooks/useBookReader";
+import useChapterNotes from "@/hooks/useChapterNotes";
 import {
   Dialog,
   DialogContent,
@@ -37,14 +38,17 @@ export default function ReadBookPage() {
     readerSettings, updateSetting, currentTheme 
   } = useReaderSettings();
 
-  // Tự động đóng sidebar nếu mở trên điện thoại, mở trên Desktop
+  const noteProps = useChapterNotes(selectedChapter?.id, isAuthenticated, t);
+
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 768);
   const isUserPremium = user?.tier === "PREMIUM" || user?.role === "ADMIN";
   const isRestoring = useRef(false);
   const hasMarkedCompleted = useRef(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
+  
   const activeChapterRef = useRef(null);
-  const contentRef = useRef(null);
+  const contentRef = useRef(null); 
+  const textContentRef = useRef(null); 
 
   const saveProgress = useRef(
     debounce(async (bId, cId, scrollPercent) => {
@@ -121,6 +125,8 @@ export default function ReadBookPage() {
     const currentIndex = getCurrentChapterIndex();
     const isLastChapter = currentIndex === chapters.length - 1;
 
+    if (noteProps.selectionBox) noteProps.setSelectionBox(null);
+
     if (isLastChapter && scrolledPercent > 95) {
       markBookAsCompleted();
     } else {
@@ -139,7 +145,6 @@ export default function ReadBookPage() {
       return;
     }
     setSelectedChapter(ch);
-    // Tự động đóng mục lục trên mobile khi chọn xong chương
     if (window.innerWidth < 768) setSidebarOpen(false);
   };
 
@@ -171,16 +176,55 @@ export default function ReadBookPage() {
     return () => document.removeEventListener('fullscreenchange', handleFsChange);
   }, []);
 
+  const renderHighlightedText = (text, highlightsList) => {
+    if (!text) return null;
+    if (!highlightsList || highlightsList.length === 0) return text;
+
+    const sortedHighlights = [...highlightsList].sort((a, b) => a.start_index - b.start_index);
+    let lastIndex = 0;
+    const result = [];
+
+    sortedHighlights.forEach((hl, index) => {
+      if (hl.start_index >= lastIndex) {
+        result.push(text.slice(lastIndex, hl.start_index));
+        result.push(
+          <mark 
+            key={hl.id || index} 
+            onClick={() => { 
+                noteProps.setViewingNote(hl); 
+                noteProps.setNoteInput(hl.note_content || ""); 
+                noteProps.setSelectedColor(hl.color || "bg-yellow-300"); 
+                noteProps.setShowNoteModal(true); 
+            }}
+            className={`${hl.color || 'bg-yellow-300'} text-slate-900 cursor-pointer hover:opacity-80 transition-colors rounded-sm px-0.5`}
+          >
+            {text.slice(hl.start_index, hl.end_index)}
+          </mark>
+        );
+        lastIndex = hl.end_index;
+      }
+    });
+    result.push(text.slice(lastIndex));
+    return result;
+  };
+
   if (loading || !book) return <div className="min-h-screen bg-slate-50"><Header /><div className="container mx-auto p-4 flex justify-center"><Loader2 className="animate-spin text-blue-500" /></div></div>;
 
   const currentIndex = getCurrentChapterIndex();
   const themeClasses = currentTheme || { container: "bg-slate-50", paper: "bg-white", heading: "text-slate-900", text: "text-slate-700" };
   const safeSettings = readerSettings || { fontSize: 20, fontFamily: 'font-serif', theme: 'light' };
+  const normalizedContent = selectedChapter?.content?.replace(/\r\n/g, '\n');
+
+  const colorOptions = [
+    { value: "bg-yellow-300", label: "Yellow" },
+    { value: "bg-green-300", label: "Green" },
+    { value: "bg-purple-300", label: "Purple" },
+    { value: "bg-pink-300", label: "Pink" },
+  ]
 
   return (
     <div className={`flex h-screen overflow-hidden transition-colors duration-300 ${themeClasses.container} theme-${safeSettings.theme}`}>
       
-      {/* LỚP PHỦ OVERLAY TRÊN MOBILE (Bấm vào để đóng Sidebar) */}
       {sidebarOpen && (
         <div 
           className="fixed inset-0 bg-black/50 z-30 md:hidden transition-opacity"
@@ -188,7 +232,6 @@ export default function ReadBookPage() {
         />
       )}
 
-      {/* SIDEBAR MỤC LỤC */}
       <aside className={`absolute md:relative z-40 h-full border-r shrink-0 transition-all duration-300 ease-in-out flex flex-col 
         ${sidebarOpen ? 'w-[85%] sm:w-80 translate-x-0 shadow-2xl md:shadow-none' : '-translate-x-full md:translate-x-0 md:w-12'} 
         ${safeSettings.theme === 'dark' ? 'bg-slate-950 border-slate-800 text-slate-300' : 
@@ -249,7 +292,6 @@ export default function ReadBookPage() {
         )}
       </aside>
 
-      {/* KHU VỰC NỘI DUNG CHÍNH */}
       <main className="flex-1 flex flex-col min-w-0 relative">
         <div className={`h-14 border-b flex items-center px-2 sm:px-4 justify-between shadow-sm z-10 shrink-0 gap-2 sm:gap-4 transition-colors duration-300
           ${safeSettings.theme === 'dark' ? 'bg-slate-950 border-slate-800 text-slate-300' : 
@@ -257,7 +299,6 @@ export default function ReadBookPage() {
             'bg-white border-slate-200 text-slate-800'}`}
         >
           <div className="flex items-center gap-1 sm:gap-3 min-w-0 shrink">
-            {/* NÚT MENU DÀNH RIÊNG CHO MOBILE */}
             <Button 
               variant="ghost" 
               size="sm" 
@@ -276,7 +317,6 @@ export default function ReadBookPage() {
           </div>
           
           <div className="ml-auto flex items-center gap-1 sm:gap-2">
-            {/* NÚT VÀ MENU SETTINGS */}
             <div className="relative" ref={settingsRef}>
               <Button 
                 variant="ghost" 
@@ -300,24 +340,24 @@ export default function ReadBookPage() {
                   <div className="mb-4">
                     <label className="text-sm text-slate-600 mb-2 block">{t("layout.readpage.showSetting.fontSize")}: {safeSettings.fontSize}px</label>
                     <div className="flex items-center gap-3">
-                      <Button variant="outline" size="sm" onClick={() => updateSetting('fontSize', Math.max(14, safeSettings.fontSize - 2))}>A-</Button>
+                      <Button variant="outline" size="sm" onClick={() => updateSetting('fontSize', Math.max(14, safeSettings.fontSize - 2))} className="hover:bg-slate-100 hover:text-blue-600 hover:border-blue-300 transition-colors">A-</Button>
                       <input type="range" min="14" max="36" step="2" className="flex-1 cursor-pointer accent-blue-600" value={safeSettings.fontSize} onChange={(e) => updateSetting('fontSize', Number(e.target.value))} />
-                      <Button variant="outline" size="sm" onClick={() => updateSetting('fontSize', Math.min(36, safeSettings.fontSize + 2))}>A+</Button>
+                      <Button variant="outline" size="sm" onClick={() => updateSetting('fontSize', Math.min(36, safeSettings.fontSize + 2))} className="hover:bg-slate-100 hover:text-blue-600 hover:border-blue-300 transition-colors">A+</Button>
                     </div>
                   </div>
                   <div className="mb-4">
                     <label className="text-sm text-slate-600 mb-2 block">{t("layout.readpage.showSetting.fontStyle")}</label>
                     <div className="flex gap-2">
-                      <Button variant={safeSettings.fontFamily === 'font-serif' ? 'default' : 'outline'} size="sm" className="flex-1 font-serif" onClick={() => updateSetting('fontFamily', 'font-serif')}>Serif</Button>
-                      <Button variant={safeSettings.fontFamily === 'font-sans' ? 'default' : 'outline'} size="sm" className="flex-1 font-sans" onClick={() => updateSetting('fontFamily', 'font-sans')}>Sans</Button>
+                      <Button variant={safeSettings.fontFamily === 'font-serif' ? 'default' : 'outline'} size="sm" className={`flex-1 font-serif transition-colors ${safeSettings.fontFamily !== 'font-serif' && 'hover:bg-slate-100 hover:text-blue-600 hover:border-blue-300'}`} onClick={() => updateSetting('fontFamily', 'font-serif')}>Serif</Button>
+                      <Button variant={safeSettings.fontFamily === 'font-sans' ? 'default' : 'outline'} size="sm" className={`flex-1 font-sans transition-colors ${safeSettings.fontFamily !== 'font-sans' && 'hover:bg-slate-100 hover:text-blue-600 hover:border-blue-300'}`} onClick={() => updateSetting('fontFamily', 'font-sans')}>Sans</Button>
                     </div>
                   </div>
                   <div>
                     <label className="text-sm text-slate-600 mb-2 block">{t("layout.readpage.showSetting.bgColor")}</label>
                     <div className="flex gap-3">
-                      <button className={`w-8 h-8 rounded-full border-2 ${safeSettings.theme === 'light' ? 'border-blue-500 scale-110' : 'border-slate-200'} bg-white shadow-sm transition-transform`} onClick={() => updateSetting('theme', 'light')} title={t("layout.readpage.showSetting.lightBtn")}></button>
-                      <button className={`w-8 h-8 rounded-full border-2 ${safeSettings.theme === 'sepia' ? 'border-blue-500 scale-110' : 'border-[#e2d5b6]'} bg-[#f4ecd8] shadow-sm transition-transform`} onClick={() => updateSetting('theme', 'sepia')} title={t("layout.readpage.showSetting.sepiaBtn")}></button>
-                      <button className={`w-8 h-8 rounded-full border-2 ${safeSettings.theme === 'dark' ? 'border-blue-500 scale-110' : 'border-slate-700'} bg-slate-900 shadow-sm transition-transform`} onClick={() => updateSetting('theme', 'dark')} title={t("layout.readpage.showSetting.darkBtn")}></button>
+                      <button className={`w-8 h-8 rounded-full border-2 ${safeSettings.theme === 'light' ? 'border-blue-500 scale-110 shadow-md' : 'border-slate-200 hover:border-blue-400 hover:scale-110'} bg-white transition-all`} onClick={() => updateSetting('theme', 'light')} title={t("layout.readpage.showSetting.lightBtn")}></button>
+                      <button className={`w-8 h-8 rounded-full border-2 ${safeSettings.theme === 'sepia' ? 'border-blue-500 scale-110 shadow-md' : 'border-[#d6c5a5] hover:border-blue-400 hover:scale-110'} bg-[#f4ecd8] transition-all`} onClick={() => updateSetting('theme', 'sepia')} title={t("layout.readpage.showSetting.sepiaBtn")}></button>
+                      <button className={`w-8 h-8 rounded-full border-2 ${safeSettings.theme === 'dark' ? 'border-blue-500 scale-110 shadow-md' : 'border-slate-700 hover:border-blue-400 hover:scale-110'} bg-slate-900 transition-all`} onClick={() => updateSetting('theme', 'dark')} title={t("layout.readpage.showSetting.darkBtn")}></button>
                     </div>
                   </div>
                 </div>
@@ -347,7 +387,6 @@ export default function ReadBookPage() {
           onScroll={handleScroll}
           className={`flex-1 overflow-y-auto transition-colors duration-300 ${themeClasses.container} custom-scrollbar`}
         >
-          {/* TỐI ƯU PADDING ĐỂ CHỮ TRẢI RỘNG TRÊN MOBILE */}
           <div className="min-h-full w-full flex justify-center p-0 sm:p-6 md:p-10 lg:p-14">
             <div className={`w-full max-w-4xl shadow-sm border-x sm:border rounded-none sm:rounded-lg p-5 sm:p-10 md:p-12 h-fit transition-colors duration-300 ${themeClasses.paper}`}>
               {selectedChapter ? (
@@ -356,14 +395,28 @@ export default function ReadBookPage() {
                     <h2 className={`text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 border-b pb-4 leading-tight transition-colors duration-300 ${themeClasses.heading}`}>
                       {selectedChapter.title}
                     </h2>
-                    {/* Bỏ margin cứng mx-16 trên mobile */}
                     <div 
-                      className={`mx-0 md:mx-8 lg:mx-16 max-w-3xl whitespace-pre-line leading-relaxed text-justify transition-all duration-300 ${themeClasses.text} ${safeSettings.fontFamily}`}
+                      ref={textContentRef}
+                      className={`mx-0 md:mx-8 lg:mx-16 max-w-3xl whitespace-pre-wrap leading-relaxed text-justify transition-all duration-300 ${themeClasses.text} ${safeSettings.fontFamily}`}
                       style={{ fontSize: `${safeSettings.fontSize}px` }}
+                      onMouseUp={() => noteProps.handleTextSelection(textContentRef, normalizedContent)}
                     >
-                      {selectedChapter.content}
+                      {renderHighlightedText(normalizedContent, noteProps.highlights)}
                     </div>
-                    {/* Thanh Pagination ôm sát viền */}
+                    {noteProps.selectionBox && (
+                      <div 
+                        className="fixed z-50 animate-in fade-in zoom-in-95 duration-200"
+                        style={{ top: noteProps.selectionBox.top, left: noteProps.selectionBox.left, transform: 'translateX(-50%)' }}
+                      >
+                        <Button 
+                          size="sm" 
+                          className="bg-slate-900 text-white hover:bg-slate-800 shadow-xl rounded-full px-4 flex gap-2 items-center"
+                          onClick={() => noteProps.setShowNoteModal(true)}
+                        >
+                        {t("layout.readpage.note.addNote")}
+                        </Button>
+                      </div>
+                    )}
                     <div className={`sticky bottom-0 z-40 backdrop-blur-md -mx-5 sm:-mx-10 md:-mx-12 px-5 sm:px-10 md:px-12 py-3 border-t mt-8 transition-all
                       ${safeSettings.theme === 'dark' ? 'bg-slate-900/90 border-slate-800 **:text-slate-300 [&_button:hover]:bg-slate-800 [&_button:hover]:text-white' : 
                         safeSettings.theme === 'sepia' ? 'bg-[#f4ecd8]/90 border-[#e2d5b6] **:text-[#5b4636] [&_button:hover]:bg-[#dfd0b2]' : 
@@ -382,6 +435,87 @@ export default function ReadBookPage() {
           </div>
         </div>
       </main >
+
+      <Dialog open={noteProps.showNoteModal || noteProps.viewingNote !== null} onOpenChange={noteProps.closeModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {!noteProps.viewingNote 
+                ? t("layout.readpage.note.addNoteTitle") 
+                : noteProps.isEditingExistingNote 
+                  ? t("layout.readpage.note.editNoteTitle") 
+                  : t("layout.readpage.note.viewNoteTitle")
+              }
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="py-2 space-y-4">
+            {(!noteProps.viewingNote || noteProps.isEditingExistingNote) && (
+              <div className="flex gap-2 items-center mb-2">
+                <span className="text-sm text-slate-500 mr-2">{t("layout.readpage.note.colorLabel")}</span>
+                  {colorOptions.map((color) => (
+                    <button
+                      key={color.value}
+                      onClick={() => noteProps.setSelectedColor(color.value)}
+                      className={`w-6 h-6 rounded-full border-2 transition-transform ${color.value} ${noteProps.selectedColor === color.value ? 'border-slate-800 scale-125' : 'border-transparent hover:scale-110'}`}
+                    />
+                  ))}
+              </div>
+            )}
+            <blockquote className="border-l-4 border-yellow-400 pl-3 italic text-slate-600 bg-slate-50 py-2 pr-2 rounded-r-md text-sm line-clamp-3">
+              "{noteProps.viewingNote?.selected_text || noteProps.currentNoteConfig?.selectedText || ''}"
+            </blockquote>
+            
+            {noteProps.viewingNote && !noteProps.isEditingExistingNote ? (
+              <div className="bg-blue-50/50 p-3 rounded-md text-slate-800 text-sm whitespace-pre-line border border-blue-100 min-h-[60px]">
+                {noteProps.viewingNote.note_content || <span className="text-slate-400 italic">{t("layout.readpage.note.emptyNote")}</span>}
+              </div>
+            ) : (
+              <textarea
+                autoFocus
+                placeholder={t("layout.readpage.note.notePlaceholder")}
+                className="w-full min-h-[100px] p-3 rounded-md border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm resize-none"
+                value={noteProps.noteInput}
+                onChange={(e) => noteProps.setNoteInput(e.target.value)}
+              />
+            )}
+          </div>
+
+          <DialogFooter className="flex sm:justify-between items-center w-full">
+            <div>
+              {noteProps.viewingNote && !noteProps.isEditingExistingNote && (
+                <Button variant="destructive" size="sm" onClick={noteProps.handleDeleteNote}>
+                  {t("layout.readpage.note.deleteNote")}
+                </Button>
+              )}
+            </div>
+
+            <div className="flex gap-2">
+              {noteProps.viewingNote && !noteProps.isEditingExistingNote ? (
+                <Button onClick={() => {
+                  noteProps.setNoteInput(noteProps.viewingNote.note_content || "");
+                  noteProps.setIsEditingExistingNote(true);
+                }}>
+                  {t("layout.readpage.note.editNote")}
+                </Button>
+              ) : noteProps.viewingNote && noteProps.isEditingExistingNote ? (
+                <>
+                  <Button variant="outline" onClick={() => noteProps.setIsEditingExistingNote(false)}>
+                    {t("layout.readpage.note.cancelBtn")}
+                  </Button>
+                  <Button onClick={noteProps.handleUpdateNote}>
+                    {t("layout.readpage.note.updateNote")}
+                  </Button>
+                </>
+              ) : (
+                <Button onClick={noteProps.handleSaveNote} disabled={!noteProps.noteInput.trim()}>
+                  {t("layout.readpage.note.saveNote")}
+                </Button>
+              )}
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* MODAL NÂNG CẤP PREMIUM */}
       <Dialog open={showUpgradeModal} onOpenChange={setShowUpgradeModal}>

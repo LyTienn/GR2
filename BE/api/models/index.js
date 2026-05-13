@@ -16,6 +16,7 @@ import Task from "./task-model.js";
 import Translation from "./translation-model.js";
 import SystemSettings from "./system-settings-model.js";
 import CommentReaction from "./comment-reaction-model.js";
+import ChapterNote from "./chapterNote-model.js";
 
 // Định nghĩa tất cả associations tại ĐÂY
 const setupAssociations = () => {
@@ -102,6 +103,14 @@ const setupAssociations = () => {
   // Comment - CommentReaction
   Comment.hasMany(CommentReaction, { foreignKey: "comment_id", as: "reactions", onDelete: 'CASCADE' });
   CommentReaction.belongsTo(Comment, { foreignKey: "comment_id", as: "comment" });
+
+  // User - ChapterNote
+  User.hasMany(ChapterNote, { foreignKey: "user_id", as: "chapterNotes", onDelete: 'CASCADE' });
+  ChapterNote.belongsTo(User, { foreignKey: "user_id", as: "user" });
+
+  // Chapter - ChapterNote
+  Chapter.hasMany(ChapterNote, { foreignKey: "chapter_id", as: "notes", onDelete: 'CASCADE' });
+  ChapterNote.belongsTo(Chapter, { foreignKey: "chapter_id", as: "chapter" });
 };
 
 // Gọi setup associations
@@ -124,6 +133,7 @@ export {
   Task,
   Translation,
   CommentReaction,
+  ChapterNote,
 };
 
 export default {
@@ -142,4 +152,5 @@ export default {
   Task,
   Translation,
   CommentReaction,
+  ChapterNote,
 };
