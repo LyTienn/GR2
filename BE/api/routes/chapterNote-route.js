@@ -1,7 +1,8 @@
 import { Router } from "express";
 import { 
     createNote, 
-    getNotesByChapter, 
+    getNotesByChapter,
+    getNotesByBook, 
     updateNote, 
     deleteNote 
 } from '../controllers/note-controller.js';
@@ -9,6 +10,7 @@ import { authenticate } from "../middlewares/auth-middleware.js";
 
 const router = Router();
 
+router.get("/book/:bookId", authenticate, getNotesByBook);
 router.get("/chapter/:chapterId", authenticate, getNotesByChapter);
 router.post("/", authenticate, createNote);
 router.put("/:id", authenticate, updateNote);

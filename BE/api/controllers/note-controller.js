@@ -2,6 +2,32 @@ import { ChapterNote, Chapter } from "../models/index.js";
 import sequelize from "../config/db-config.js";
 import { Op } from "sequelize";
 
+export const getNotesByBook = async (req, res) => {
+    try {
+        const { bookId } = req.params;
+        const user_id = req.user?.id || req.user?.userId;
+        if (!user_id) {
+            return res.status(401).json({ success: false, message: "Unauthorized" });
+        }
+        const notes = await ChapterNote.findAll({
+            where: {
+                user_id
+            },
+            include: [{
+                model: Chapter,
+                as: "chapter",
+                where: { book_id: bookId },
+                attributes: ['id','title']
+            }],
+            order: [['createdAt', 'ASC']]
+        });
+        res.json({ success: true, data: notes });
+    } catch (error) {
+        console.error("❌ LỖI GET NOTES BY BOOK:", error);
+        res.status(500).json({ success: false, message: "Lỗi lấy ghi chú theo sách", errorCode: "FETCH_NOTES_BY_BOOK_FAILED" });
+    }
+};
+
 export const getNotesByChapter = async (req, res) => {
     try {
         const { chapterId } = req.params;
@@ -25,7 +51,7 @@ export const getNotesByChapter = async (req, res) => {
 
 export const createNote = async (req, res) => {
     try {
-        const { chapter_id, start_index, end_index, selected_text, note_content, color } = req.body;
+        const { chapter_id, start_index, end_index, selected_text, note_content } = req.body;
         const user_id = req.user?.id || req.user?.userId;
 
         // Validate
@@ -45,8 +71,7 @@ export const createNote = async (req, res) => {
             start_index,
             end_index,
             selected_text,
-            note_content,
-            color
+            note_content
         });
 
         res.status(201).json({ success: true, data: newNote, message: "Tạo ghi chú thành công" });
@@ -58,7 +83,7 @@ export const createNote = async (req, res) => {
 export const updateNote = async (req, res) => {
     try {
         const { id } = req.params;
-        const { note_content, color } = req.body;
+        const { note_content } = req.body;
         const user_id = req.user?.id || req.user?.userId;
 
         const note = await ChapterNote.findByPk(id);
@@ -72,7 +97,7 @@ export const updateNote = async (req, res) => {
         }
 
         await note.update({
-            note_content, color
+            note_content
         });
 
         res.json({ success: true, data: note, message: "Cập nhật ghi chú thành công" });

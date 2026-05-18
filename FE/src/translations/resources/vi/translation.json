@@ -140,10 +140,15 @@
       "loginToAssess": "Vui lòng đăng nhập để đánh giá"
     },
     "readpage": {
+      "leftSidebar": {
+        "collapse": "Thu gọn",
+        "expand": "Mở rộng"
+      },
       "tableOfContents": "Mục lục",
       "fullscreenOn": "Toàn màn hình",
       "fullscreenOff": "Thoát toàn màn hình",
       "showSetting": {
+        "setting": "Cài đặt",
         "label": "Tùy chỉnh giao diện",
         "title": "Giao diện đọc",
         "fontSize": "Cỡ chữ",
@@ -163,6 +168,8 @@
         "upgradeBtn": "Nâng cấp ngay"
       },
       "note": {
+        "title": "Ghi chú của bạn",
+        "label": "Ghi chú",
         "saveSuccess": "Đã lưu ghi chú thành công!",
         "updateSuccess": "Đã cập nhật ghi chú thành công!",
         "deleteSuccess": "Đã xóa ghi chú thành công!",

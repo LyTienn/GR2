@@ -24,7 +24,7 @@ import CommentsModeration from './pages/admin/CommentsModeration';
 import Settings from './pages/admin/Settings';
 
 const HomePage = lazy(() => import('./pages/HomePage'));
-const Read = lazy(() => import('./pages/Read'));
+const Read = lazy(() => import('./pages/read/Read'));
 const BookSection = lazy(() => import('./pages/BookSection'));
 const BookShelf = lazy(() => import('./pages/BookShelf'));
 const Profile = lazy(() => import('./pages/Profile'));

@@ -31,14 +31,9 @@ const ChapterNote = sequelize.define("ChapterNote", {
       type: DataTypes.TEXT, 
       allowNull: true 
     },
-    color: {
-      type: DataTypes.STRING,
-      defaultValue: "bg-yellow-300",
-      allowNull: false
-    }
 }, {
     tableName: "ChapterNotes",
-    timestamps: true, // Tự động tạo createdAt, updatedAt
+    timestamps: true,
 });
 
 export default ChapterNote;

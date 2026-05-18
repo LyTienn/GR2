@@ -140,10 +140,15 @@
       "loginToAssess": "Please log in to leave a review"
     },
     "readpage": {
+      "leftSidebar": {
+        "collapse": "Collapse",
+        "expand": "Expand"
+      },
       "tableOfContents": "Chapter List",
       "fullscreenOn": "Fullscreen",
       "fullscreenOff": "Exit Fullscreen",
       "showSetting": {
+        "setting": "Setting",
         "label": "Customize Interface",
         "title": "Reading Settings",
         "fontSize": "Font Size",
@@ -163,6 +168,8 @@
         "upgradeBtn": "Upgrade Now"
       },
       "note": {
+        "title": "Your Notes",
+        "label": "Note",
         "saveSuccess": "Note saved successfully!",
         "updateSuccess": "Note updated successfully!",
         "deleteSuccess": "Note deleted successfully!",
