@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import { User, Lock, Trash2, Save, Loader2, AlertTriangle } from "lucide-react";
 import Header from "@/components/HeaderBar";
@@ -23,6 +24,7 @@ import AuthService from "@/service/AuthService";
 // import { setUser } from "@/store/Auth/authSlice";
 
 export default function ProfilePage() {
+  const { t } = useTranslation();
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -78,11 +80,11 @@ export default function ProfilePage() {
           });
         }
         // dispatch(fetchUserProfile());
-        toast.success("Cập nhật hồ sơ thành công");
+        toast.success(t("toasts.success.updateProfileSuccess"));
       }
     } catch (error) {
       console.error("Lỗi chi tiết:", error);
-      toast.error(error.response?.data?.message || "Lỗi cập nhật hồ sơ");
+      toast.error(error.response?.data?.message || t("toasts.error.updateProfileError"));
     } finally {
       setLoadingProfile(false);
     }
@@ -92,11 +94,11 @@ export default function ProfilePage() {
     e.preventDefault();
 
     if (passData.newPassword !== passData.confirmPassword) {
-      toast.error("Mật khẩu xác nhận không khớp");
+      toast.error(t("toasts.error.confirmPassword"));
       return;
     }
     if (passData.newPassword.length < 6) {
-      toast.error("Mật khẩu mới phải có ít nhất 6 ký tự");
+      toast.error(t("toasts.error.passwordTooShort"));
       return;
     }
 
@@ -107,10 +109,10 @@ export default function ProfilePage() {
         newPassword: passData.newPassword
       });
 
-      toast.success("Đổi mật khẩu thành công");
+      toast.success(t("toasts.success.changePasswordSuccess"));
       setPassData({ currentPassword: "", newPassword: "", confirmPassword: "" });
     } catch (error) {
-      toast.error(error.response?.data?.message || "Mật khẩu hiện tại không đúng");
+      toast.error(error.response?.data?.message || t("toasts.error.currentPasswordWrong"));
     } finally {
       setLoadingPass(false);
     }
@@ -118,7 +120,7 @@ export default function ProfilePage() {
 
   const handleDeleteAccount = async () => {
     if (!deletePassword) {
-      toast.warn("Vui lòng nhập mật khẩu để xác nhận");
+      toast.warn(t("toasts.warn.missingFields"));
       return;
     }
 
@@ -128,11 +130,11 @@ export default function ProfilePage() {
       });
 
       if (res.success || res.data?.success) {
-        toast.success("Tài khoản đã được xóa. Hẹn gặp lại!");
+        toast.success(t("toasts.success.deleteAccountSuccess"));
         window.location.href = "/login";
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Mật khẩu không đúng hoặc lỗi server");
+      toast.error(error.response?.data?.message || t("toasts.error.deleteAccountError"));
     }
   };
 
@@ -156,32 +158,32 @@ export default function ProfilePage() {
             {/* Tiêu đề trang */}
             <div>
               <h1 className="text-3xl font-bold flex items-center gap-2">
-                <User className="h-8 w-8" /> Quản lý tài khoản
+                <User className="h-8 w-8" /> {t("layout.profile.title")}
               </h1>
               <p className="text-muted-foreground mt-1">
-                Cập nhật thông tin cá nhân và bảo mật
+                {t("layout.profile.subtitle")}
               </p>
             </div>
 
             {/* --- FORM 1: THÔNG TIN CÁ NHÂN --- */}
             <Card>
               <CardHeader>
-                <CardTitle>Thông tin cá nhân</CardTitle>
-                <CardDescription>Thông tin hiển thị công khai của bạn</CardDescription>
+                <CardTitle>{t("layout.profile.personalInfo.cardTitle")}</CardTitle>
+                <CardDescription>{t("layout.profile.personalInfo.cardDescription")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleUpdateProfile} className="space-y-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="fullName">Họ và tên</Label>
+                    <Label htmlFor="fullName">{t("layout.profile.personalInfo.fullNameLabel")}</Label>
                     <Input
                       id="fullName"
                       value={profileData.fullName}
                       onChange={(e) => setProfileData({ ...profileData, fullName: e.target.value })}
-                      placeholder="Tên hiển thị"
+                      placeholder={t("layout.profile.personalInfo.fullNamePlaceholder")}
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email">{t("layout.profile.personalInfo.emailLabel")}</Label>
                     <Input
                       id="email"
                       type="email"
@@ -192,7 +194,7 @@ export default function ProfilePage() {
                   <div className="flex justify-end">
                     <Button type="submit" disabled={loadingProfile} className="hover:bg-gray-100">
                       {loadingProfile ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                      Lưu thay đổi
+                      {t("layout.profile.personalInfo.saveButton")}
                     </Button>
                   </div>
                 </form>
@@ -203,14 +205,14 @@ export default function ProfilePage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Lock className="h-5 w-5" /> Đổi mật khẩu
+                  <Lock className="h-5 w-5" /> {t("layout.profile.changePassword.cardTitle")}
                 </CardTitle>
-                <CardDescription>Bảo vệ tài khoản bằng mật khẩu mạnh</CardDescription>
+                <CardDescription>{t("layout.profile.changePassword.cardDescription")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleChangePassword} className="space-y-4">
                   <div className="grid gap-2">
-                    <Label>Mật khẩu hiện tại</Label>
+                    <Label>{t("layout.profile.changePassword.currentPasswordLabel")}</Label>
                     <Input
                       type="password"
                       value={passData.currentPassword}
@@ -219,16 +221,16 @@ export default function ProfilePage() {
                   </div>
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="grid gap-2">
-                      <Label>Mật khẩu mới</Label>
+                      <Label>{t("layout.profile.changePassword.newPasswordLabel")}</Label>
                       <Input
                         type="password"
                         value={passData.newPassword}
                         onChange={(e) => setPassData({ ...passData, newPassword: e.target.value })}
-                        placeholder="Min 6 ký tự"
+                        placeholder={t("layout.profile.changePassword.newPasswordPlaceholder")}
                       />
                     </div>
                     <div className="grid gap-2">
-                      <Label>Xác nhận mật khẩu</Label>
+                      <Label>{t("layout.profile.changePassword.confirmPasswordLabel")}</Label>
                       <Input
                         type="password"
                         value={passData.confirmPassword}
@@ -238,7 +240,7 @@ export default function ProfilePage() {
                   </div>
                   <div className="flex justify-end">
                     <Button type="submit" variant="outline" disabled={loadingPass} className="hover:bg-gray-100">
-                      Đổi mật khẩu
+                      {t("layout.profile.changePassword.submitButton")}
                     </Button>
                   </div>
                 </form>
@@ -249,38 +251,38 @@ export default function ProfilePage() {
             <Card className="border-red-200 bg-red-50/50 dark:bg-red-950/20">
               <CardHeader>
                 <CardTitle className="text-red-600 flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5" /> Vùng nguy hiểm
+                  <AlertTriangle className="h-5 w-5" /> {t("layout.profile.deleteAccount.cardTitle")}
                 </CardTitle>
                 <CardDescription className="text-red-600/80">
-                  Hành động này không thể hoàn tác
+                  {t("layout.profile.deleteAccount.cardDescription")}
                 </CardDescription>
               </CardHeader>
               <CardContent className="text-red-600">
                 <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
                   <DialogTrigger asChild>
                     <Button variant="destructive" className="w-full sm:w-auto hover:bg-gray-200">
-                      <Trash2 className="mr-2 h-4 w-4 text-red-600" /> Xóa tài khoản vĩnh viễn
+                      <Trash2 className="mr-2 h-4 w-4 text-red-600" /> {t("layout.profile.deleteAccount.deleteButton")}
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>Xác nhận xóa tài khoản?</DialogTitle>
+                      <DialogTitle>{t("layout.profile.deleteAccount.dialogTitle")}</DialogTitle>
                       <DialogDescription>
-                        Nhập mật khẩu của bạn để xác nhận hành động này. Dữ liệu sẽ mất vĩnh viễn.
+                        {t("layout.profile.deleteAccount.dialogDescription")}
                       </DialogDescription>
                     </DialogHeader>
                     <div className="py-4">
                       <Input
                         type="password"
-                        placeholder="Nhập mật khẩu của bạn"
+                        placeholder={t("layout.profile.deleteAccount.passwordPlaceholder")}
                         value={deletePassword}
                         onChange={(e) => setDeletePassword(e.target.value)}
                       />
                     </div>
                     <DialogFooter>
-                      <Button variant="outline" className="hover:bg-gray-200" onClick={() => setDeleteDialogOpen(false)}>Hủy</Button>
+                      <Button variant="outline" className="hover:bg-gray-200" onClick={() => setDeleteDialogOpen(false)}>{t("layout.profile.deleteAccount.cancelButton")}</Button>
                       <Button variant="destructive" className="hover:bg-gray-200" onClick={handleDeleteAccount}>
-                        Xác nhận xóa
+                        {t("layout.profile.deleteAccount.confirmButton")}
                       </Button>
                     </DialogFooter>
                   </DialogContent>

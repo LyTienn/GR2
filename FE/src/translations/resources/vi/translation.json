@@ -81,7 +81,31 @@
       "registerBtn": "Tạo tài khoản miễn phí"
     },
     "footer": {
-      "title_description": "Nền tảng đọc sách số thông minh"
+      "title_description": "Nền tảng đọc sách số thông minh",
+      "discover": "Khám phá",
+      "discoverItems": {
+        "search": "Tìm kiếm sách",
+        "genre": "Thể loại",
+        "author": "Tác giả"
+      },
+      "account": "Tài khoản",
+      "accountItems": {
+        "login": "Đăng nhập",
+        "register": "Đăng ký",
+        "membership": "Gói Premium"
+      },
+      "newsletter": {
+        "title": "Nhận thông báo sách mới",
+        "emailLabel": "Email của bạn",
+        "emailPlaceholder": "Nhập email của bạn",
+        "submitBtn": "Đăng ký",
+        "submitting": "Đang gửi...",
+        "description": "Nhận thông báo về sách mới, ưu đãi và tin tức từ Lybrary.",
+        "successMsg": "Đăng ký thành công! Hãy kiểm tra email của bạn.",
+        "invalidEmail": "Vui lòng nhập email hợp lệ.",
+        "errorMsg": "Đăng ký thất bại. Vui lòng thử lại."
+      },
+      "copyright": "© 2026 Lybrary. All rights reserved."
     },
     "searchpage": {
       "sidebar": {
@@ -187,6 +211,57 @@
         "emptyNote": "Không có nội dung ghi chú.",
         "cancelBtn": "Hủy"
       }
+    },
+    "bookshelf": {
+      "title": "Tủ sách của tôi",
+      "emptyMessage": "Tủ sách của bạn đang trống",
+      "tabs": {
+        "reading": "Đang đọc",
+        "favorite": "Yêu thích"
+      },
+      "loading": "Đang tải...",
+      "emptyStates": {
+        "reading": "Bạn chưa thêm sách nào vào danh sách đang đọc",
+        "favorite": "Bạn chưa có cuốn sách yêu thích nào"
+      }
+    },
+    "accountSidebar": {
+      "menuItems": {
+        "profile": "Quản lý tài khoản",
+        "bookshelf": "Tủ sách cá nhân",
+        "transactions": "Lịch sử giao dịch"
+      }
+    },
+    "profile": {
+      "title": "Quản lý tài khoản",
+      "subtitle": "Cập nhật thông tin cá nhân và bảo mật",
+      "personalInfo": {
+        "cardTitle": "Thông tin cá nhân",
+        "cardDescription": "Thông tin hiển thị công khai của bạn",
+        "fullNameLabel": "Họ và tên",
+        "fullNamePlaceholder": "Tên hiển thị",
+        "emailLabel": "Email",
+        "saveButton": "Lưu thay đổi"
+      },
+      "changePassword": {
+        "cardTitle": "Đổi mật khẩu",
+        "cardDescription": "Bảo vệ tài khoản bằng mật khẩu mạnh",
+        "currentPasswordLabel": "Mật khẩu hiện tại",
+        "newPasswordLabel": "Mật khẩu mới",
+        "newPasswordPlaceholder": "Min 6 ký tự",
+        "confirmPasswordLabel": "Xác nhận mật khẩu",
+        "submitButton": "Đổi mật khẩu"
+      },
+      "deleteAccount": {
+        "cardTitle": "Vùng nguy hiểm",
+        "cardDescription": "Hành động này không thể hoàn tác",
+        "deleteButton": "Xóa tài khoản vĩnh viễn",
+        "dialogTitle": "Xác nhận xóa tài khoản?",
+        "dialogDescription": "Nhập mật khẩu của bạn để xác nhận hành động này. Dữ liệu sẽ mất vĩnh viễn.",
+        "passwordPlaceholder": "Nhập mật khẩu của bạn",
+        "cancelButton": "Hủy",
+        "confirmButton": "Xác nhận xóa"
+      }
     }
   },
   "components": {
@@ -234,17 +309,25 @@
     "success": {
       "loginSuccess": "Đăng nhập thành công. Chào mừng bạn quay trở lại!",
       "logoutSuccess": "Đăng xuất thành công!",
-      "registerSuccess": "Đăng ký thành công. Vui lòng đăng nhập."
+      "registerSuccess": "Đăng ký thành công. Vui lòng đăng nhập.",
+      "updateProfileSuccess": "Cập nhật hồ sơ thành công",
+      "changePasswordSuccess": "Đổi mật khẩu thành công",
+      "deleteAccountSuccess": "Tài khoản đã được xóa. Hẹn gặp lại!"
     },
     "error": {
       "confirmPassword": "Mật khẩu xác nhận không khớp",
       "authenticatedToRead": "Bạn cần đăng nhập để đọc sách",
       "saveProgress": "Lỗi lưu tiến độ: ",
       "fullScreenFailed": "Không thể bật toàn màn hình",
-      "loadBookData": "Lỗi khi tải dữ liệu sách."
+      "loadBookData": "Lỗi khi tải dữ liệu sách.",
+      "updateProfileError": "Lỗi cập nhật hồ sơ",
+      "passwordTooShort": "Mật khẩu mới phải có ít nhất 6 ký tự",
+      "currentPasswordWrong": "Mật khẩu hiện tại không đúng",
+      "deleteAccountError": "Mật khẩu không đúng hoặc lỗi server"
     },
     "warn": {
-      "missingFields": "Vui lòng điền đầy đủ thông tin"    },
+      "missingFields": "Vui lòng điền đầy đủ thông tin"
+    },
     "info": {
       "continueReading": "Đọc tiếp: "
     }

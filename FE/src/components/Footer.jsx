@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { BookOpen } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
     const { t } = useTranslation();
-    const navigate = useNavigate();
     const [email, setEmail] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [newsletterMsg, setNewsletterMsg] = useState("");
@@ -14,7 +13,7 @@ const Footer = () => {
       return new Promise((resolve, reject) => {
         setTimeout(() => {
           if (email.endsWith("@gmail.com")) resolve({ success: true });
-          else reject(new Error("Chỉ chấp nhận email @gmail.com (demo)"));
+          else reject(new Error(t("layout.footer.newsletter.errorMsg")));
         }, 1000);
       });
     }
@@ -23,16 +22,16 @@ const Footer = () => {
       event.preventDefault();
       setNewsletterMsg("");
       if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-        setNewsletterMsg("Vui lòng nhập email hợp lệ.");
+        setNewsletterMsg(t("layout.footer.newsletter.invalidEmail"));
         return;
       }
       setIsSubmitting(true);
       try {
         await subscribeToNewsletter(email);
-        setNewsletterMsg("Đăng ký thành công! Hãy kiểm tra email của bạn.");
+        setNewsletterMsg(t("layout.footer.newsletter.successMsg"));
         setEmail("");
       } catch (err) {
-        setNewsletterMsg(err.message || "Đăng ký thất bại. Vui lòng thử lại.");
+        setNewsletterMsg(err.message || t("layout.footer.newsletter.errorMsg"));
       } finally {
         setIsSubmitting(false);
       }
@@ -66,54 +65,54 @@ const Footer = () => {
             </div>
             {/* Khám phá */}
             <div>
-              <h4 className="font-semibold mb-4">Khám phá</h4>
+              <h4 className="font-semibold mb-4">{t("layout.footer.discover")}</h4>
               <ul className="space-y-2 text-sm text-slate-400">
-                <li><Link to="/search" className="hover:text-white transition-colors">Tìm kiếm sách</Link></li>
-                <li><Link to="/search" className="hover:text-white transition-colors">Thể loại</Link></li>
-                <li><Link to="/search" className="hover:text-white transition-colors">Tác giả</Link></li>
+                <li><Link to="/search" className="hover:text-white transition-colors">{t("layout.footer.discoverItems.search")}</Link></li>
+                <li><Link to="/search" className="hover:text-white transition-colors">{t("layout.footer.discoverItems.genre")}</Link></li>
+                <li><Link to="/search" className="hover:text-white transition-colors">{t("layout.footer.discoverItems.author")}</Link></li>
               </ul>
             </div>
             {/* Tài khoản */}
             <div>
-              <h4 className="font-semibold mb-4">Tài khoản</h4>
+              <h4 className="font-semibold mb-4">{t("layout.footer.account")}</h4>
               <ul className="space-y-2 text-sm text-slate-400">
-                <li><Link to="/login" className="hover:text-white transition-colors">Đăng nhập</Link></li>
-                <li><Link to="/register" className="hover:text-white transition-colors">Đăng ký</Link></li>
-                <li><Link to="/membership" className="hover:text-white transition-colors">Gói Premium</Link></li>
+                <li><Link to="/login" className="hover:text-white transition-colors">{t("layout.footer.accountItems.login")}</Link></li>
+                <li><Link to="/register" className="hover:text-white transition-colors">{t("layout.footer.accountItems.register")}</Link></li>
+                <li><Link to="/membership" className="hover:text-white transition-colors">{t("layout.footer.accountItems.membership")}</Link></li>
               </ul>
             </div>
             {/* Đăng ký nhận tin */}
             <div>
-              <h4 className="font-semibold mb-4">Nhận thông báo sách mới</h4>
+              <h4 className="font-semibold mb-4">{t("layout.footer.newsletter.title")}</h4>
               <form className="flex flex-col gap-2" onSubmit={handleSubscribe}>
-                <label htmlFor="newsletter-email" className="text-sm font-medium text-slate-200">Email của bạn</label>
+                <label htmlFor="newsletter-email" className="text-sm font-medium text-slate-200">{t("layout.footer.newsletter.emailLabel")}</label>
                 <input
                   id="newsletter-email"
                   type="email"
-                  placeholder="Nhập email của bạn"
+                  placeholder={t("layout.footer.newsletter.emailPlaceholder")}
                   className="rounded px-3 py-2 text-white bg-slate-800 placeholder:text-slate-400"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   disabled={isSubmitting}
                   required
-                  aria-label="Email của bạn"
+                  aria-label={t("layout.footer.newsletter.emailLabel")}
                 />
                 <button
                   type="submit"
                   className="bg-blue-500 hover:bg-blue-600 text-white rounded px-3 py-2 disabled:opacity-60"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? "Đang gửi..." : "Đăng ký"}
+                  {isSubmitting ? t("layout.footer.newsletter.submitting") : t("layout.footer.newsletter.submitBtn")}
                 </button>
                 {newsletterMsg && (
-                  <div className="text-xs mt-1" style={{ color: newsletterMsg.includes("thành công") ? '#22c55e' : '#f87171' }}>{newsletterMsg}</div>
+                  <div className="text-xs mt-1" style={{ color: newsletterMsg.includes("thành công") || newsletterMsg.includes("Successfully") ? '#22c55e' : '#f87171' }}>{newsletterMsg}</div>
                 )}
               </form>
-              <p className="text-xs text-slate-400 mt-2">Nhận thông báo về sách mới, ưu đãi và tin tức từ Thư Viện Sách.</p>
+              <p className="text-xs text-slate-400 mt-2">{t("layout.footer.newsletter.description")}</p>
             </div>
           </div>
           <div className="border-t border-slate-800 pt-8 text-center text-sm text-slate-500">
-            <p>© 2026 Lybrary. All rights reserved.</p>
+            <p>{t("layout.footer.copyright")}</p>
           </div>
         </div>
       </footer>

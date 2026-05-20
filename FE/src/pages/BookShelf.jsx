@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 import { Library, BookOpen, Heart } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/HeaderBar";
@@ -10,6 +11,7 @@ import { firstValueFrom } from "rxjs";
 import HttpClient from "@/service/HttpClient";
 
 const BookShelf = () => {
+    const { t } = useTranslation();
     const { isAuthenticated } = useSelector((state) => state.auth);
     const navigate = useNavigate();
     const [favorite, setFavorite] = useState([]);
@@ -60,7 +62,7 @@ const BookShelf = () => {
     if (!isAuthenticated) return null;
     const totalBooks = favorite.length + reading.length;
     const BookGrid = ({ books, emptyMessage }) => {
-        if (loading) return <div className="text-center py-12">Đang tải...</div>;
+        if (loading) return <div className="text-center py-12">{t("layout.bookshelf.loading")}</div>;
         
         if (!books || books.length === 0) {
             return (
@@ -91,11 +93,11 @@ const BookShelf = () => {
                         <div className="mb-8">
                             <div className="flex items-center gap-3 mb-2">
                                 <Library className="h-8 w-8 text-primary" />
-                                <h1 className="text-3xl font-bold">Tủ sách của tôi</h1>
+                                <h1 className="text-3xl font-bold">{t("layout.bookshelf.title")}</h1>
                             </div>
                             {favorite.length === 0 && reading.length === 0 && (
                                 <p className="text-muted-foreground text-lg">
-                                    Tủ sách của bạn đang trống
+                                    {t("layout.bookshelf.emptyMessage")}
                                 </p>
                             )}
                         </div>
@@ -103,20 +105,20 @@ const BookShelf = () => {
                             <TabsList className="grid w-full max-w-xs grid-cols-2 mb-8 gap-2">
                                 <TabsTrigger value="reading" className="flex items-center gap-2 hover:bg-gray-100">
                                     <BookOpen className="h-4 w-4" />
-                                    Đang đọc ({reading.length})
+                                    {t("layout.bookshelf.tabs.reading")} ({reading.length})
                                 </TabsTrigger>
                                 <TabsTrigger value="favorite" className="flex items-center gap-2 hover:bg-gray-100">
                                     <Heart className="h-4 w-4" />
-                                    Yêu thích ({favorite.length})
+                                    {t("layout.bookshelf.tabs.favorite")} ({favorite.length})
                                 </TabsTrigger>
                             </TabsList>
 
                             <TabsContent value="reading" className="pb-20 focus-visible:ring-0 focus-visible:outline-none">
-                                <BookGrid books={reading} emptyMessage="Bạn chưa thêm sách nào vào danh sách đang đọc" />
+                                <BookGrid books={reading} emptyMessage={t("layout.bookshelf.emptyStates.reading")} />
                             </TabsContent>
 
                             <TabsContent value="favorite" className="pb-20 focus-visible:ring-0 focus-visible:outline-none">
-                                <BookGrid books={favorite} emptyMessage="Bạn chưa có cuốn sách yêu thích nào" />
+                                <BookGrid books={favorite} emptyMessage={t("layout.bookshelf.emptyStates.favorite")} />
                             </TabsContent>
                         </Tabs>
 

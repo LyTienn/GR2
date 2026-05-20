@@ -111,7 +111,7 @@ const HeaderBar = () => {
 
         {/* NAV/TRANS - DESKTOP */}
         <nav className="hidden md:flex items-center gap-2">
-            <LanguageSwitcher className="flex items-center bg-slate-200/60 p-1 rounded-lg border border-slate-300/50 mr-4" />
+          <LanguageSwitcher className="flex items-center shrink-0 bg-slate-200/60 p-1 rounded-lg border border-slate-300/50 mr-4" />
           <Button variant="ghost" onClick={() => navigate('/search')} className={`transition-colors ${
               location.pathname === '/search' 
                 ? "bg-slate-100 text-slate-600 font-semibold" 
@@ -125,7 +125,7 @@ const HeaderBar = () => {
             <Button
               variant="ghost"
               onClick={() => navigate('/membership')}
-              className="text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+              className="shrink-0 min-w-fit text-amber-600 hover:text-amber-700 hover:bg-amber-50"
             >
               <Zap className="h-4 w-4 mr-2" />
               Premium
@@ -139,7 +139,7 @@ const HeaderBar = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => navigate('/membership')}
-                  className="hidden sm:flex border-amber-500 text-amber-700 bg-amber-50 hover:bg-amber-100"
+                  className="hidden sm:flex shrink-0 min-w-fit border-amber-500 text-amber-700 bg-amber-50 hover:bg-amber-100"
                 >
                   <Crown className='h-4 w-4 mr-2 text-amber-600' />
                   {getSubscriptionText()}
@@ -148,7 +148,7 @@ const HeaderBar = () => {
 
               {user?.role === "admin" && (
                 <Link to="/admin/users">
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" className="shrink-0 min-w-fit">
                     <LayoutDashboard className="h-4 w-4 mr-2" />
                     Quản trị
                   </Button>
@@ -157,8 +157,8 @@ const HeaderBar = () => {
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-9 pl-2 pr-2 hover:bg-slate-100 flex items-center gap-2 border border-transparent hover:border-slate-200">
-                    <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600">
+                  <Button variant="ghost" size="sm" className="shrink-0 h-9 pl-2 pr-2 hover:bg-slate-100 flex items-center gap-2 border border-transparent hover:border-slate-200">
+                    <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 shrink-0">
                       <User className="h-4 w-4" />
                     </div>
                     <span
@@ -204,10 +204,10 @@ const HeaderBar = () => {
             </>
           ) : (
             <>
-              <Button variant="ghost" onClick={() => navigate('/login')} className="hover:bg-slate-100">
+              <Button variant="ghost" onClick={() => navigate('/login')} className="shrink-0 min-w-fit hover:bg-slate-100">
                 {t("layout.header.login")}
               </Button>
-              <Button onClick={() => navigate('/register')} className="bg-slate-900 text-white hover:bg-slate-800 shadow-lg shadow-slate-200 hover:shadow-xl transition-all">
+              <Button onClick={() => navigate('/register')} className="shrink-0 min-w-fit bg-slate-900 text-white hover:bg-slate-800">
                 {t("layout.header.register")}
               </Button>
             </>
@@ -295,7 +295,7 @@ const HeaderBar = () => {
                 <Button variant="outline" className="justify-start" onClick={() => { navigate('/login'); setIsMenuOpen(false); }}>
                   <User className="mr-2 h-4 w-4" /> {t("layout.header.login")}
                 </Button>
-                <Button className="justify-start bg-slate-900 text-white" onClick={() => { navigate('/register'); setIsMenuOpen(false); }}>
+                <Button className="justify-start bg-slate-900 text-white hover:bg-slate-800" onClick={() => { navigate('/register'); setIsMenuOpen(false); }}>
                   {t("layout.header.register")}
                 </Button>
               </>

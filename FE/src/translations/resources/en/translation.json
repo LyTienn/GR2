@@ -81,7 +81,31 @@
       "registerBtn": "Create a Free Account"
     },
     "footer": {
-      "title_description": "Smart digital reading platform"
+      "title_description": "Smart digital reading platform",
+      "discover": "Explore",
+      "discoverItems": {
+        "search": "Search Books",
+        "genre": "Genres",
+        "author": "Authors"
+      },
+      "account": "Account",
+      "accountItems": {
+        "login": "Login",
+        "register": "Register",
+        "membership": "Premium Plan"
+      },
+      "newsletter": {
+        "title": "Get New Book Notifications",
+        "emailLabel": "Your Email",
+        "emailPlaceholder": "Enter your email",
+        "submitBtn": "Subscribe",
+        "submitting": "Sending...",
+        "description": "Get notifications about new books, offers and news from Lybrary.",
+        "successMsg": "Successfully subscribed! Please check your email.",
+        "invalidEmail": "Please enter a valid email address.",
+        "errorMsg": "Subscription failed. Please try again."
+      },
+      "copyright": "© 2026 Lybrary. All rights reserved."
     },
     "searchpage": {
       "sidebar": {
@@ -187,6 +211,57 @@
         "emptyNote": "No note content.",
         "cancelBtn": "Cancel"
       }
+    },
+    "bookshelf": {
+      "title": "My Bookshelf",
+      "emptyMessage": "Your bookshelf is empty",
+      "tabs": {
+        "reading": "Reading",
+        "favorite": "Favorites"
+      },
+      "loading": "Loading...",
+      "emptyStates": {
+        "reading": "You haven't added any books to your reading list",
+        "favorite": "You don't have any favorite books yet"
+      }
+    },
+    "accountSidebar": {
+      "menuItems": {
+        "profile": "Manage Account",
+        "bookshelf": "Personal Bookshelf",
+        "transactions": "Transaction History"
+      }
+    },
+    "profile": {
+      "title": "Manage Account",
+      "subtitle": "Update personal information and security settings",
+      "personalInfo": {
+        "cardTitle": "Personal Information",
+        "cardDescription": "Your publicly visible information",
+        "fullNameLabel": "Full Name",
+        "fullNamePlaceholder": "Display Name",
+        "emailLabel": "Email",
+        "saveButton": "Save Changes"
+      },
+      "changePassword": {
+        "cardTitle": "Change Password",
+        "cardDescription": "Protect your account with a strong password",
+        "currentPasswordLabel": "Current Password",
+        "newPasswordLabel": "New Password",
+        "newPasswordPlaceholder": "Min 6 characters",
+        "confirmPasswordLabel": "Confirm Password",
+        "submitButton": "Change Password"
+      },
+      "deleteAccount": {
+        "cardTitle": "Danger Zone",
+        "cardDescription": "This action cannot be undone",
+        "deleteButton": "Permanently Delete Account",
+        "dialogTitle": "Confirm Account Deletion?",
+        "dialogDescription": "Enter your password to confirm this action. Data will be permanently lost.",
+        "passwordPlaceholder": "Enter your password",
+        "cancelButton": "Cancel",
+        "confirmButton": "Confirm Delete"
+      }
     }
   },
   "components": {
@@ -234,14 +309,21 @@
     "success": {
       "loginSuccess": "Logged in successfully. Welcome back!",
       "logoutSuccess": "Logged out successfully!",
-      "registerSuccess": "Registered successfully. Please log in."
+      "registerSuccess": "Registration successful. Please log in.",
+      "updateProfileSuccess": "Profile updated successfully",
+      "changePasswordSuccess": "Password changed successfully",
+      "deleteAccountSuccess": "Account deleted. See you later!"
     },
     "error": {
-      "confirmPassword": "Confirm password does not match",
-      "authenticatedToRead": "You need to log in to read the book",
+      "confirmPassword": "Passwords do not match",
+      "authenticatedToRead": "You need to log in to read books",
       "saveProgress": "Error saving progress: ",
-      "fullScreenFailed": "Failed to enable fullscreen mode",
-      "loadBookData": "Error loading book data."
+      "fullScreenFailed": "Failed to enter fullscreen",
+      "loadBookData": "Error loading book data.",
+      "updateProfileError": "Error updating profile",
+      "passwordTooShort": "New password must be at least 6 characters",
+      "currentPasswordWrong": "Current password is incorrect",
+      "deleteAccountError": "Password is incorrect or server error"
     },
     "warn": {
       "missingFields": "Please fill in all required fields"    },
