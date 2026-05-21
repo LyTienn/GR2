@@ -236,6 +236,7 @@
       "title": "Nâng cấp gói Hội viên",
       "description": "Mở khóa không giới hạn kho tri thức. Đầu tư cho bản thân với chi phí chỉ bằng một ly cà phê.",
       "backBtn": "Quay lại",
+      "hasPending": "Bạn có một đơn hàng đang chờ thanh toán.",
       "package3m": {
         "name": "Gói 3 tháng",
         "period": "3 tháng",
@@ -258,6 +259,8 @@
         "feature3": "Giảm giá 15%"
       },
       "upgradeBtn": "Nâng cấp ngay",
+      "extendBtn": "Gia hạn",
+      "extendDescription": "Tuyệt vời! Bạn có thể chọn mua thêm các gói bên dưới để gia hạn cộng dồn thời gian sử dụng.",
       "alreadyPremium": {
         "title": "Bạn đang là Hội viên Premium",
         "description": "Cảm ơn bạn đã đồng hành. Hãy tận hưởng kho sách không giới hạn!",
@@ -293,6 +296,8 @@
       "noResults": "Không tìm thấy kết quả",
       "noResultsDescription": "Thử thay đổi bộ lọc để xem thêm giao dịch",
       "error": "Không thể tải lịch sử giao dịch",
+      "purchaseBtn": "Bấm để thanh toán",
+      "continueBtn": "Bấm để tiếp tục thanh toán",
       "subscription": {
         "expired": "Hội viên của bạn đã hết hạn. Vui lòng gia hạn để tiếp tục sử dụng dịch vụ."
       },

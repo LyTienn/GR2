@@ -34,6 +34,75 @@ class PaymentController {
     return statusMap[status] || "Không xác định";
   }
 
+  static async getPendingPayment(req, res) {
+    try {
+      const userId = req.user.userId;
+      const pending = await Subscription.findOne({
+        where: {
+          user_id: userId,
+          status: 'PENDING'
+        },
+        order: [['start_date', 'DESC']]
+      });
+      if (!pending) {
+        return res.status(200).json({
+          success: true,
+          data: null,
+          message: "Không có giao dịch đang chờ nào"
+        });
+      }
+      return res.status(200).json({
+        success: true,
+        data: {
+          orderId: pending.payment_transaction_id,
+          amount: PaymentController.getPackageAmount(pending.package_details),
+          bankAccount: process.env.SEPAY_BANK_ACCOUNT,
+          bankName: process.env.SEPAY_BANK_NAME,
+          packageDetails: pending.package_details,
+          createdAt: pending.start_date
+        }
+      });
+    } catch (error) {
+      console.error("Get pending payment error:", error);
+      return res.status(500).json({ success: false, message: "Lỗi lấy giao dịch đang chờ" });
+    }
+  }
+
+  static async cancelPendingPayment(req, res) {
+    try {
+      const userId = req.user.userId;
+
+      const updated = await Subscription.update(
+        { status: "CANCELLED" },
+        { 
+          where: { 
+            user_id: userId, 
+            status: "PENDING" 
+          }
+        }
+      );
+
+      if (updated[0] === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "Không tìm thấy đơn thanh toán đang chờ"
+        });
+      }
+
+      console.log(`User ${userId} đã hủy đơn PENDING`);
+      return res.status(200).json({
+        success: true,
+        message: "Đã hủy đơn thanh toán. Bạn có thể tạo đơn mới."
+      });
+    } catch (error) {
+      console.error("Cancel pending payment error:", error);
+      return res.status(500).json({ 
+        success: false, 
+        message: "Lỗi hủy đơn thanh toán" 
+      });
+    }
+  }
+
   static async getPaymentHistory(req, res) {
     try {
       const userId = req.user.userId;
@@ -147,15 +216,40 @@ class PaymentController {
       });
 
       if (expiredSubs.length > 0) {
-        const subIds = expiredSubs.map(s => s.id);
-        const userIds = expiredSubs.map(s => s.user_id);
+        // Lấy danh sách ID của các gói hết hạn và danh sách User ID (lọc trùng)
+        const subIds = expiredSubs.map(s => s.subcription_id); 
+        const userIds = [...new Set(expiredSubs.map(s => s.user_id))];
 
-        await Subscription.update({ status: "EXPIRED" }, { where: { id: { [Op.in]: subIds } } });
-        
-        // CHÚ Ý CHỖ NÀY: Dùng id thay vì user_id theo Model của bạn
-        await User.update({ tier: "FREE" }, { where: { id: { [Op.in]: userIds } } });
-        
-        console.log(`[CRON] Đã hạ cấp ${userIds.length} user về FREE.`);
+        // 1. Cập nhật trạng thái các gói đó thành EXPIRED
+        await Subscription.update(
+          { status: "EXPIRED" }, 
+          { where: { subcription_id: { [Op.in]: subIds } } } 
+        );
+
+        const usersToDowngrade = [];
+        for (const userId of userIds) {
+          const stillHasActiveSub = await Subscription.findOne({
+            where: {
+              user_id: userId,
+              status: "ACTIVE",
+              expiry_date: { [Op.gt]: now } 
+            }
+          });
+          if (!stillHasActiveSub) {
+            usersToDowngrade.push(userId);
+          }
+        }
+
+        if (usersToDowngrade.length > 0) {
+          // CHÚ Ý CHỖ NÀY: Dùng id hay user_id tùy thuộc vào Model User của bạn
+          await User.update(
+            { tier: "FREE" }, 
+            { where: { user_id: { [Op.in]: usersToDowngrade } } } 
+          );
+          console.log(`[CRON] Đã hạ cấp ${usersToDowngrade.length} user về FREE.`);
+        } else {
+          console.log(`[CRON] Đã set EXPIRED ${subIds.length} gói, nhưng không có user nào bị hạ cấp (vì họ đã mua gia hạn).`);
+        }
       }
     } catch (error) {
       console.error("[CRON] Lỗi hạ cấp EXPIRED:", error);
@@ -287,20 +381,39 @@ class PaymentController {
          return res.json({ success: true, message: "Insufficient amount" });
       }
 
-      //Cập nhật trạng thái giao dịch thành công
+      const monthsMap = {
+        "3_THANG": 3,
+        "6_THANG": 6,
+        "12_THANG": 12,
+      };
+      const monthsToAdd = monthsMap[subscription.package_details] || 0;
+      const lastActiveSub = await Subscription.findOne({
+        where: {
+          user_id: subscription.user_id,
+          status: "ACTIVE"
+        },
+        order: [["expiry_date", "DESC"]]
+      });
+
+      let baseDate = new Date(); 
+      if (lastActiveSub && lastActiveSub.expiry_date && new Date(lastActiveSub.expiry_date) > new Date()) {
+          baseDate = new Date(lastActiveSub.expiry_date);
+      }   
+      const newExpiryDate = new Date(baseDate);
+      newExpiryDate.setMonth(newExpiryDate.getMonth() + monthsToAdd);
       subscription.status = "ACTIVE";
+      subscription.expiry_date = newExpiryDate;
       await subscription.save();
 
-      //Nâng cấp User lên Premium
       await User.update(
         { tier: "PREMIUM" },
-        { where: { user_id: subscription.user_id } }
+        { where: { user_id: subscription.user_id } } 
       );
-      console.log(`SePay Success: User ${subscription.user_id} đã lên Premium qua đơn ${orderId}`);
+      console.log(`SePay Success: User ${subscription.user_id} đã lên Premium, hạn đến ${newExpiryDate}`);
       return res.status(200).json({ success: true, message: "Success" });
     } catch (error) {
       console.error("SePay Webhook Error:", error);
-      return res.status(200).json({ success: false, message: "Server Error" });
+      return res.status(200).json({ success: false, message: "Internal Error" }); 
     }
   }
 }

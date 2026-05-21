@@ -7,7 +7,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 import PaymentService from "@/service/PaymentService";
 import AuthService from "@/service/AuthService";
-// import { setUser } from "@/store/Auth/authSlice";
+import { fetchProfileSuccess } from "@/store/Auth/authSlice";
 
 const Membership = () => {
     const { user } = useSelector((state) => state.auth);
@@ -20,33 +20,33 @@ const Membership = () => {
     const packages = [
         {
             id: "3_THANG",
-            name: t("membership.package3m.name"),
+            name: t("layout.membership.package3m.name"),
             price: 99000,
-            period: t("membership.package3m.period"),
-            features: [t("membership.package3m.feature1"), t("membership.package3m.feature2")],
+            period: t("layout.membership.package3m.period"),
+            features: [t("layout.membership.package3m.feature1"), t("layout.membership.package3m.feature2")],
             isBestValue: false,
         },
         {
             id: "6_THANG",
-            name: t("membership.package6m.name"),
+            name: t("layout.membership.package6m.name"),
             price: 179000,
-            period: t("membership.package6m.period"),
-            features: [t("membership.package6m.feature1"), t("membership.package6m.feature2"), t("membership.package6m.feature3")],
+            period: t("layout.membership.package6m.period"),
+            features: [t("layout.membership.package6m.feature1"), t("layout.membership.package6m.feature2"), t("layout.membership.package6m.feature3")],
             isBestValue: true,
         },
         {
             id: "12_THANG",
-            name: t("membership.package12m.name"),
+            name: t("layout.membership.package12m.name"),
             price: 299000,
-            period: t("membership.package12m.period"),
-            features: [t("membership.package12m.feature1"), t("membership.package12m.feature2"), t("membership.package12m.feature3")],
+            period: t("layout.membership.package12m.period"),
+            features: [t("layout.membership.package12m.feature1"), t("layout.membership.package12m.feature2"), t("layout.membership.package12m.feature3")],
             isBestValue: false,
         },
     ];
 
     const handleUpgrade = async (pkg) => {
         if (!user) {
-            toast.error(t("membership.notLogin"));
+            toast.error(t("layout.membership.notLogin"));
             return navigate("/login");
         }
 
@@ -59,12 +59,12 @@ const Membership = () => {
 
             if (res.success && res.data) {
                 console.log("paymentInfo:", res.data);
-                setPaymentInfo(res.data); // Lưu thông tin đơn hàng
-                toast.info(t("membership.orderCreated"));
+                setPaymentInfo(res.data); 
+                toast.info(t("layout.membership.orderCreated"));
             }
         } catch (error) {
             console.error("Error creating payment:", error);
-            toast.error(t("membership.orderError"));
+            toast.error(t("layout.membership.orderError"));
         } finally {
             setLoading(false);
         }
@@ -72,13 +72,65 @@ const Membership = () => {
 
     const handleCopy = (text) => {
         navigator.clipboard.writeText(text);
-        toast.success(t("membership.copiedSuccess"));
+        toast.success(t("layout.membership.copiedSuccess"));
     };
 
-    const handleFinish = () => {
-        // Reload để cập nhật lại thông tin User (Tier: PREMIUM) từ Backend
-        window.location.href = "/";
+    const handleFinish = async () => {
+        try {
+            const res = await AuthService.getProfile();
+            if (res.success && res.data) {
+                const updatedUser = res.data || res.data.user;
+                
+                if (updatedUser.tier === 'PREMIUM') {
+                    dispatch(fetchProfileSuccess(updatedUser));
+                    setPaymentInfo(null);
+                    toast.success(t("layout.membership.upgradeSuccess", "Nâng cấp Premium thành công!"));
+                } else {
+                    toast.info(t("layout.membership.processing", "Hệ thống đang xử lý giao dịch. Vui lòng giữ màn hình và đợi trong giây lát..."));
+                }
+            }
+        } catch (error) {
+            console.error("Lỗi kiểm tra trạng thái:", error);
+            toast.error("Có lỗi xảy ra khi kiểm tra trạng thái.");
+        }
     };
+
+    const handleCancelPending = async () => {
+        try {
+            setLoading(true);
+            // Lưu ý: Route BE của bạn là /cancel/:subscriptionId, 
+            // nhưng Controller BE đang update dựa vào user_id & status="PENDING" chứ không dùng params. 
+            // Nên truyền đại id='current' hoặc orderId đều được.
+            const res = await PaymentService.cancelPendingPayment();
+            
+            if (res.success) {
+                setPaymentInfo(null); // Đóng màn hình QR
+                toast.success(res.message || "Đã hủy giao dịch thành công.");
+            }
+        } catch (error) {
+            console.error("Lỗi hủy đơn:", error);
+            toast.error("Không thể hủy giao dịch lúc này.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    //Check pending subcription
+    useEffect(() => {
+        const checkPendingPayment = async () => {
+            if (!user || user.tier === 'PREMIUM') return;
+            try {
+                const res = await PaymentService.getPendingPayment();
+                if (res.success && res.data) {
+                    setPaymentInfo(res.data);
+                    toast.info(t("layout.membership.hasPending"));
+                }
+            } catch (error) {
+                console.error("Lỗi fetch pending payment:", error);
+            }
+        };
+        checkPendingPayment();
+    }, [user]);
 
     useEffect(() => {
         let interval;
@@ -103,22 +155,22 @@ const Membership = () => {
         return () => clearInterval(interval);
     }, [paymentInfo, dispatch]);
 
-    if (user?.tier === 'PREMIUM') {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
-                <div className="text-center p-8 bg-white rounded-2xl shadow-xl max-w-md w-full border border-yellow-200">
-                    <div className="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <Star className="h-10 w-10 text-yellow-500 fill-yellow-500" />
-                    </div>
-                    <h2 className="text-2xl font-bold text-slate-800 mb-2">{t("membership.alreadyPremium.title")}</h2>
-                    <p className="text-slate-600 mb-6">{t("membership.alreadyPremium.description")}</p>
-                    <Button onClick={() => navigate('/')} className="w-full bg-slate-900 text-white hover:bg-slate-800">
-                        {t("membership.alreadyPremium.backBtn")}
-                    </Button>
-                </div>
-            </div>
-        );
-    }
+    // if (user?.tier === 'PREMIUM') {
+    //     return (
+    //         <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
+    //             <div className="text-center p-8 bg-white rounded-2xl shadow-xl max-w-md w-full border border-yellow-200">
+    //                 <div className="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
+    //                     <Star className="h-10 w-10 text-yellow-500 fill-yellow-500" />
+    //                 </div>
+    //                 <h2 className="text-2xl font-bold text-slate-800 mb-2">{t("layout.membership.alreadyPremium.title")}</h2>
+    //                 <p className="text-slate-600 mb-6">{t("layout.membership.alreadyPremium.description")}</p>
+    //                 <Button onClick={() => navigate('/')} className="w-full bg-slate-900 text-white hover:bg-slate-800">
+    //                     {t("layout.membership.alreadyPremium.backBtn")}
+    //                 </Button>
+    //             </div>
+    //         </div>
+    //     );
+    // }
 
     if (paymentInfo) {
         const { bankAccount, bankName, amount, orderId } = paymentInfo;
@@ -127,11 +179,11 @@ const Membership = () => {
             <div className="min-h-screen bg-slate-50 py-12 px-4 flex items-center justify-center">
                 <div className="bg-white p-6 md:p-8 rounded-2xl shadow-xl max-w-lg w-full text-center border border-slate-200 relative">
                     <Button onClick={() => setPaymentInfo(null)} className="absolute top-4 left-4 text-slate-400 hover:text-slate-600 flex items-center text-sm">
-                        <ArrowLeft className="h-4 w-4 mr-1" /> {t("membership.payment.backBtn")}
+                        <ArrowLeft className="h-4 w-4 mr-1" /> {t("layout.membership.payment.backBtn")}
                     </Button>
 
-                    <h2 className="text-2xl font-bold text-slate-800 mb-2 mt-4">{t("membership.payment.title")}</h2>
-                    <p className="text-slate-500 mb-6 text-sm">{t("membership.payment.description")}</p>
+                    <h2 className="text-2xl font-bold text-slate-800 mb-2 mt-4">{t("layout.membership.payment.title")}</h2>
+                    <p className="text-slate-500 mb-6 text-sm">{t("layout.membership.payment.description")}</p>
 
                     {/* QR CODE */}
                     <div className="bg-white p-2 rounded-xl border border-slate-100 shadow-inner mb-6 inline-block">
@@ -140,21 +192,21 @@ const Membership = () => {
 
                     <div className="text-left bg-yellow-50 p-4 rounded-lg border border-yellow-200 text-sm mb-6 space-y-3">
                         <div className="flex justify-between border-b border-yellow-200 pb-2">
-                            <span className="text-slate-600">{t("membership.bankInfo.bank")}</span>
+                            <span className="text-slate-600">{t("layout.membership.bankInfo.bank")}</span>
                             <span className="font-bold text-slate-800">{bankName}</span>
                         </div>
                         <div className="flex justify-between border-b border-yellow-200 pb-2">
-                            <span className="text-slate-600">{t("membership.bankInfo.account")}</span>
+                            <span className="text-slate-600">{t("layout.membership.bankInfo.account")}</span>
                             <span className="font-bold text-slate-800 tracking-wider">{bankAccount}</span>
                         </div>
                         <div className="flex justify-between border-b border-yellow-200 pb-2">
-                            <span className="text-slate-600">{t("membership.bankInfo.amount")}</span>
+                            <span className="text-slate-600">{t("layout.membership.bankInfo.amount")}</span>
                             <span className="font-bold text-red-600 text-lg">{amount.toLocaleString()}đ</span>
                         </div>
 
                         {/* NỘI DUNG CHUYỂN KHOẢN */}
                         <div className="pt-1">
-                            <p className="text-xs text-slate-500 mb-1">{t("membership.bankInfo.content")}</p>
+                            <p className="text-xs text-slate-500 mb-1">{t("layout.membership.bankInfo.content")}</p>
                             <div className="flex gap-2">
                                 <div className="flex-1 text-lg font-mono font-bold text-blue-700 bg-white p-2 rounded border border-dashed border-blue-300 text-center">
                                     {orderId}
@@ -171,10 +223,18 @@ const Membership = () => {
                             onClick={handleFinish}
                             className="w-full bg-green-600 hover:bg-green-700 text-white h-12 text-lg font-semibold shadow-lg shadow-green-200"
                         >
-                            {t("membership.paymentConfirm.button")}
+                            {t("layout.membership.paymentConfirm.button")}
+                        </Button>
+                        <Button
+                            onClick={handleCancelPending}
+                            disabled={loading}
+                            variant="destructive"
+                            className="w-full h-12 text-lg font-semibold bg-red-50 text-red-600 hover:bg-red-100 border border-red-200"
+                        >
+                            {loading ? <Loader2 className="animate-spin" /> : t("layout.membership.cancelPayment", "Hủy giao dịch này")}
                         </Button>
                         <p className="text-xs text-slate-400">
-                            {t("membership.paymentConfirm.helper")}
+                            {t("layout.membership.paymentConfirm.helper")}
                         </p>
                     </div>
                 </div>
@@ -192,31 +252,46 @@ const Membership = () => {
                     className="text-slate-600 hover:text-slate-900 flex items-center gap-2"
                 >
                     <ArrowLeft className="h-4 w-4" />
-                    {t("membership.backBtn")}
+                    {t("layout.membership.backBtn")}
                 </Button>
             </div>
 
             {/* Header */}
             <div className="text-center mb-12">
-                <h1 className="text-4xl font-bold text-slate-800 mb-4">{t("membership.title")}</h1>
+                <h1 className="text-4xl font-bold text-slate-800 mb-4">{t("layout.membership.title")}</h1>
                 <p className="text-slate-600 max-w-2xl mx-auto text-lg">
-                    {t("membership.description")}
+                    {t("layout.membership.description")}
                 </p>
             </div>
+            {user?.tier === 'PREMIUM' && (
+                <div className="max-w-6xl mx-auto mb-10 p-6 bg-linear-to-r from-yellow-50 to-amber-50 border border-yellow-200 rounded-2xl flex items-center gap-5 shadow-sm px-8">
+                    <div className="p-4 bg-yellow-400/20 rounded-full shrink-0">
+                        <Star className="h-8 w-8 text-yellow-600 fill-yellow-600" />
+                    </div>
+                    <div>
+                        <h3 className="font-bold text-yellow-900 text-xl mb-1">
+                            {t("layout.membership.alreadyPremium.title")}
+                        </h3>
+                        <p className="text-sm text-yellow-800/80">
+                            {t("layout.membership.extendDescription")}
+                        </p>
+                    </div>
+                </div>
+            )}
 
             {/* Grid Packages */}
-            <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-8 items-center px-2 md:px-12">
-
+            <div className="max-w-6xl mx-auto grid lg:grid-cols-3 gap-8 items-stretch px-4">
                 {packages.map((pkg) => (
                     <div
                         key={pkg.id}
-                        className={`bg-white p-8 rounded-2xl shadow-lg transition-all duration-300 relative border
-                    ${pkg.isBestValue ? 'border-2 border-yellow-400 transform md:scale-105 z-10' : 'border-slate-200 hover:border-blue-300'}
-                `}
+                        // THÊM: flex flex-col để chia không gian bên trong thẻ
+                        className={`flex flex-col bg-white p-8 rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 relative border
+                        ${pkg.isBestValue ? 'border-2 border-yellow-400 transform lg:-translate-y-2 z-10 shadow-md' : 'border-slate-200 hover:border-blue-200 hover:-translate-y-1'}
+                        `}
                     >
                         {pkg.isBestValue && (
-                            <div className="absolute top-0 right-0 bg-yellow-400 text-yellow-900 text-xs font-bold px-3 py-1 rounded-bl-lg shadow-sm">
-                                {t("membership.package6m.badge")}
+                            <div className="absolute top-0 right-0 bg-yellow-400 text-yellow-900 text-xs font-bold px-4 py-1.5 rounded-bl-xl rounded-tr-2xl shadow-sm tracking-wide">
+                                {t("layout.membership.package6m.badge")}
                             </div>
                         )}
 
@@ -226,38 +301,39 @@ const Membership = () => {
                         </h3>
 
                         <div className="mb-6">
-                            <span className="text-4xl font-bold text-slate-800">{pkg.price.toLocaleString()}đ</span>
-                            <span className="text-slate-400 text-sm font-normal"> / {pkg.period}</span>
+                            <span className="text-4xl font-bold text-slate-900">{pkg.price.toLocaleString()}đ</span>
+                            <span className="text-slate-500 text-sm font-medium"> / {pkg.period}</span>
                         </div>
 
-                        <ul className="space-y-4 mb-8">
+                        {/* THÊM: flex-1 để danh sách tính năng đẩy nút bấm xuống đáy */}
+                        <ul className="space-y-4 mb-8 flex-1">
                             {pkg.features.map((feature, idx) => (
-                                <li key={idx} className="flex gap-3 text-slate-700">
-                                    <Check className={`h-5 w-5 ${pkg.isBestValue ? 'text-yellow-500' : 'text-blue-500'}`} />
-                                    {feature}
+                                <li key={idx} className="flex gap-3 text-slate-600 text-sm leading-relaxed">
+                                    <Check className={`h-5 w-5 shrink-0 ${pkg.isBestValue ? 'text-yellow-500' : 'text-blue-500'}`} />
+                                    <span>{feature}</span>
                                 </li>
                             ))}
                         </ul>
 
+                        {/* NÚT BẤM: mt-auto và bo góc lớn hơn một chút */}
                         <Button
                             onClick={() => handleUpgrade(pkg)}
                             disabled={loading}
-                            className={`w-full h-12 text-lg font-bold transition-all
-                        ${pkg.isBestValue
-                                    ? 'bg-yellow-400 hover:bg-yellow-500 text-slate-900 shadow-yellow-200 shadow-md'
-                                    : 'bg-slate-900 hover:bg-slate-800 text-white'}
-                    `}
+                            className={`w-full h-12 text-lg font-bold transition-all mt-auto rounded-xl
+                                ${pkg.isBestValue
+                                    ? 'bg-yellow-400 hover:bg-yellow-500 text-slate-900 shadow-yellow-200 shadow-lg hover:shadow-yellow-300'
+                                    : 'bg-slate-900 hover:bg-slate-800 text-white shadow-md hover:shadow-lg'}
+                            `}
                         >
-                            {loading ? <Loader2 className="animate-spin mr-2" /> : t("membership.upgradeBtn")}
+                            {loading ? <Loader2 className="animate-spin mr-2" /> : (user?.tier === 'PREMIUM' ? t("layout.membership.extendBtn") : t("layout.membership.upgradeBtn", "Nâng cấp ngay"))}
                         </Button>
                     </div>
                 ))}
-
             </div>
 
             <div className="text-center mt-12 text-slate-400 text-sm">
                 <p className="flex items-center justify-center gap-2">
-                    <Shield className="h-4 w-4" /> {t("membership.security")}
+                    <Shield className="h-4 w-4" /> {t("layout.membership.security")}
                 </p>
             </div>
         </div>

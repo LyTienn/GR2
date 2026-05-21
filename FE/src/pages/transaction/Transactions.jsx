@@ -239,10 +239,27 @@ export default function Transactions() {
               <>
                 <div className="space-y-4 mb-8">
                   {filteredHistory.map((transaction) => (
-                    <TransactionCard
-                      key={transaction.subcription_id}
-                      transaction={transaction}
-                    />
+                    <div 
+                      key={transaction.subscription_id}
+                      onClick={() => {
+                        if (transaction.status === 'PENDING') {
+                          navigate('/membership');
+                        }
+                      }}
+                      className={
+                        transaction.status === 'PENDING' 
+                          ? "cursor-pointer transition-all duration-200 hover:ring-2 hover:ring-blue-400 hover:shadow-md rounded-xl relative" 
+                          : ""
+                      }
+                      title={transaction.status === 'PENDING' ? t("layout.transactions.continueBtn") : ""}
+                    >
+                      <TransactionCard transaction={transaction} />
+                      {transaction.status === 'PENDING' && (
+                        <div className="absolute top-4 right-32 text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                          {t("layout.transactions.purchaseBtn")}
+                        </div>
+                      )}
+                    </div>
                   ))}
                 </div>
 

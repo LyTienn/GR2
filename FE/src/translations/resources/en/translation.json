@@ -236,6 +236,7 @@
       "title": "Upgrade Membership Package",
       "description": "Unlock unlimited knowledge treasure. Invest in yourself with costs as low as a cup of coffee.",
       "backBtn": "Back",
+      "hasPending": "You have a pending order waiting for payment.",
       "package3m": {
         "name": "3-Month Package",
         "period": "3 months",
@@ -258,6 +259,8 @@
         "feature3": "15% discount"
       },
       "upgradeBtn": "Upgrade Now",
+      "extendBtn": "Extend Package",
+      "extendDescription": "Great! You can choose to purchase additional packages below to extend your usage time cumulatively.",
       "alreadyPremium": {
         "title": "You are a Premium Member",
         "description": "Thank you for being with us. Enjoy unlimited book collection!",
@@ -293,6 +296,8 @@
       "noResults": "No results found",
       "noResultsDescription": "Try changing filters to see more transactions",
       "error": "Unable to load transaction history",
+      "purchaseBtn": "Click to pay",
+      "continueBtn": "Click to continue payment",
       "subscription": {
         "expired": "Your membership has expired. Please renew to continue using the service."
       },

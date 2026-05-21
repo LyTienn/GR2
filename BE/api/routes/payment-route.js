@@ -5,22 +5,6 @@ import { body } from "express-validator";
 
 const router = express.Router();
 
-// Tạo URL thanh toán
-// router.post(
-//   "/create-payment-url",
-//   authenticate,
-//   [
-//     body("package_details")
-//       .isIn(["3_THANG", "6_THANG", "12_THANG"])
-//       .withMessage("Invalid package"),
-//     body("amount").isNumeric().withMessage("Amount must be a number"),
-//   ],
-//   PaymentController.createPaymentUrl
-// );
-// VNPay callback
-// router.get("/vnpay-return", PaymentController.vnpayReturn);
-// router.get("/vnpay-ipn", PaymentController.vnpayIPN);
-
 //--- SEPAY ---
 // /api/payment/sepay/create
 router.post("/sepay/create", authenticate, PaymentController.createSepayPayment);
@@ -35,4 +19,9 @@ router.get("/history", authenticate, PaymentController.getPaymentHistory);
 //Kiểm tra subscription hiện tại & hạn hội viên
 router.get("/subscription/current", authenticate, PaymentController.getCurrentSubscription);
 
+//Lấy pending subscription
+router.get("/subscription/pending", authenticate, PaymentController.getPendingPayment);
+
+//Hủy pending subscription 
+router.put("/subscription/cancel/:subscriptionId", authenticate, PaymentController.cancelPendingPayment);
 export default router;

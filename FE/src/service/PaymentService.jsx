@@ -40,6 +40,32 @@ const PaymentService = {
       throw error;
     }
   },
+
+  // ✅ Lấy pending subscription
+  async getPendingPayment() {
+    try {
+      const res = await firstValueFrom(
+        HttpClient.get("/payment/subscription/pending")
+      );
+      return res;
+    } catch (error) {
+      console.error("Lỗi getPendingPayment:", error);
+      throw error;
+    }
+  },
+
+  // ✅ Hủy pending subscription
+  async cancelPendingPayment() {
+    try {
+      const res = await firstValueFrom(
+        HttpClient.put(`/payment/subscription/cancel`)
+      );
+      return res;
+    } catch (error) {
+      console.error("Lỗi cancelPendingPayment:", error);
+      throw error;
+    }
+  },
 };
 
 export default PaymentService;
