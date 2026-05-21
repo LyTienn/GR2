@@ -2,18 +2,20 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Receipt, Loader2, AlertCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import Header from "@/components/HeaderBar";
 import { AccountSidebar } from "@/components/Account-sidebar";
 import { Card, CardContent } from "@/components/ui/card";
-import TransactionFilter from "@/components/transaction/TransactionFilter";
-import TransactionCard from "@/components/transaction/TransactionCard";
-import TransactionStats from "@/components/transaction/TransactionStats";
+import TransactionFilter from "@/pages/transaction/TransactionFilter";
+import TransactionCard from "@/pages/transaction/TransactionCard";
+import TransactionStats from "@/pages/transaction/TransactionStats";
 import PaymentService from "@/service/PaymentService";
 import { toast } from "react-toastify";
 
 export default function Transactions() {
   const { isAuthenticated } = useSelector((state) => state.auth);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [allHistory, setAllHistory] = useState([]);
   const [filteredHistory, setFilteredHistory] = useState([]);
@@ -50,7 +52,7 @@ export default function Transactions() {
         console.log("✅ Current Subscription:", subRes);
         if (subRes.success) {
           if(subRes.data.isExpired) {
-            toast.warn("Hội viên của bạn đã hết hạn. Vui lòng gia hạn để tiếp tục sử dụng dịch vụ.");
+            toast.warn(t("transactions.subscription.expired"));
           } else if (subRes.data.subcription) {
             console.log("✅ Subscription Details:", subRes.data.subcription);
           }
@@ -69,8 +71,8 @@ export default function Transactions() {
       }
     } catch (err) {
       console.error("❌ Failed to fetch payment history:", err);
-      setError("Không thể tải lịch sử giao dịch");
-      toast.error("Không thể tải lịch sử giao dịch");
+      setError(t("transactions.error"));
+      toast.error(t("transactions.error"));
     } finally {
       setLoading(false);
     }
@@ -162,10 +164,10 @@ export default function Transactions() {
             <div className="mb-8">
               <h1 className="text-3xl font-bold flex items-center gap-2 mb-2">
                 <Receipt className="h-8 w-8" />
-                Lịch sử giao dịch
+                {t("layout.transactions.title")}
               </h1>
               <p className="text-muted-foreground">
-                Xem lại các giao dịch thanh toán của bạn
+                {t("layout.transactions.subtitle")}
               </p>
             </div>
 
@@ -181,7 +183,7 @@ export default function Transactions() {
               <div className="flex flex-col items-center justify-center py-20">
                 <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
                 <p className="text-muted-foreground">
-                  Đang tải lịch sử giao dịch...
+                  {t("layout.transactions.loading")}
                 </p>
               </div>
             )}
@@ -205,10 +207,10 @@ export default function Transactions() {
                   <CardContent className="flex flex-col items-center justify-center py-20">
                     <Receipt className="h-16 w-16 text-muted-foreground/50 mb-4" />
                     <p className="text-xl font-medium text-muted-foreground mb-2">
-                      Chưa có giao dịch nào
+                      {t("layout.transactions.empty")}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      Các giao dịch thanh toán của bạn sẽ hiển thị ở đây
+                      {t("layout.transactions.emptyDescription")}
                     </p>
                   </CardContent>
                 </Card>
@@ -223,10 +225,10 @@ export default function Transactions() {
                   <CardContent className="flex flex-col items-center justify-center py-20">
                     <AlertCircle className="h-16 w-16 text-muted-foreground/50 mb-4" />
                     <p className="text-xl font-medium text-muted-foreground mb-2">
-                      Không tìm thấy kết quả
+                      {t("layout.transactions.noResults")}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      Thử thay đổi bộ lọc để xem thêm giao dịch
+                      {t("layout.transactions.noResultsDescription")}
                     </p>
                   </CardContent>
                 </Card>

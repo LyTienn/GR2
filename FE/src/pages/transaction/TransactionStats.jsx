@@ -1,6 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useTranslation } from "react-i18next";
 
 export default function TransactionStats({ history }) {
+  const { t } = useTranslation();
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -19,7 +21,7 @@ export default function TransactionStats({ history }) {
   return (
     <Card className="bg-slate-50 border-slate-200">
       <CardHeader>
-        <CardTitle className="text-lg">Tổng quan</CardTitle>
+        <CardTitle className="text-lg">{t("layout.transactions.stats.overview")}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
@@ -27,19 +29,19 @@ export default function TransactionStats({ history }) {
             <p className="text-2xl font-bold text-slate-800">
               {totalTransactions}
             </p>
-            <p className="text-sm text-muted-foreground">Tổng giao dịch</p>
+            <p className="text-sm text-muted-foreground">{t("layout.transactions.stats.totalTransactions")}</p>
           </div>
           <div>
             <p className="text-2xl font-bold text-green-600">
               {successfulTransactions}
             </p>
-            <p className="text-sm text-muted-foreground">Thành công</p>
+            <p className="text-sm text-muted-foreground">{t("layout.transactions.stats.successful")}</p>
           </div>
           <div>
             <p className="text-2xl font-bold text-primary">
               {formatCurrency(totalSpent)}
             </p>
-            <p className="text-sm text-muted-foreground">Tổng chi tiêu</p>
+            <p className="text-sm text-muted-foreground">{t("layout.transactions.stats.totalSpent")}</p>
           </div>
         </div>
       </CardContent>

@@ -232,6 +232,110 @@
         "transactions": "Lịch sử giao dịch"
       }
     },
+    "membership": {
+      "title": "Nâng cấp gói Hội viên",
+      "description": "Mở khóa không giới hạn kho tri thức. Đầu tư cho bản thân với chi phí chỉ bằng một ly cà phê.",
+      "backBtn": "Quay lại",
+      "package3m": {
+        "name": "Gói 3 tháng",
+        "period": "3 tháng",
+        "feature1": "Truy cập không giới hạn",
+        "feature2": "Hỗ trợ 24/7"
+      },
+      "package6m": {
+        "name": "Gói 6 tháng",
+        "period": "6 tháng",
+        "feature1": "Truy cập không giới hạn",
+        "feature2": "Hỗ trợ 24/7",
+        "feature3": "Giảm giá 10%",
+        "badge": "PHỔ BIẾN NHẤT"
+      },
+      "package12m": {
+        "name": "Gói 12 tháng",
+        "period": "12 tháng",
+        "feature1": "Truy cập không giới hạn",
+        "feature2": "Hỗ trợ 24/7",
+        "feature3": "Giảm giá 15%"
+      },
+      "upgradeBtn": "Nâng cấp ngay",
+      "alreadyPremium": {
+        "title": "Bạn đang là Hội viên Premium",
+        "description": "Cảm ơn bạn đã đồng hành. Hãy tận hưởng kho sách không giới hạn!",
+        "backBtn": "Về trang đọc sách"
+      },
+      "payment": {
+        "title": "Thanh toán chuyển khoản",
+        "description": "Mở App Ngân hàng và quét mã QR bên dưới",
+        "backBtn": "Chọn gói khác"
+      },
+      "bankInfo": {
+        "bank": "Ngân hàng:",
+        "account": "Số tài khoản:",
+        "amount": "Số tiền:",
+        "content": "Nội dung chuyển khoản (Bắt buộc):"
+      },
+      "paymentConfirm": {
+        "button": "Đã chuyển tiền & Kích hoạt",
+        "helper": "Hệ thống tự động kích hoạt sau 1-3 phút khi nhận tiền."
+      },
+      "security": "Thanh toán an toàn & bảo mật",
+      "notLogin": "Vui lòng đăng nhập để nâng cấp gói thành viên.",
+      "orderCreated": "Đơn hàng đã được tạo. Vui lòng chuyển khoản theo thông tin dưới đây.",
+      "orderError": "Đã xảy ra lỗi khi tạo đơn hàng. Vui lòng thử lại.",
+      "copiedSuccess": "Đã sao chép nội dung chuyển khoản!"
+    },
+    "transactions": {
+      "title": "Lịch sử giao dịch",
+      "subtitle": "Xem lại các giao dịch thanh toán của bạn",
+      "loading": "Đang tải lịch sử giao dịch...",
+      "empty": "Chưa có giao dịch nào",
+      "emptyDescription": "Các giao dịch thanh toán của bạn sẽ hiển thị ở đây",
+      "noResults": "Không tìm thấy kết quả",
+      "noResultsDescription": "Thử thay đổi bộ lọc để xem thêm giao dịch",
+      "error": "Không thể tải lịch sử giao dịch",
+      "subscription": {
+        "expired": "Hội viên của bạn đã hết hạn. Vui lòng gia hạn để tiếp tục sử dụng dịch vụ."
+      },
+      "card": {
+        "transactionCode": "Mã GD:",
+        "noCode": "Không có mã",
+        "amount": "Số tiền thanh toán",
+        "transactionDate": "Ngày giao dịch",
+        "expiryDate": "Ngày hết hạn",
+        "pending": "Giao dịch đang chờ xử lý. Vui lòng hoàn tất thanh toán.",
+        "cancelled": "Giao dịch đã bị hủy hoặc thanh toán không thành công.",
+        "expired": "Giao dịch đã hết hạn."
+      },
+      "filter": {
+        "transactionId": "Mã giao dịch",
+        "searchPlaceholder": "Tìm mã GD...",
+        "status": "Trạng thái",
+        "packageType": "Loại gói",
+        "timeRange": "Thời gian",
+        "statusAll": "Tất cả",
+        "statusActive": "Thành công",
+        "statusPending": "Đang xử lý",
+        "statusCancelled": "Đã hủy",
+        "statusExpired": "Hết hạn",
+        "packageAll": "Tất cả",
+        "package3m": "Gói 3 tháng",
+        "package6m": "Gói 6 tháng",
+        "package12m": "Gói 12 tháng",
+        "timeAll": "Tất cả",
+        "time7days": "7 ngày qua",
+        "time30days": "30 ngày qua",
+        "time90days": "3 tháng qua",
+        "time1year": "1 năm qua",
+        "filtering": "Đang lọc:",
+        "clearAll": "Xóa tất cả"
+      },
+      "stats": {
+        "overview": "Tổng quan",
+        "totalTransactions": "Tổng giao dịch",
+        "successful": "Thành công",
+        "totalSpent": "Tổng chi tiêu"
+      }
+    },
     "profile": {
       "title": "Quản lý tài khoản",
       "subtitle": "Cập nhật thông tin cá nhân và bảo mật",

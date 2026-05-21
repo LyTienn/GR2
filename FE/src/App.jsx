@@ -30,7 +30,7 @@ const BookShelf = lazy(() => import('./pages/BookShelf'));
 const Profile = lazy(() => import('./pages/Profile'));
 const SearchPage = lazy(() => import('./pages/SearchPage'));
 const Membership = lazy(() => import('./pages/Membership'));
-const Transactions = lazy(() => import('./pages/Transactions'))
+const Transactions = lazy(() => import('./pages/transaction/Transactions'))
 
 const MainLayout = () => {
   return (

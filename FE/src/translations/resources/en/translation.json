@@ -232,6 +232,110 @@
         "transactions": "Transaction History"
       }
     },
+    "membership": {
+      "title": "Upgrade Membership Package",
+      "description": "Unlock unlimited knowledge treasure. Invest in yourself with costs as low as a cup of coffee.",
+      "backBtn": "Back",
+      "package3m": {
+        "name": "3-Month Package",
+        "period": "3 months",
+        "feature1": "Unlimited access",
+        "feature2": "24/7 support"
+      },
+      "package6m": {
+        "name": "6-Month Package",
+        "period": "6 months",
+        "feature1": "Unlimited access",
+        "feature2": "24/7 support",
+        "feature3": "10% discount",
+        "badge": "MOST POPULAR"
+      },
+      "package12m": {
+        "name": "12-Month Package",
+        "period": "12 months",
+        "feature1": "Unlimited access",
+        "feature2": "24/7 support",
+        "feature3": "15% discount"
+      },
+      "upgradeBtn": "Upgrade Now",
+      "alreadyPremium": {
+        "title": "You are a Premium Member",
+        "description": "Thank you for being with us. Enjoy unlimited book collection!",
+        "backBtn": "Go to reading page"
+      },
+      "payment": {
+        "title": "Bank Transfer Payment",
+        "description": "Open your banking app and scan the QR code below",
+        "backBtn": "Choose another package"
+      },
+      "bankInfo": {
+        "bank": "Bank:",
+        "account": "Account Number:",
+        "amount": "Amount:",
+        "content": "Transfer content (Required):"
+      },
+      "paymentConfirm": {
+        "button": "Transfer sent & Activate",
+        "helper": "System will automatically activate within 1-3 minutes after receiving payment."
+      },
+      "security": "Safe & Secure Payment",
+      "notLogin": "Please log in to upgrade membership package.",
+      "orderCreated": "Order created. Please transfer according to the information below.",
+      "orderError": "An error occurred while creating the order. Please try again.",
+      "copiedSuccess": "Transfer content copied!"
+    },
+    "transactions": {
+      "title": "Transaction History",
+      "subtitle": "Review your payment transactions",
+      "loading": "Loading transaction history...",
+      "empty": "No transactions yet",
+      "emptyDescription": "Your payment transactions will be displayed here",
+      "noResults": "No results found",
+      "noResultsDescription": "Try changing filters to see more transactions",
+      "error": "Unable to load transaction history",
+      "subscription": {
+        "expired": "Your membership has expired. Please renew to continue using the service."
+      },
+      "card": {
+        "transactionCode": "Transaction ID:",
+        "noCode": "No code",
+        "amount": "Payment Amount",
+        "transactionDate": "Transaction Date",
+        "expiryDate": "Expiry Date",
+        "pending": "Transaction is pending. Please complete the payment.",
+        "cancelled": "Transaction has been cancelled or payment failed.",
+        "expired": "Transaction has expired."
+      },
+      "filter": {
+        "transactionId": "Transaction ID",
+        "searchPlaceholder": "Search transaction ID...",
+        "status": "Status",
+        "packageType": "Package Type",
+        "timeRange": "Time Range",
+        "statusAll": "All",
+        "statusActive": "Successful",
+        "statusPending": "Pending",
+        "statusCancelled": "Cancelled",
+        "statusExpired": "Expired",
+        "packageAll": "All",
+        "package3m": "3-Month Package",
+        "package6m": "6-Month Package",
+        "package12m": "12-Month Package",
+        "timeAll": "All",
+        "time7days": "Last 7 days",
+        "time30days": "Last 30 days",
+        "time90days": "Last 3 months",
+        "time1year": "Last 1 year",
+        "filtering": "Filtering:",
+        "clearAll": "Clear All"
+      },
+      "stats": {
+        "overview": "Overview",
+        "totalTransactions": "Total Transactions",
+        "successful": "Successful",
+        "totalSpent": "Total Spent"
+      }
+    },
     "profile": {
       "title": "Manage Account",
       "subtitle": "Update personal information and security settings",

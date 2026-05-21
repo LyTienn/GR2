@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "react-i18next";
 import {
   Card,
   CardContent,
@@ -17,6 +18,7 @@ import {
 } from "lucide-react";
 
 export default function TransactionCard({ transaction }) {
+  const { t } = useTranslation();
   const { 
     payment_transaction_id, 
     package_details, 
@@ -50,9 +52,9 @@ export default function TransactionCard({ transaction }) {
 
   const formatPackageName = (pkg) => {
     const map = {
-      "3_THANG": "Gói 3 tháng",
-      "6_THANG": "Gói 6 tháng",
-      "12_THANG": "Gói 12 tháng",
+      "3_THANG": t("layout.membership.package3m.name"),
+      "6_THANG": t("layout.membership.package6m.name"),
+      "12_THANG": t("layout.membership.package12m.name"),
     };
     return map[pkg] || pkg;
   };
@@ -102,8 +104,8 @@ export default function TransactionCard({ transaction }) {
             </CardTitle>
             <CardDescription className="mt-1 flex items-center gap-1.5">
               <CreditCard className="h-3.5 w-3.5" />
-              Mã GD:{" "}
-              <span className="font-mono">{payment_transaction_id || "Không có mã"}</span>
+              {t("layout.transactions.card.transactionCode")}{" "}
+              <span className="font-mono">{payment_transaction_id || t("layout.transactions.card.noCode")}</span>
             </CardDescription>
           </div>
 
@@ -121,7 +123,7 @@ export default function TransactionCard({ transaction }) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
           {/* Số tiền */}
           <div className="flex flex-col gap-1">
-            <span className="text-muted-foreground">Số tiền thanh toán</span>
+            <span className="text-muted-foreground">{t("layout.transactions.card.amount")}</span>
             <span className="text-lg font-bold text-primary">
               {formatCurrency(getPackagePrice(package_details))}
             </span>
@@ -131,7 +133,7 @@ export default function TransactionCard({ transaction }) {
           {transactionDate && (
             <div className="flex flex-col gap-1">
               <span className="text-muted-foreground flex items-center gap-1">
-                <Calendar className="h-3.5 w-3.5" /> Ngày giao dịch
+                <Calendar className="h-3.5 w-3.5" /> {t("layout.transactions.card.transactionDate")}
               </span>
               <span className="font-medium">{formatDate(transactionDate)}</span>
             </div>
@@ -141,7 +143,7 @@ export default function TransactionCard({ transaction }) {
           {(status === "ACTIVE" || status === "EXPIRED") && expiry_date && (
             <div className="flex flex-col gap-1">
               <span className="text-muted-foreground flex items-center gap-1">
-                <Calendar className="h-3.5 w-3.5" /> Ngày hết hạn
+                <Calendar className="h-3.5 w-3.5" /> {t("layout.transactions.card.expiryDate")}
               </span>
               <span className="font-medium">{formatDate(expiry_date)}</span>
             </div>
@@ -152,21 +154,21 @@ export default function TransactionCard({ transaction }) {
         {status === "PENDING" && (
           <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
             <AlertCircle className="h-4 w-4 inline mr-2" />
-            Giao dịch đang chờ xử lý. Vui lòng hoàn tất thanh toán.
+            {t("layout.transactions.card.pending")}
           </div>
         )}
 
         {status === "CANCELLED" && (
           <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800">
             <XCircle className="h-4 w-4 inline mr-2" />
-            Giao dịch đã bị hủy hoặc thanh toán không thành công.
+            {t("layout.transactions.card.cancelled")}
           </div>
         )}
 
         {status === "EXPIRED" && (
           <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-800">
             <AlertCircle className="h-4 w-4 inline mr-2" />
-            Giao dịch đã hết hạn.
+            {t("layout.transactions.card.expired")}
           </div>
         )}
       </CardContent>
