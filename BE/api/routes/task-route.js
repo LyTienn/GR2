@@ -1,8 +1,8 @@
-import express from "express";
-import { getTaskStatus } from "../controllers/task-controller.js";
+// import express from "express";
+// import { getTaskStatus } from "../controllers/task-controller.js";
 
-const router = express.Router();
+// const router = express.Router();
 
-router.get("/:taskId", getTaskStatus);
+// router.get("/:taskId", getTaskStatus);
 
-export default router;
+// export default router;

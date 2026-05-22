@@ -12,9 +12,9 @@ import Chapter from "./chapter-model.js";
 import Bookshelf from "./bookshelf-model.js";
 import BookBookshelf from "./book_bookshelf-model.js";
 import Subscription from "./subscription-model.js"
-import Task from "./task-model.js";
-import Translation from "./translation-model.js";
-import SystemSettings from "./system-settings-model.js";
+// import Task from "./task-model.js";
+// import Translation from "./translation-model.js";
+// import SystemSettings from "./system-settings-model.js";
 import CommentReaction from "./comment-reaction-model.js";
 import ChapterNote from "./chapterNote-model.js";
 
@@ -89,12 +89,12 @@ const setupAssociations = () => {
   Subscription.belongsTo(User, { foreignKey: "user_id", as: "user" });
 
   // Task - Chapter
-  Task.belongsTo(Chapter, { foreignKey: "chapter_id", as: "chapter" });
-  Chapter.hasMany(Task, { foreignKey: "chapter_id", as: "tasks" });
+  // Task.belongsTo(Chapter, { foreignKey: "chapter_id", as: "chapter" });
+  // Chapter.hasMany(Task, { foreignKey: "chapter_id", as: "tasks" });
 
-  // Chapter - Translation
-  Chapter.hasMany(Translation, { foreignKey: "chapter_id", as: "translations" });
-  Translation.belongsTo(Chapter, { foreignKey: "chapter_id", as: "chapter" });
+  // // Chapter - Translation
+  // Chapter.hasMany(Translation, { foreignKey: "chapter_id", as: "translations" });
+  // Translation.belongsTo(Chapter, { foreignKey: "chapter_id", as: "chapter" });
 
   // User - CommentReaction
   User.hasMany(CommentReaction, { foreignKey: "user_id", as: "reactions", onDelete: 'CASCADE' });
@@ -130,8 +130,8 @@ export {
   Bookshelf,
   BookBookshelf,
   Subscription,
-  Task,
-  Translation,
+  // Task,
+  // Translation,
   CommentReaction,
   ChapterNote,
 };
@@ -149,8 +149,8 @@ export default {
   Bookshelf,
   BookBookshelf,
   Subscription,
-  Task,
-  Translation,
+  // Task,
+  // Translation,
   CommentReaction,
   ChapterNote,
 };

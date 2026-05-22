@@ -1,8 +1,8 @@
-import { Router } from "express";
-import { summarizeChapter } from "../controllers/summary-controller.js";
+// import { Router } from "express";
+// import { summarizeChapter } from "../controllers/summary-controller.js";
 
-const router = Router();
+// const router = Router();
 
-router.post("/", summarizeChapter);
+// router.post("/", summarizeChapter);
 
-export default router;
+// export default router;
