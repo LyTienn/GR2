@@ -4,7 +4,7 @@ import Author from "../models/author-model.js";
 import BookSubject from "../models/book_subject-model.js";
 import BookShelf from "../models/bookshelf-model.js";
 import BookBookshelf from "../models/book_bookshelf-model.js";
-import { addBookToVectorStore } from "../services/rag-service.js";
+// import { addBookToVectorStore } from "../services/rag-service.js";
 import { Op } from "sequelize";
 import sequelize from "../config/db-config.js";
 
@@ -275,7 +275,7 @@ export const createBook = async (req, res) => {
     });
 
     // Trigger embedding generation for RAG (async)
-    addBookToVectorStore(book.id).catch(err => console.error("Background embedding generation failed:", err));
+    // addBookToVectorStore(book.id).catch(err => console.error("Background embedding generation failed:", err));
 
     res.status(201).json({ success: true, data: bookWithDetails, message: "Tạo sách thành công" });
   } catch (error) {
@@ -344,7 +344,7 @@ export const getSimilarBooks = async (req, res) => {
   try {
     const { id } = req.params;
 
-    //Raw Query lấy mảng ID sách tương tự từ bảng book_recommendations
+    // 1. Raw Query lấy mảng ID sách tương tự từ bảng book_recommendations
     const [recommendation] = await sequelize.query(
       'SELECT similar_book_ids FROM book_recommendations WHERE book_id = :bookId',
       {
@@ -352,20 +352,45 @@ export const getSimilarBooks = async (req, res) => {
         type: sequelize.QueryTypes.SELECT
       }
     );
-    if (!recommendation || !recommendation.similar_book_ids || recommendation.similar_book_ids.length === 0) {
-      return res.json({ success: true, data: [] });
-    }
-    let similarBookIds = recommendation.similar_book_ids;
-    if (typeof similarBookIds === 'string') {
-      const cleanString = similarBookIds.replaceAll('{', '[').replaceAll('}', ']');
-      similarBookIds = JSON.parse(cleanString);
+
+    let similarBookIds = [];
+    if (recommendation && recommendation.similar_book_ids) {
+      similarBookIds = recommendation.similar_book_ids;
+      if (typeof similarBookIds === 'string') {
+        try {
+          const cleanString = similarBookIds.replaceAll('{', '[').replaceAll('}', ']');
+          similarBookIds = JSON.parse(cleanString);
+        } catch {
+          similarBookIds = [];
+        }
+      }
     }
 
-    // Nếu sau khi parse vẫn rỗng thì thoát
+    //(FALLBACK) - NẾU MẢNG ID RỖNG (SÁCH MỚI)
     if (!Array.isArray(similarBookIds) || similarBookIds.length === 0) {
-      return res.json({ success: true, data: [] });
+      // Tìm thông tin cuốn sách hiện tại để biết author_id của nó
+      const currentBook = await Book.findByPk(id);
+      
+      if (!currentBook) {
+        return res.json({ success: true, data: [] });
+      }
+
+      // Quét lấy tối đa 5 cuốn sách của cùng tác giả (loại trừ chính nó) làm gợi ý thay thế
+      const fallbackBooks = await Book.findAll({
+        where: {
+          author_id: currentBook.author_id,
+          id: { [Op.ne]: id }, // Không gợi ý lại chính cuốn sách đang xem
+          is_deleted: 0
+        },
+        include: [{ model: Author, as: "author", attributes: ["name"] }],
+        attributes: ['id', 'title', 'image_url', 'type'],
+        limit: 5
+      });
+
+      return res.json({ success: true, data: fallbackBooks });
     }
 
+    // NẾU AI CÓ DỮ LIỆU -> Lấy thông tin chi tiết và sắp xếp theo đúng thứ tự
     const similarBooks = await Book.findAll({
       where: { id: { [Op.in]: similarBookIds }, is_deleted: 0 },
       include: [{ model: Author, as: "author", attributes: ["name"] }],

@@ -22,7 +22,7 @@ import chatbotRoutes from "./routes/chatbot-route.js";
 import subscriptionRoutes from "./routes/subscription-route.js";
 import chapterRoutes from "./routes/chapter-route.js";
 import chapterNoteRoutes from "./routes/chapterNote-route.js";
-import { initializeVectorStore } from "./services/rag-service.js";
+// import { initializeVectorStore } from "./services/rag-service.js";
 import cron from "node-cron";
 import PaymentController from "./controllers/payment-controller.js";
 

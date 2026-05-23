@@ -11,9 +11,8 @@ const Book = sequelize.define("books", {
   summary: { type: DataTypes.TEXT },
   image_url: { type: DataTypes.TEXT },
   txt_url: { type: DataTypes.TEXT },
-  created_at: { type: DataTypes.DATE },
+  created_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
   type: { type: DataTypes.ENUM('FREE', 'PREMIUM'), allowNull: false, defaultValue: 'FREE' },
-  embedding: { type: DataTypes.TEXT }, // Stores JSON string of embedding vector
   is_deleted: { type: DataTypes.INTEGER, defaultValue: 0 },
 }, {
   timestamps: false
