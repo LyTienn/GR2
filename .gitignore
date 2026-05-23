@@ -6,3 +6,5 @@ BE/scripts/
 .env
 Data/data.backup
 data_5500.backup
+env/
+**/env/

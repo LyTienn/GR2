@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getAllBooks, getBookById, getBookChapters, createBook, updateBook, deleteBook } from "../controllers/book-controller.js";
+import { getAllBooks, getBookById, getBookChapters, createBook, updateBook, deleteBook, getSimilarBooks } from "../controllers/book-controller.js";
 import { authenticate, authorizeRoles } from "../middlewares/auth-middleware.js";
 
 const router = Router();
@@ -8,6 +8,7 @@ const router = Router();
 router.get("/", getAllBooks);
 router.get("/:id", getBookById);
 router.get("/:id/chapters", authenticate, getBookChapters);
+router.get("/:id/similar", getSimilarBooks); // lấy sách tương tự dựa trên AI Recommendation
 
 // Admin routes
 router.post("/", authenticate, authorizeRoles("ADMIN"), createBook);

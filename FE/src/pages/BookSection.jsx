@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { Heart, BookOpen, Share2, ChevronRight, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import BookCard from "@/components/BookCard";
 import { toast } from "react-toastify";
 import {
   Dialog,
@@ -30,6 +31,7 @@ export default function BookSection({ book: bookProp }) {
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [book, setBook] = useState(bookProp || null);
   const [showFullSummary, setShowFullSummary] = useState(false);
+  const [similarBooks, setSimilarBooks] = useState([]);
   const { isAuthenticated } = useSelector((state) => state.auth);
 
   useEffect(() => {
@@ -54,22 +56,36 @@ export default function BookSection({ book: bookProp }) {
   }, [params.id, bookProp]);
 
   useEffect(() => {
-  if (isAuthenticated && book?.id) {
-    const subscription = HttpClient.get(`/bookshelf/books/${book.id}/check`)
-      .subscribe({
+    if (isAuthenticated && book?.id) {
+      const subscription = HttpClient.get(`/bookshelf/books/${book.id}/check`)
+        .subscribe({
+          next: (res) => {
+            if (res.success && res.data) {
+              setIsFavorite(res.data.isFavorite);
+            }
+          },
+          error: (error) => {
+            console.error("Lỗi check status:", error);
+          }
+        });
+
+      return () => subscription.unsubscribe();
+    }
+  }, [isAuthenticated, book?.id]);
+
+  useEffect(() => {
+    if (book?.id) {
+      const subscription = HttpClient.get(`/books/${book.id}/similar`).subscribe({
         next: (res) => {
           if (res.success && res.data) {
-            setIsFavorite(res.data.isFavorite);
+            setSimilarBooks(res.data);
           }
         },
-        error: (error) => {
-          console.error("Lỗi check status:", error);
-        }
+        error: (err) => console.error("Lỗi lấy sách tương tự:", err)
       });
-
-    return () => subscription.unsubscribe();
-  }
-}, [isAuthenticated, book?.id]);
+      return () => subscription.unsubscribe();
+    }
+  }, [book?.id]);
 
   if (!book) {
     return (
@@ -280,6 +296,19 @@ export default function BookSection({ book: bookProp }) {
             </div>
           </div>
         </div>
+        
+        {similarBooks.length > 0 && (
+          <div className="mt-12 mb-8">
+            <h2 className="text-2xl font-bold mb-6">{t("layout.bookdetailpage.maybeLikeTitle")}</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
+              {similarBooks.map((simBook) => (
+                <div key={simBook.id} className="cursor-pointer transition-transform hover:-translate-y-1" onClick={() => window.scrollTo(0, 0)}>
+                  <BookCard book={simBook} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="mt-4 pt-8">
           <div className="mb-6">

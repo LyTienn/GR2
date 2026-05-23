@@ -338,3 +338,47 @@ export const updateBook = async (req, res) => {
     res.status(500).json({ success: false, message: "Lỗi cập nhật sách", error: error.message });
   }
 };
+
+// Đề xuất danh sách sách tương đồng (AI)
+export const getSimilarBooks = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    //Raw Query lấy mảng ID sách tương tự từ bảng book_recommendations
+    const [recommendation] = await sequelize.query(
+      'SELECT similar_book_ids FROM book_recommendations WHERE book_id = :bookId',
+      {
+        replacements: { bookId: id },
+        type: sequelize.QueryTypes.SELECT
+      }
+    );
+    if (!recommendation || !recommendation.similar_book_ids || recommendation.similar_book_ids.length === 0) {
+      return res.json({ success: true, data: [] });
+    }
+    let similarBookIds = recommendation.similar_book_ids;
+    if (typeof similarBookIds === 'string') {
+      const cleanString = similarBookIds.replaceAll('{', '[').replaceAll('}', ']');
+      similarBookIds = JSON.parse(cleanString);
+    }
+
+    // Nếu sau khi parse vẫn rỗng thì thoát
+    if (!Array.isArray(similarBookIds) || similarBookIds.length === 0) {
+      return res.json({ success: true, data: [] });
+    }
+
+    const similarBooks = await Book.findAll({
+      where: { id: { [Op.in]: similarBookIds }, is_deleted: 0 },
+      include: [{ model: Author, as: "author", attributes: ["name"] }],
+      attributes: ['id', 'title', 'image_url', 'type'] 
+    });
+
+    const sortedBooks = similarBookIds
+      .map(bookId => similarBooks.find(b => b.id === bookId))
+      .filter(Boolean);
+
+    res.json({ success: true, data: sortedBooks });
+  } catch (error) {
+    console.error("Lỗi lấy sách tương tự:", error);
+    res.status(500).json({ success: false, message: "Lỗi lấy sách tương tự", error: error.message });
+  }
+};

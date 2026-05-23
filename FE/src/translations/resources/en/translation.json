@@ -152,6 +152,7 @@
       "readBtn": "Read Book",
       "showSummaryBtn": "See more",
       "hideSummaryBtn": "Show less",
+      "maybeLikeTitle": "You may also like",
       "dialogShare": {
         "title": "Share this book",
         "titleleft": "Share",

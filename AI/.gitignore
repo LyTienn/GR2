@@ -1,0 +1,13 @@
+# Chặn thư mục môi trường ảo
+env/
+venv/
+ENV/
+
+# Chặn các file bộ nhớ đệm của Python khi chạy code
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Chặn các file cấu hình của VS Code trong thư mục này (nếu có)
+.vscode/
