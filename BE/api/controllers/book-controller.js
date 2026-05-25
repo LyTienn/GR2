@@ -24,39 +24,37 @@ if (!Book.associations.bookshelves) {
   });
 }
 
-
-
 export const getAllBooks = async (req, res) => {
   try {
     const { subjectId, authorId, keyword, q, type, sort } = req.query;
-    
     const pageNum = Math.max(1, parseInt(req.query.page, 10) || 1);
     const limitNum = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 10));
     const offset = (pageNum - 1) * limitNum;
 
     let where = { is_deleted: 0 }; 
 
-    let order = [['created_at', 'DESC']]; 
+    let order = [['created_at', 'DESC'], ['id', 'ASC']]; 
+    
     if (sort) {
       switch (sort) {
         case 'id':
           order = [['id', 'ASC']];
           break;
         case 'oldest':
-          order = [['created_at', 'ASC']];
+          order = [['created_at', 'ASC'], ['id', 'ASC']];
           break;
         case 'a-z':
-          order = [['title', 'ASC']];
+          order = [['title', 'ASC'], ['id', 'ASC']];
           break;
         case 'z-a':
-          order = [['title', 'DESC']];
+          order = [['title', 'DESC'], ['id', 'ASC']];
           break;
         case 'views':
-          order = [['download_count', 'DESC']]; // Assuming download_count ~ views/popularity
+          order = [['download_count', 'DESC'], ['id', 'ASC']]; 
           break;
         case 'newest':
         default:
-          order = [['created_at', 'DESC']];
+          order = [['created_at', 'DESC'], ['id', 'ASC']];
       }
     }
 
@@ -109,7 +107,6 @@ export const getAllBooks = async (req, res) => {
         as: "bookshelves"
       }
     ];
-
 
     const { count, rows } = await Book.findAndCountAll({
       where,

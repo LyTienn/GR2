@@ -236,7 +236,7 @@ export default function ReadBookPage() {
   else if (themeMode === "sepia") headerThemeClasses = "bg-[#e9dec5]/90 border-[#d5c7a3]";
 
   return (
-    <div className={`min-h-screen flex w-full overflow-hidden select-none ${themeContainerClasses}`}>
+    <div className={`min-h-screen flex w-full overflow-hidden select-none ${themeContainerClasses} theme-${themeMode}`}>
       
       {/* LEFTSIDEBAR */}
       <LeftSidebar 
@@ -333,6 +333,7 @@ export default function ReadBookPage() {
         currentTheme={currentTheme}
         isFullScreen={isFullScreen}
         toggleFullScreen={toggleFullScreen}
+        bookTitle={book?.title}
         t={t}
       />
 

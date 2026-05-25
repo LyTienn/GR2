@@ -1,35 +1,18 @@
-import "dotenv/config"; // Đọc API Key từ file .env
+import dotenv from 'dotenv';
+dotenv.config();
 
-async function listAvailableModels() {
-    try {
-        const apiKey = process.env.GEMINI_API_KEY;
-        if (!apiKey) {
-            console.log("❌ Không tìm thấy GEMINI_API_KEY trong file .env");
-            return;
-        }
-
-        const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
-        const response = await fetch(url);
-        const data = await response.json();
-
-        if (data.error) {
-            console.log("❌ Lỗi từ Google:", data.error.message);
-            return;
-        }
-
-        console.log("✅ DANH SÁCH CÁC MODEL BẠN ĐƯỢC PHÉP SỬ DỤNG:");
-        console.log("--------------------------------------------------");
-        data.models.forEach(model => {
-            // Chỉ in ra các model hỗ trợ generateContent (tạo văn bản)
-            if (model.supportedGenerationMethods.includes("generateContent")) {
-                console.log(`Tên chuẩn: "${model.name.replace('models/', '')}"`);
-                console.log(`Mô tả: ${model.displayName}\n`);
-            }
-        });
-
-    } catch (error) {
-        console.error("Lỗi kết nối:", error);
-    }
+async function checkEmbeddingModels() {
+    // Gọi thẳng vào máy chủ Google AI Studio
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${process.env.GEMINI_API_KEY_1}`);
+    const data = await response.json();
+    
+    // Lọc ra danh sách các model có chức năng "embedContent" (chuyển chữ thành Vector)
+    const embeddingModels = data.models.filter(m => 
+        m.supportedGenerationMethods && m.supportedGenerationMethods.includes("embedContent")
+    );
+    
+    console.log("Danh sách các Model chuyên tạo Vector của Google:");
+    embeddingModels.forEach(m => console.log(`- ${m.name} (Bản mới nhất: ${m.version})`));
 }
 
-listAvailableModels();
+checkEmbeddingModels();

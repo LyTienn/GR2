@@ -32,20 +32,18 @@ export default function SettingsPanel({ readerSettings, updateSetting, t }) {
       <div className="space-y-3">
         <label className="text-xs font-semibold uppercase text-slate-500">{t("layout.readpage.showSetting.fontStyle")}</label>
         <div className="grid grid-cols-2 gap-2">
-          <Button
-            variant={readerSettings.fontFamily === 'font-sans' ? 'default' : 'outline'}
+          <button
             onClick={() => updateSetting('fontFamily', 'font-sans')}
-            className="w-full font-sans transition-all duration-200 hover:shadow-md"
+            className={`py-2 rounded-md border font-medium transition-all duration-200 font-sans ${readerSettings.fontFamily === 'font-sans' ? 'border-blue-500 ring-1 ring-blue-500 shadow-md bg-slate-100 dark:bg-slate-800' : 'border-slate-200 dark:border-slate-700 hover:shadow-md hover:bg-slate-50 dark:hover:bg-slate-800'} text-slate-900 dark:text-slate-100`}
           >
             Sans-serif
-          </Button>
-          <Button
-            variant={readerSettings.fontFamily === 'font-serif' ? 'default' : 'outline'}
+          </button>
+          <button
             onClick={() => updateSetting('fontFamily', 'font-serif')}
-            className="w-full font-serif transition-all duration-200 hover:shadow-md"
+            className={`py-2 rounded-md border font-medium transition-all duration-200 font-serif ${readerSettings.fontFamily === 'font-serif' ? 'border-blue-500 ring-1 ring-blue-500 shadow-md bg-slate-100 dark:bg-slate-800' : 'border-slate-200 dark:border-slate-700 hover:shadow-md hover:bg-slate-50 dark:hover:bg-slate-800'} text-slate-900 dark:text-slate-100`}
           >
             Serif
-          </Button>
+          </button>
         </div>
       </div>
 

@@ -413,6 +413,13 @@
       "submitDeleteDescription": "Bạn có chắc chắn muốn xóa đánh giá này không? Hành động này không thể hoàn tác",
       "deleteBtn": "Xóa",
       "editBtn": "Sửa"
+    },
+    "chatPanel": {
+      "greeting": "Chào bạn! Mình là trợ lý AI. Bạn có câu hỏi nào về cuốn sách",
+      "thinkingLoading": "Đang suy nghĩ...",
+      "placeholder": "Hỏi AI về sách này...",
+      "errorFormat": "❌ Lỗi:",
+      "connectionError": "❌ Không thể kết nối đến máy chủ AI."
     }
   },
   "toasts": {

@@ -17,6 +17,7 @@ import Subscription from "./subscription-model.js"
 // import SystemSettings from "./system-settings-model.js";
 import CommentReaction from "./comment-reaction-model.js";
 import ChapterNote from "./chapterNote-model.js";
+import ChapterEmbedding from "./chapterEmbedding_model.js";
 
 // Định nghĩa tất cả associations tại ĐÂY
 const setupAssociations = () => {
@@ -111,6 +112,10 @@ const setupAssociations = () => {
   // Chapter - ChapterNote
   Chapter.hasMany(ChapterNote, { foreignKey: "chapter_id", as: "notes", onDelete: 'CASCADE' });
   ChapterNote.belongsTo(Chapter, { foreignKey: "chapter_id", as: "chapter" });
+
+  // Chapter - ChapterEmbedding
+  Chapter.hasMany(ChapterEmbedding, { foreignKey: "chapter_id", as: "embeddings", onDelete: 'CASCADE' });
+  ChapterEmbedding.belongsTo(Chapter, { foreignKey: "chapter_id", as: "chapter" });
 };
 
 // Gọi setup associations
@@ -134,6 +139,7 @@ export {
   // Translation,
   CommentReaction,
   ChapterNote,
+  ChapterEmbedding,
 };
 
 export default {
@@ -153,4 +159,5 @@ export default {
   // Translation,
   CommentReaction,
   ChapterNote,
+  ChapterEmbedding,
 };

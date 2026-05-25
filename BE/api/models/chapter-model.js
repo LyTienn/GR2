@@ -12,7 +12,14 @@ const Chapter = sequelize.define("chapters", {
   comic_data: { type: DataTypes.JSON, defaultValue: [] }, // Stores [{ url, caption, order }]
 }, {
   freezeTableName: true,
-  timestamps: false
+  timestamps: false,
+  indexes: [
+    {
+      unique: true,
+      fields: ['book_id', 'title'],
+      name: 'unique_book_chapter'
+    }
+  ]
 });
 
 export default Chapter;
