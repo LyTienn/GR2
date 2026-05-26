@@ -75,37 +75,67 @@ export const syncBookToVector = async (bookId) => {
     }
 };
 
-export const chatWithAgent = async (message, currentBookTitle, userName) => {
+export const chatWithAgent = async (message, currentBookTitle, currentChapterId, userName) => {
     try {
-        // 1. Chuyển câu hỏi của người dùng thành Vector (768 chiều)
+        // (Metadata) 
+        let metaContext = `Cuốn sách người dùng đang đọc: ${currentBookTitle || 'Không rõ'}\n`;
+
+        if (currentBookTitle) {
+            // total chapters
+            const [[bookMeta]] = await sequelize.query(
+                `SELECT COUNT(c.id) as total_chapters FROM books b JOIN chapters c ON b.id = c.book_id WHERE b.title = :title`,
+                { replacements: { title: currentBookTitle }, logging: false }
+            );
+            if (bookMeta) metaContext += `Tổng số chương của sách: ${bookMeta.total_chapters}\n`;
+        }
+
+        if (currentChapterId) {
+            // Lấy tiêu đề chương hiện tại
+            const [[chapterMeta]] = await sequelize.query(
+                `SELECT title FROM chapters WHERE id = :id`,
+                { replacements: { id: currentChapterId }, logging: false }
+            );
+            if (chapterMeta) metaContext += `Chương hiện tại người dùng đang đọc: ${chapterMeta.title}\n`;
+        }
+
+        // 2. Chuyển câu hỏi thành Vector
         const queryVector = await embeddings.embedQuery(message);
         const vectorString = JSON.stringify(queryVector);
 
-        // 2. Chọc vào DB: JOIN bảng để khoanh vùng CHỈ TÌM TRONG CUỐN SÁCH ĐANG MỞ
-        const [results] = await sequelize.query(`
+        // 3. Tìm kiếm Vector
+        let query = `
             SELECT e.chunk_content, 
                    1 - (e.embedding::vector <=> :queryVector::vector) as similarity
             FROM chapter_embeddings e
-            JOIN chapters c ON e.chapter_id = c.id
-            JOIN books b ON c.book_id = b.id
-            WHERE b.title = :bookTitle
-            ORDER BY e.embedding::vector <=> :queryVector::vector
-            LIMIT 5;
-        `, {
-            replacements: { 
-                queryVector: vectorString,
-                bookTitle: currentBookTitle 
-            },
-            logging: false 
-        });
+        `;
+        const replacements = { queryVector: vectorString };
 
-        // 3. Gộp 5 đoạn văn bản làm "Tài liệu tham khảo"
+        if (currentChapterId) {
+            query += ` WHERE e.chapter_id = :chapterId`;
+            replacements.chapterId = currentChapterId;
+        } else if (currentBookTitle) {
+            query += `
+                JOIN chapters c ON e.chapter_id = c.id
+                JOIN books b ON c.book_id = b.id
+                WHERE b.title = :bookTitle
+            `;
+            replacements.bookTitle = currentBookTitle;
+        } else {
+            query += ` WHERE 1=1`; 
+        }
+
+        query += ` ORDER BY e.embedding::vector <=> :queryVector::vector LIMIT 5;`;
+
+        const [results] = await sequelize.query(query, { replacements, logging: false });
         const context = results.map(r => r.chunk_content).join("\n\n");
 
-        // 4. Bơm prompt cho LLM
-        const prompt = `Bạn là trợ lý AI đọc sách. Dựa vào tài liệu tham khảo dưới đây để trả lời câu hỏi một cách ngắn gọn, chính xác. Nếu thông tin không có trong tài liệu, hãy nói là bạn không biết, tuyệt đối không bịa đặt.
+        // Prompt 
+        const prompt = `Bạn là trợ lý AI đọc sách. Dựa vào [THÔNG TIN HỆ THỐNG] và [TÀI LIỆU THAM KHẢO] dưới đây để trả lời câu hỏi một cách ngắn gọn, tự nhiên. Nếu thông tin không có, hãy nói là bạn không biết.
         
-        Tài liệu tham khảo (trích xuất từ sách ${currentBookTitle || ''}):
+        [THÔNG TIN HỆ THỐNG]
+        ${metaContext}
+        
+        [TÀI LIỆU THAM KHẢO (Trích xuất từ nội dung sách)]
         ${context}
         
         Người hỏi: ${userName || 'Khách'}

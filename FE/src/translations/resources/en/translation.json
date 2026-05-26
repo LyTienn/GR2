@@ -308,6 +308,7 @@
         "amount": "Payment Amount",
         "transactionDate": "Transaction Date",
         "expiryDate": "Expiry Date",
+        "active": "Transaction successful.",
         "pending": "Transaction is pending. Please complete the payment.",
         "cancelled": "Transaction has been cancelled or payment failed.",
         "expired": "Transaction has expired."
@@ -429,7 +430,12 @@
       "registerSuccess": "Registration successful. Please log in.",
       "updateProfileSuccess": "Profile updated successfully",
       "changePasswordSuccess": "Password changed successfully",
-      "deleteAccountSuccess": "Account deleted. See you later!"
+      "deleteAccountSuccess": "Account deleted. See you later!",
+      "handleCopyLink": "Book link copied to clipboard!",
+      "toggleFavorite": {
+        "add": "Added to favorites!",
+        "remove": "Removed from favorites!"
+      }
     },
     "error": {
       "confirmPassword": "Passwords do not match",
@@ -440,7 +446,8 @@
       "updateProfileError": "Error updating profile",
       "passwordTooShort": "New password must be at least 6 characters",
       "currentPasswordWrong": "Current password is incorrect",
-      "deleteAccountError": "Password is incorrect or server error"
+      "deleteAccountError": "Password is incorrect or server error",
+      "loginToContinue": "Please log in to continue"
     },
     "warn": {
       "missingFields": "Please fill in all required fields"    },

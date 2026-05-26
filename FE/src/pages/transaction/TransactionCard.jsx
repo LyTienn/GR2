@@ -114,7 +114,7 @@ export default function TransactionCard({ transaction }) {
             className={`${statusConfig.color} gap-1.5 px-3 py-1.5 font-medium`}
           >
             <StatusIcon className={`h-4 w-4 ${statusConfig.iconColor}`} />
-            {statusConfig.statusText}
+            {/* {statusConfig.statusText} */}
           </Badge>
         </div>
       </CardHeader>
@@ -151,6 +151,13 @@ export default function TransactionCard({ transaction }) {
         </div>
 
         {/* Ghi chú */}
+        {status === "ACTIVE" && (
+          <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-800">
+            <CheckCircle2 className="h-4 w-4 inline mr-2" />
+            {t("layout.transactions.card.active")}
+          </div>
+        )}
+
         {status === "PENDING" && (
           <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
             <AlertCircle className="h-4 w-4 inline mr-2" />

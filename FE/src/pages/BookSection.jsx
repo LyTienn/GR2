@@ -98,7 +98,7 @@ export default function BookSection({ book: bookProp }) {
   // LOGIC 3: Xử lý Toggle
   const handleToggleFavorite = async () => {
   if (!isAuthenticated) {
-    toast.error("Bạn cần đăng nhập để thêm sách vào yêu thích");
+    toast.error(t("toasts.error.loginToContinue"));
     navigate("/login");
     return;
   }
@@ -111,7 +111,7 @@ export default function BookSection({ book: bookProp }) {
       HttpClient.delete(`/bookshelf/books/${book.id}?status=FAVORITE`)
         .subscribe({
           next: () => {
-            toast.success("Đã xóa sách khỏi yêu thích");
+            toast.success(t("toasts.success.toggleFavorite.remove"));
             window.dispatchEvent(new Event("bookshelf-updated"));
           },
           error: (error) => {
@@ -123,7 +123,7 @@ export default function BookSection({ book: bookProp }) {
       HttpClient.post(`/bookshelf/books/${book.id}`, { status: "FAVORITE" })
         .subscribe({
           next: () => {
-            toast.success("Đã thêm sách vào yêu thích");
+            toast.success(t("toasts.success.toggleFavorite.add"));
             window.dispatchEvent(new Event("bookshelf-updated"));
           },
           error: (error) => {
@@ -138,7 +138,6 @@ export default function BookSection({ book: bookProp }) {
   }
 };
 
-  // --- CÁC HÀM XỬ LÝ UI KHÁC GIỮ NGUYÊN ---
   const handleReadBook = () => {
     if (book?.id) {
       navigate(`/book/${book.id}/read`);
@@ -148,7 +147,7 @@ export default function BookSection({ book: bookProp }) {
   const handleCopyLink = () => {
     const url = window.location.href
     navigator.clipboard.writeText(url)
-    toast.success("Đã sao chép liên kết vào clipboard");
+    toast.success(t("toasts.success.handleCopyLink"));
     setShareDialogOpen(false)
   }
 
@@ -161,9 +160,9 @@ export default function BookSection({ book: bookProp }) {
       case "facebook":
         shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`
         break
-      case "twitter":
-        shareUrl = `https://twitter.com/intent/tweet?url=${url}&text=${title}`
-        break
+      // case "twitter":
+      //   shareUrl = `https://twitter.com/intent/tweet?url=${url}&text=${title}`
+      //   break
       case "linkedin":
         shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${url}`
         break
@@ -266,7 +265,7 @@ export default function BookSection({ book: bookProp }) {
                         </svg>
                         {t("layout.bookdetailpage.dialogShare.shareFacebookBtn")}
                       </Button>
-                      <Button
+                      {/* <Button
                         onClick={() => handleShareSocial("twitter")}
                         variant="outline"
                         className="w-full justify-start hover:bg-gray-100"
@@ -275,7 +274,7 @@ export default function BookSection({ book: bookProp }) {
                           <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z" />
                         </svg>
                         {t("layout.bookdetailpage.dialogShare.shareTwitterBtn")}
-                      </Button>
+                      </Button> */}
                       <Button
                         onClick={() => handleShareSocial("zalo")}
                         variant="outline"

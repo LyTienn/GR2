@@ -104,10 +104,10 @@ export default function useChapterNotes(bookId, chapterId, isAuthenticated, t) {
         const newNote = { ...res.data, chapter: { id: chapterId } };
         setHighlights(prev => [...prev, newNote]);
         closeModal();
-        toast.success(t("api.notes.saveSuccess", "Đã lưu ghi chú!"));
+        toast.success(t("layout.readpage.note.saveSuccess"));
       }
     } catch (error) {
-      toast.error(t("api.errors.DEFAULT_ERROR", "Lỗi lưu ghi chú"));
+      toast.error(t("layout.readpage.note.saveError"));
     }
   };
 
@@ -119,24 +119,24 @@ export default function useChapterNotes(bookId, chapterId, isAuthenticated, t) {
       if (res && res.success) {
         setHighlights(prev => prev.map(n => n.id === viewingNote.id ? { ...n, note_content: noteInput } : n));
         closeModal();
-        toast.success(t("api.notes.updateSuccess", "Đã cập nhật!"));
+        toast.success(t("layout.readpage.note.updateSuccess"));
       }
     } catch (error) {
-      toast.error(t("api.errors.DEFAULT_ERROR", "Lỗi cập nhật"));
+      toast.error(t("layout.readpage.note.updateError"));
     }
   };
 
   const handleDeleteNote = async () => {
-    if (!window.confirm(t("layout.readpage.confirmDeleteNote", "Xóa ghi chú này?"))) return;
+    if (!window.confirm(t("layout.readpage.note.confirmDeleteNote"))) return;
     try {
       const res = await firstValueFrom(HttpClient.delete(`/chapter-notes/${viewingNote.id}`));
       if (res && res.success) {
         setHighlights(prev => prev.filter(n => n.id !== viewingNote.id));
         closeModal();
-        toast.success(t("api.notes.deleteSuccess", "Đã xóa!"));
+        toast.success(t("layout.readpage.note.deleteSuccess"));
       }
     } catch (error) {
-      toast.error(t("api.errors.DEFAULT_ERROR", "Lỗi xóa ghi chú"));
+      toast.error(t("layout.readpage.note.deleteError"));
     }
   };
 

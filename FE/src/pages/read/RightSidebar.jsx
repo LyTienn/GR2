@@ -13,6 +13,7 @@ export default function RightSidebar({
   isFullScreen,
   toggleFullScreen,
   bookTitle,
+  chapterId,
   t 
 }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -131,7 +132,7 @@ export default function RightSidebar({
             ) : activeTab === 'settings' ? (
               <SettingsPanel readerSettings={readerSettings} updateSetting={updateSetting} t={t} />
             ) : (
-              <ChatPanel bookTitle={bookTitle} t={t} />
+              <ChatPanel bookTitle={bookTitle} chapterId={chapterId} t={t} />
             )}
           </div>
         </div>

@@ -3,6 +3,10 @@ import { useTranslation } from "react-i18next";
 
 export default function TransactionStats({ history }) {
   const { t } = useTranslation();
+  const getPackagePrice = (pkg) => {
+    const prices = { "3_THANG": 99000, "6_THANG": 179000, "12_THANG": 299000 };
+    return prices[pkg] || 0;
+  };
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -16,7 +20,7 @@ export default function TransactionStats({ history }) {
   ).length;
   const totalSpent = history
     .filter((t) => t.status === "ACTIVE")
-    .reduce((sum, t) => sum + t.amount, 0);
+    .reduce((sum, t) => sum + getPackagePrice(t.package_details), 0);
 
   return (
     <Card className="bg-slate-50 border-slate-200">

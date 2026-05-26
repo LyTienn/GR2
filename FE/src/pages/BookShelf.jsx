@@ -1,49 +1,45 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
-import { Library, BookOpen, Heart } from "lucide-react";
+import { Library, BookOpen, Heart, Search } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/HeaderBar";
 import BookCard from "@/components/BookCard";
 import { AccountSidebar } from "@/components/Account-sidebar";
 import { firstValueFrom } from "rxjs";
 import HttpClient from "@/service/HttpClient";
+import Pagination from "@/components/Pagination";
+
+const ITEMS_PER_PAGE = 10; 
 
 const BookShelf = () => {
     const { t } = useTranslation();
     const { isAuthenticated } = useSelector((state) => state.auth);
-    const navigate = useNavigate();
+    const navigate = useNavigate();    
     const [favorite, setFavorite] = useState([]);
     const [reading, setReading] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState("reading");
+    const [currentPage, setCurrentPage] = useState(1);
 
     const fetchBookshelf = useCallback(async () => {
-    if (!isAuthenticated) return;
-    setLoading(true);
-    try {
-        const [resFav, resRead] = await Promise.all([
-            firstValueFrom(HttpClient.get('/bookshelf?status=FAVORITE')),
-            firstValueFrom(HttpClient.get('/bookshelf?status=READING'))
-        ]);
-        
-        console.log("Response Favorite:", resFav);
-        console.log("Response Reading:", resRead);
-        
-        if (resFav?.data) {
-            setFavorite(resFav.data.favorites || []);
+        if (!isAuthenticated) return;
+        setLoading(true);
+        try {
+            const [resFav, resRead] = await Promise.all([
+                firstValueFrom(HttpClient.get('/bookshelf?status=FAVORITE')),
+                firstValueFrom(HttpClient.get('/bookshelf?status=READING'))
+            ]);
+            
+            if (resFav?.data) setFavorite(resFav.data.favorites || []);
+            if (resRead?.data) setReading(resRead.data.reading || []);
+        } catch (error) {
+            console.error("Lỗi tải tủ sách:", error);
+        } finally {
+            setLoading(false);
         }
-
-        if (resRead?.data) {
-            setReading(resRead.data.reading || []);
-        }
-
-    } catch (error) {
-        console.error("Lỗi tải tủ sách:", error);
-    } finally {
-        setLoading(false);
-    }
-}, [isAuthenticated]);
+    }, [isAuthenticated]);
 
     useEffect(() => {
         if (!isAuthenticated) {
@@ -53,76 +49,94 @@ const BookShelf = () => {
         fetchBookshelf();
     }, [isAuthenticated, navigate, fetchBookshelf]);
 
-    useEffect(() => {
-        const handleUpdate = () => fetchBookshelf();
-        window.addEventListener("bookshelf-updated", handleUpdate);
-        return () => window.removeEventListener("bookshelf-updated", handleUpdate);
-    }, [fetchBookshelf]);
+    const handleTabChange = (value) => {
+        setActiveTab(value);
+        setCurrentPage(1);
+    };
+
+    const currentBooksData = useMemo(() => {
+        const fullList = activeTab === "reading" ? reading : favorite;
+        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+        const slicedList = fullList.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+        const totalPages = Math.ceil(fullList.length / ITEMS_PER_PAGE);
+        return { slicedList, totalPages };
+    }, [activeTab, reading, favorite, currentPage]);
 
     if (!isAuthenticated) return null;
-    const totalBooks = favorite.length + reading.length;
-    const BookGrid = ({ books, emptyMessage }) => {
-        if (loading) return <div className="text-center py-12">{t("layout.bookshelf.loading")}</div>;
-        
-        if (!books || books.length === 0) {
-            return (
-                <div className="text-center py-12 bg-muted/30 rounded-lg">
-                    <Library className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-                    <p className="text-muted-foreground">{emptyMessage}</p>
-                </div>
-            );
-        }
-        return (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                {books.map((book) => (
-                    <BookCard key={book.id || book.book_id} book={book} />
-                ))}
-            </div>
-        );
-    };
 
     return (
         <div className="h-screen flex flex-col bg-background overflow-hidden">
             <Header />
             <main className="flex-1 flex overflow-hidden">
-                <div className="shrink-0">
+                <div className="shrink-0 border-r bg-card">
                     <AccountSidebar />
                 </div>
-                <div className="flex-1 overflow-y-scroll bg-background/50">
-                    <div className="container mx-auto px-8 py-8 max-w-6xl">
-                        <div className="mb-8">
-                            <div className="flex items-center gap-3 mb-2">
-                                <Library className="h-8 w-8 text-primary" />
-                                <h1 className="text-3xl font-bold">{t("layout.bookshelf.title")}</h1>
+
+                <div className="flex-1 flex flex-col overflow-hidden bg-slate-50/50 dark:bg-transparent">
+                    <div className="shrink-0 px-8 pt-8 pb-4">
+                        <div className="flex items-center justify-between mb-6">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-primary/10 rounded-lg">
+                                    <Library className="h-6 w-6 text-primary" />
+                                </div>
+                                <h1 className="text-2xl font-bold tracking-tight">{t("layout.bookshelf.title")}</h1>
                             </div>
-                            {favorite.length === 0 && reading.length === 0 && (
-                                <p className="text-muted-foreground text-lg">
-                                    {t("layout.bookshelf.emptyMessage")}
-                                </p>
-                            )}
                         </div>
-                        <Tabs defaultValue="reading" className="w-full">
-                            <TabsList className="grid w-full max-w-xs grid-cols-2 mb-8 gap-2">
-                                <TabsTrigger value="reading" className="flex items-center gap-2 hover:bg-gray-100">
+
+                        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+                            <TabsList className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground w-fit mb-2">
+                                <TabsTrigger value="reading" className="px-6 flex items-center gap-2">
                                     <BookOpen className="h-4 w-4" />
                                     {t("layout.bookshelf.tabs.reading")} ({reading.length})
                                 </TabsTrigger>
-                                <TabsTrigger value="favorite" className="flex items-center gap-2 hover:bg-gray-100">
+                                <TabsTrigger value="favorite" className="px-6 flex items-center gap-2">
                                     <Heart className="h-4 w-4" />
                                     {t("layout.bookshelf.tabs.favorite")} ({favorite.length})
                                 </TabsTrigger>
                             </TabsList>
-
-                            <TabsContent value="reading" className="pb-20 focus-visible:ring-0 focus-visible:outline-none">
-                                <BookGrid books={reading} emptyMessage={t("layout.bookshelf.emptyStates.reading")} />
-                            </TabsContent>
-
-                            <TabsContent value="favorite" className="pb-20 focus-visible:ring-0 focus-visible:outline-none">
-                                <BookGrid books={favorite} emptyMessage={t("layout.bookshelf.emptyStates.favorite")} />
-                            </TabsContent>
                         </Tabs>
-
                     </div>
+
+                    {/* 2. Vùng cuộn danh sách sách (Chỉ cuộn ở đây) */}
+                    <div className="flex-1 overflow-y-auto custom-scrollbar px-8">
+                        <div className="max-w-7xl mx-auto py-4">
+                            {loading ? (
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 animate-pulse">
+                                    {[...Array(5)].map((_, i) => (
+                                        <div key={i} className="aspect-3/4 bg-muted rounded-xl" />
+                                    ))}
+                                </div>
+                            ) : currentBooksData.slicedList.length > 0 ? (
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-8">
+                                    {currentBooksData.slicedList.map((book) => (
+                                        <BookCard key={book.id || book.book_id} book={book} />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="flex flex-col items-center justify-center py-20 text-center bg-card/50 border border-dashed rounded-2xl">
+                                    <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+                                        <Library className="h-8 w-8 text-muted-foreground" />
+                                    </div>
+                                    <p className="text-muted-foreground font-medium">
+                                        {activeTab === "reading" ? t("layout.bookshelf.emptyStates.reading") : t("layout.bookshelf.emptyStates.favorite")}
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {currentBooksData.totalPages > 1 && (
+                        <div className="shrink-0 bg-background/80 backdrop-blur-md px-8 py-4">
+                            <div className="max-w-7xl mx-auto flex justify-center">
+                                <Pagination 
+                                    currentPage={currentPage}
+                                    totalPages={currentBooksData.totalPages}
+                                    onPageChange={(page) => setCurrentPage(page)}
+                                    className="w-full max-w-2xl"
+                                />
+                            </div>
+                        </div>
+                    )}
                 </div>
             </main>
         </div>

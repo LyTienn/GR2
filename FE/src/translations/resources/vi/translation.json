@@ -206,7 +206,7 @@
         "deleteNote": "Xóa",
         "editNote": "Chỉnh sửa",
         "updateNote": "Cập nhật",
-        "saveNote": "Lưu ghi chú",
+        "saveNote": "Lưu",
         "confirmDeleteNote": "Bạn có chắc chắn muốn xóa ghi chú này không?",
         "colorLabel": "Màu sắc:",
         "emptyNote": "Không có nội dung ghi chú.",
@@ -308,6 +308,7 @@
         "amount": "Số tiền thanh toán",
         "transactionDate": "Ngày giao dịch",
         "expiryDate": "Ngày hết hạn",
+        "active": "Giao dịch thành công.",
         "pending": "Giao dịch đang chờ xử lý. Vui lòng hoàn tất thanh toán.",
         "cancelled": "Giao dịch đã bị hủy hoặc thanh toán không thành công.",
         "expired": "Giao dịch đã hết hạn."
@@ -429,7 +430,12 @@
       "registerSuccess": "Đăng ký thành công. Vui lòng đăng nhập.",
       "updateProfileSuccess": "Cập nhật hồ sơ thành công",
       "changePasswordSuccess": "Đổi mật khẩu thành công",
-      "deleteAccountSuccess": "Tài khoản đã được xóa. Hẹn gặp lại!"
+      "deleteAccountSuccess": "Tài khoản đã được xóa. Hẹn gặp lại!",
+      "handleCopyLink": "Đã sao chép liên kết sách vào clipboard!",
+      "toggleFavorite": {
+        "add": "Đã thêm vào sách yêu thích!",
+        "remove": "Đã xóa khỏi sách yêu thích!"
+      }
     },
     "error": {
       "confirmPassword": "Mật khẩu xác nhận không khớp",
@@ -440,7 +446,8 @@
       "updateProfileError": "Lỗi cập nhật hồ sơ",
       "passwordTooShort": "Mật khẩu mới phải có ít nhất 6 ký tự",
       "currentPasswordWrong": "Mật khẩu hiện tại không đúng",
-      "deleteAccountError": "Mật khẩu không đúng hoặc lỗi server"
+      "deleteAccountError": "Mật khẩu không đúng hoặc lỗi server",
+      "loginToContinue": "Vui lòng đăng nhập để tiếp tục"
     },
     "warn": {
       "missingFields": "Vui lòng điền đầy đủ thông tin"

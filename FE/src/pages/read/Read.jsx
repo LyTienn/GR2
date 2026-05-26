@@ -334,6 +334,7 @@ export default function ReadBookPage() {
         isFullScreen={isFullScreen}
         toggleFullScreen={toggleFullScreen}
         bookTitle={book?.title}
+        chapterId={selectedChapter?.id}
         t={t}
       />
 
@@ -342,7 +343,7 @@ export default function ReadBookPage() {
         <DialogContent className="sm:max-w-md bg-white dark:bg-slate-900 border dark:border-slate-800">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold text-slate-900 dark:text-slate-100">
-              {noteProps.isEditingExistingNote ? t("layout.readpage.editNoteTitle", "Chỉnh sửa ghi chú") : t("layout.readpage.addNoteTitle", "Tạo ghi chú mới")}
+              {noteProps.isEditingExistingNote ? t("layout.readpage.note.editNoteTitle") : t("layout.readpage.note.addNoteTitle")}
             </DialogTitle>
             <DialogDescription className="text-xs bg-slate-100 dark:bg-slate-800 p-3 rounded text-slate-600 dark:text-slate-300 italic max-h-24 overflow-y-auto mt-2">
               "{noteProps.isEditingExistingNote ? noteProps.viewingNote?.selected_text : noteProps.currentNoteConfig?.selectedText}"
@@ -352,7 +353,7 @@ export default function ReadBookPage() {
           <div className="py-2">
             <textarea
               className="w-full h-24 p-3 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-transparent text-slate-900 dark:text-slate-100 border-slate-200 dark:border-slate-700 custom-scrollbar"
-              placeholder={t("layout.readpage.notePlaceholder", "Nhập suy nghĩ của bạn về đoạn văn này (không bắt buộc)...")}
+              placeholder={t("layout.readpage.note.notePlaceholder")}
               value={noteProps.noteInput}
               onChange={(e) => noteProps.setNoteInput(e.target.value)}
             />
@@ -360,20 +361,20 @@ export default function ReadBookPage() {
 
           <DialogFooter className="flex sm:justify-between items-center gap-2">
             {noteProps.isEditingExistingNote && (
-              <Button variant="destructive" size="sm" onClick={noteProps.handleDeleteNote}>
-                {t("layout.readpage.deleteBtn", "Xóa")}
+              <Button variant="destructive" size="sm" onClick={noteProps.handleDeleteNote} className="dark:border-slate-700 dark:hover:bg-slate-800 hover:bg-red-600/20">
+                {t("layout.readpage.note.deleteNote")}
               </Button>
             )}
             <div className="flex items-center gap-2 ml-auto">
-              <Button variant="outline" size="sm" onClick={noteProps.closeModal} className="dark:border-slate-700 dark:hover:bg-slate-800">
-                {t("layout.readpage.cancelBtn", "Hủy")}
+              <Button variant="outline" size="sm" onClick={noteProps.closeModal} className="dark:border-slate-700 dark:hover:bg-slate-800 hover:bg-gray-300/20">
+                {t("layout.readpage.note.cancelBtn")}
               </Button>
               <Button 
                 size="sm" 
                 className="bg-blue-600 hover:bg-blue-700 text-white"
                 onClick={noteProps.isEditingExistingNote ? noteProps.handleUpdateNote : noteProps.handleSaveNote}
               >
-                {noteProps.isEditingExistingNote ? t("layout.readpage.updateBtn", "Cập nhật") : t("layout.readpage.saveBtn", "Lưu")}
+                {noteProps.isEditingExistingNote ? t("layout.readpage.note.updateNote") : t("layout.readpage.note.saveNote")}
               </Button>
             </div>
           </DialogFooter>

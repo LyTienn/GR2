@@ -3,7 +3,7 @@ import { Send, Bot, User, Loader2 } from 'lucide-react';
 import HttpClient from '@/service/HttpClient';
 import { firstValueFrom } from 'rxjs';
 
-export default function ChatPanel({ bookTitle, t }) {
+export default function ChatPanel({ bookTitle, chapterId, t }) {
   const [messages, setMessages] = useState([
     { role: 'ai', content: `${t('components.chatPanel.greeting')} "${bookTitle}" ?` }
   ]);
@@ -30,7 +30,8 @@ export default function ChatPanel({ bookTitle, t }) {
       const result = await firstValueFrom(
         HttpClient.post('/chatbot/chat', { 
             message: userMessage,
-            currentBookTitle: bookTitle
+            currentBookTitle: bookTitle,
+            currentChapterId: chapterId
         })
     );
 

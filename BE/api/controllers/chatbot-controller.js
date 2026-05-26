@@ -3,14 +3,14 @@ import { chatWithAgent, syncBookToVector } from "../services/rag-service.js";
 export const chat = async (req, res) => {
     try {
         // Nhận tin nhắn và tên sách đang mở từ Frontend
-        const { message, currentBookTitle } = req.body;
+        const { message, currentBookTitle, currentChapterId } = req.body;
         
         if (!message) {
             return res.status(400).json({ success: false, message: "Vui lòng nhập câu hỏi." });
         }
         const userName = req.user?.full_name;
         // Gọi luồng xử lý AI
-        const result = await chatWithAgent(message, currentBookTitle, userName);
+        const result = await chatWithAgent(message, currentBookTitle, currentChapterId, userName);
 
         if (result.success) {
             res.status(200).json({ success: true, data: result.reply });
