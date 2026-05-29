@@ -87,28 +87,28 @@ export default function RightSidebar({
       <div className={`w-14 flex flex-col items-center py-4 space-y-4 ${isOpen ? `border-r ${sidebarBorder}` : ''}`}>
         <button 
           onClick={toggleFullScreen}
-          className="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+          className="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/15 transition-colors"
           title={isFullScreen ? t("layout.readpage.fullscreenOff") : t("layout.readpage.fullscreenOn")}
         >
           {isFullScreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
         </button>
         <button 
           onClick={() => handleOpenTab('notes')}
-          className={`p-2 rounded-md transition-colors ${isOpen && activeTab === 'notes' ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400' : 'hover:bg-black/5 dark:hover:bg-white/5'}`}
+          className={`p-2 rounded-md transition-colors ${isOpen && activeTab === 'notes' ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400' : 'hover:bg-black/5 dark:hover:bg-white/15'}`}
           title={t("layout.readpage.note.label")}
         >
           <BookOpen className="w-5 h-5" />
         </button>
         <button 
           onClick={() => handleOpenTab('settings')}
-          className={`p-2 rounded-md transition-colors ${isOpen && activeTab === 'settings' ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400' : 'hover:bg-black/5 dark:hover:bg-white/5'}`}
+          className={`p-2 rounded-md transition-colors ${isOpen && activeTab === 'settings' ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400' : 'hover:bg-black/5 dark:hover:bg-white/15'}`}
           title={t("layout.readpage.showSetting.setting")}
         >
           <Settings2 className="w-5 h-5" />
         </button>
         <button 
           onClick={() => handleOpenTab('chat')}
-          className={`p-2 rounded-md transition-colors ${isOpen && activeTab === 'chat' ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400' : 'hover:bg-black/5 dark:hover:bg-white/5'}`}
+          className={`p-2 rounded-md transition-colors ${isOpen && activeTab === 'chat' ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400' : 'hover:bg-black/5 dark:hover:bg-white/15'}`}
           title="AI Chatbot"
         >
           <Bot className="w-5 h-5" />

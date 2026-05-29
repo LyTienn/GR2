@@ -20,8 +20,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import AuthService from "@/service/AuthService";
-// import { fetchUserProfile } from "@/store/Auth/AuthThunk";
-// import { setUser } from "@/store/Auth/authSlice";
+import { fetchProfileStart, logoutStart } from "@/store/Auth/authSlice";
 
 export default function ProfilePage() {
   const { t } = useTranslation();
@@ -29,26 +28,15 @@ export default function ProfilePage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // State cho form Profile
-  const [profileData, setProfileData] = useState({
-    fullName: "",
-    email: "",
-  });
+  const [profileData, setProfileData] = useState({ fullName: "", email: "" });
   const [loadingProfile, setLoadingProfile] = useState(false);
 
-  // State cho form Password
-  const [passData, setPassData] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-  });
+  const [passData, setPassData] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
   const [loadingPass, setLoadingPass] = useState(false);
 
-  // State cho Delete Account
   const [deletePassword, setDeletePassword] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-  // Load dữ liệu user ban đầu vào form
   useEffect(() => {
     if (!isAuthenticated) {
       navigate("/login");
@@ -66,25 +54,15 @@ export default function ProfilePage() {
     e.preventDefault();
     setLoadingProfile(true);
     try {
-      const res = await axios.put("/users/profile", {
+      await AuthService.updateProfile({
         fullName: profileData.fullName,
         email: profileData.email
       });
-      if (res.success || res.data?.success) {
-        const updatedUser = res.data?.user || res.data?.data?.user || res.user;
-        if (updatedUser) {
-          // dispatch(setUser(updatedUser));
-          setProfileData({
-            fullName: updatedUser.fullName || updatedUser.full_name || "",
-            email: updatedUser.email || "",
-          });
-        }
-        // dispatch(fetchUserProfile());
-        toast.success(t("toasts.success.updateProfileSuccess"));
-      }
+      dispatch(fetchProfileStart());
+      toast.success(t("toasts.success.updateProfileSuccess"));
     } catch (error) {
-      console.error("Lỗi chi tiết:", error);
-      toast.error(error.response?.data?.message || t("toasts.error.updateProfileError"));
+      console.error("Update profile error:", error);
+      toast.error(error.response?.message || error.response?.data?.message || t("toasts.error.updateProfileError"));
     } finally {
       setLoadingProfile(false);
     }
@@ -112,7 +90,7 @@ export default function ProfilePage() {
       toast.success(t("toasts.success.changePasswordSuccess"));
       setPassData({ currentPassword: "", newPassword: "", confirmPassword: "" });
     } catch (error) {
-      toast.error(error.response?.data?.message || t("toasts.error.currentPasswordWrong"));
+      toast.error(error.response?.message || error.response?.data?.message || t("toasts.error.currentPasswordWrong"));
     } finally {
       setLoadingPass(false);
     }
@@ -123,18 +101,14 @@ export default function ProfilePage() {
       toast.warn(t("toasts.warn.missingFields"));
       return;
     }
-
     try {
-      const res = await axios.delete("/users/account", {
-        data: { password: deletePassword }
-      });
-
-      if (res.success || res.data?.success) {
-        toast.success(t("toasts.success.deleteAccountSuccess"));
-        window.location.href = "/login";
-      }
+      await AuthService.deleteAccount(deletePassword);
+      toast.success(t("toasts.success.deleteAccountSuccess"));
+      setDeleteDialogOpen(false);
+      dispatch(logoutStart());
+      navigate("/login");
     } catch (error) {
-      toast.error(error.response?.data?.message || t("toasts.error.deleteAccountError"));
+      toast.error(error.response?.message || error.response?.data?.message || t("toasts.error.deleteAccountError"));
     }
   };
 
@@ -145,17 +119,12 @@ export default function ProfilePage() {
       <Header />
 
       <main className="flex-1 flex overflow-hidden">
-
-        {/* Sidebar cố định */}
         <div className="shrink-0">
           <AccountSidebar />
         </div>
-
-        {/* Content tự cuộn */}
         <div className="flex-1 overflow-y-auto bg-background/50">
           <div className="container mx-auto px-8 py-8 max-w-6xl space-y-8 pb-20">
 
-            {/* Tiêu đề trang */}
             <div>
               <h1 className="text-3xl font-bold flex items-center gap-2">
                 <User className="h-8 w-8" /> {t("layout.profile.title")}
@@ -165,7 +134,6 @@ export default function ProfilePage() {
               </p>
             </div>
 
-            {/* --- FORM 1: THÔNG TIN CÁ NHÂN --- */}
             <Card>
               <CardHeader>
                 <CardTitle>{t("layout.profile.personalInfo.cardTitle")}</CardTitle>
@@ -201,7 +169,7 @@ export default function ProfilePage() {
               </CardContent>
             </Card>
 
-            {/* --- FORM 2: ĐỔI MẬT KHẨU --- */}
+            {/* FORM 2: ĐỔI MẬT KHẨU */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -240,6 +208,7 @@ export default function ProfilePage() {
                   </div>
                   <div className="flex justify-end">
                     <Button type="submit" variant="outline" disabled={loadingPass} className="hover:bg-gray-100">
+                      {loadingPass ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                       {t("layout.profile.changePassword.submitButton")}
                     </Button>
                   </div>
@@ -247,7 +216,7 @@ export default function ProfilePage() {
               </CardContent>
             </Card>
 
-            {/* --- FORM 3: XÓA TÀI KHOẢN --- */}
+            {/* FORM 3: XÓA TÀI KHOẢN */}
             <Card className="border-red-200 bg-red-50/50 dark:bg-red-950/20">
               <CardHeader>
                 <CardTitle className="text-red-600 flex items-center gap-2">

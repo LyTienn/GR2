@@ -17,7 +17,7 @@ export default function NotesPanel({ highlights, handleJumpToNote, t }) {
         <div 
           key={note.id} 
           onClick={() => handleJumpToNote(note)}
-          className="p-4 border-b border-slate-200/50 hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors group"
+          className="p-4 border-b border-slate-200/50 dark:border-slate-700/50 hover:bg-black/5 dark:hover:bg-white/25 cursor-pointer transition-all group"
         >
           <div className="flex items-start mb-2 relative">
             <span 

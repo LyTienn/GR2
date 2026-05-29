@@ -85,11 +85,11 @@ const BookShelf = () => {
 
                         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
                             <TabsList className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground w-fit mb-2">
-                                <TabsTrigger value="reading" className="px-6 flex items-center gap-2">
+                                <TabsTrigger value="reading" className="px-6 flex items-center gap-2 rounded-md hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors duration-200">
                                     <BookOpen className="h-4 w-4" />
                                     {t("layout.bookshelf.tabs.reading")} ({reading.length})
                                 </TabsTrigger>
-                                <TabsTrigger value="favorite" className="px-6 flex items-center gap-2">
+                                <TabsTrigger value="favorite" className="px-6 flex items-center gap-2 rounded-md hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors duration-200">
                                     <Heart className="h-4 w-4" />
                                     {t("layout.bookshelf.tabs.favorite")} ({favorite.length})
                                 </TabsTrigger>

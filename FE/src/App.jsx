@@ -6,7 +6,7 @@ import AuthLayout from './components/auth/AuthLayout';
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { ProgressProvider } from './contexts/ProgressContext';
-import GlobalProgressTracker from './components/GlobalProgressTracker';
+// import GlobalProgressTracker from './components/GlobalProgressTracker';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProfileStart, selectIsAuthenticated } from './store/Auth';
 // import Chatbot from './components/Chatbot/Chatbot';
@@ -87,7 +87,7 @@ function App() {
   return (
     <ProgressProvider>
       <AppContent />
-      <GlobalProgressTracker />
+      {/* <GlobalProgressTracker /> */}
       <ToastContainer
         position="top-right"
         autoClose={3000}
