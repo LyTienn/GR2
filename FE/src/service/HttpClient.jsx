@@ -50,7 +50,7 @@ const handle401Error = (requestObj) => {
   }
 };
 
-const handleError = (error, requestObj) => {
+const handleError = (error, requestObj, skipToast = false) => {
   if (error.status === 401) {
     return handle401Error(requestObj);
   }
@@ -64,14 +64,20 @@ const handleError = (error, requestObj) => {
       case 500: errorMessage = "Lỗi hệ thống máy chủ."; break;
     }
   }
-  
-  toast.error(errorMessage);
-  return throwError(() => error);
+  if (!skipToast) {
+    toast.error(errorMessage);
+  }
+  return throwError(() => ({
+    ...error,
+    response: error.response,
+    status: error.status
+  }));
 };
 
 // #region Hàm request 
 const request = (method, url, body = null, options = {}) => {
     return defer(() => {
+        const skipToast = options.skipToast || false;
         const fullUrl = buildRequestUrl(`${BASE_URL}${url}`, options.search);
         const headers = extractHeaders({ ...options, body: body ? JSON.stringify(body) : null });
         const cleanOptions = removeCustomKeys(options);
@@ -85,7 +91,7 @@ const request = (method, url, body = null, options = {}) => {
         };
         return ajax(requestObj).pipe(
             switchMap(res => of(res.response)),
-            catchError(error => handleError(error, requestObj))
+            catchError(error => handleError(error, requestObj, skipToast))
         );
     });
 };

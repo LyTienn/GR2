@@ -121,7 +121,7 @@ export function ReviewsSection({ bookId, refreshKey }) {
       );
       setAverageRating(Number(d?.averageRating || 0));
       setTotalComments(d?.totalComments || 0);
-      toast.success("Cập nhật đánh giá thành công!");
+      toast.success(t("components.reviewsection.success.update"));
       setEditModal({ open: false, commentId: null, content: "", rating: 1 });
     } catch (err) {
       console.error("Lỗi cập nhật đánh giá:", err);
@@ -181,7 +181,7 @@ export function ReviewsSection({ bookId, refreshKey }) {
       );
       setAverageRating(Number(d?.averageRating || 0));
       setTotalComments(d?.totalComments || 0);
-      toast.success("Xóa đánh giá thành công!");
+      toast.success(t("components.reviewsection.success.delete"));
       setDeleteModal({ open: false, commentId: null });
     } catch (err) {
       console.error("Lỗi xóa đánh giá:", err);

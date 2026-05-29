@@ -388,7 +388,14 @@
       "labelComment": "Nội dung đánh giá",
       "placeholderComment": "Sách hay ở điểm nào? Có điều gì bạn muốn chia sẻ? ...",
       "submitLoading": "Đang gửi đánh giá...",
-      "submitBtn": "Gửi đánh giá"
+      "submitBtn": "Gửi đánh giá",
+      "error": {
+        "alreadyCommented": "Bạn đã đánh giá cuốn sách này trước đó.",
+        "submitFailed": "Đã xảy ra lỗi khi gửi đánh giá. Vui lòng thử lại."
+      },
+      "success": {
+        "create": "Đánh giá của bạn đã được gửi thành công!"
+      }
     },
     "reviewsection": {
       "loading": "Đang tải đánh giá...",
@@ -404,7 +411,11 @@
       "submitDeleteTitle": "Xác nhận xóa đánh giá",
       "submitDeleteDescription": "Bạn có chắc chắn muốn xóa đánh giá này không? Hành động này không thể hoàn tác",
       "deleteBtn": "Xóa",
-      "editBtn": "Sửa"
+      "editBtn": "Sửa",
+      "success": {
+        "update": "Cập nhật đánh giá thành công!",
+        "delete": "Xóa đánh giá thành công!"
+      }
     },
     "chatPanel": {
       "greeting": "Chào bạn! Mình là trợ lý AI. Bạn có câu hỏi nào về cuốn sách",

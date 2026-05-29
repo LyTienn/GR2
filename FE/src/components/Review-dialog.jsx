@@ -43,9 +43,9 @@ const ReviewDialog = ({ bookId, onReviewAdded }) => {
                 HttpClient.post(`/comments/books/${bookId}/comments`, {
                     rating: rating,
                     content: comment,
-                })
+                }, { skipToast: true })
             );
-            toast.success("Đánh giá của bạn đã được gửi thành công!");
+            toast.success(t("components.reviewdialog.success.create"));
             setIsOpen(false);
             setRating(0);
             setComment("");
@@ -54,11 +54,12 @@ const ReviewDialog = ({ bookId, onReviewAdded }) => {
             }
         } catch (err) {
             console.error("Lỗi gửi đánh giá:", err);
-            if (err.response && err.response.status === 409) {
-                toast.error("Bạn đã đánh giá cuốn sách này trước đó.");
-            } else {
-                toast.error("Đã xảy ra lỗi khi gửi đánh giá. Vui lòng thử lại.");
-            }
+            const message = err.response?.message || err.message;
+            const errorMap = {
+                "You have already commented on this book": t("components.reviewdialog.error.alreadyCommented"),
+            };
+            const errorMessage = errorMap[message] || t("components.reviewdialog.error.submitFailed");
+            toast.error(errorMessage);
         } finally {
             setSubmitting(false);
         }
