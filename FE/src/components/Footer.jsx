@@ -1,41 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BookOpen } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
 const Footer = () => {
     const { t } = useTranslation();
-    const [email, setEmail] = useState("");
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [newsletterMsg, setNewsletterMsg] = useState("");
-
-    async function subscribeToNewsletter(email) {
-      return new Promise((resolve, reject) => {
-        setTimeout(() => {
-          if (email.endsWith("@gmail.com")) resolve({ success: true });
-          else reject(new Error(t("layout.footer.newsletter.errorMsg")));
-        }, 1000);
-      });
-    }
-
-    const handleSubscribe = async (event) => {
-      event.preventDefault();
-      setNewsletterMsg("");
-      if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-        setNewsletterMsg(t("layout.footer.newsletter.invalidEmail"));
-        return;
-      }
-      setIsSubmitting(true);
-      try {
-        await subscribeToNewsletter(email);
-        setNewsletterMsg(t("layout.footer.newsletter.successMsg"));
-        setEmail("");
-      } catch (err) {
-        setNewsletterMsg(err.message || t("layout.footer.newsletter.errorMsg"));
-      } finally {
-        setIsSubmitting(false);
-      }
-    };
 
     return (
         <footer className="bg-slate-900 text-white py-12">
@@ -81,34 +50,41 @@ const Footer = () => {
                 <li><Link to="/membership" className="hover:text-white transition-colors">{t("layout.footer.accountItems.membership")}</Link></li>
               </ul>
             </div>
-            {/* Đăng ký nhận tin */}
             <div>
-              <h4 className="font-semibold mb-4">{t("layout.footer.newsletter.title")}</h4>
-              <form className="flex flex-col gap-2" onSubmit={handleSubscribe}>
-                <label htmlFor="newsletter-email" className="text-sm font-medium text-slate-200">{t("layout.footer.newsletter.emailLabel")}</label>
-                <input
-                  id="newsletter-email"
-                  type="email"
-                  placeholder={t("layout.footer.newsletter.emailPlaceholder")}
-                  className="rounded px-3 py-2 text-white bg-slate-800 placeholder:text-slate-400"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  disabled={isSubmitting}
-                  required
-                  aria-label={t("layout.footer.newsletter.emailLabel")}
-                />
-                <button
-                  type="submit"
-                  className="bg-blue-500 hover:bg-blue-600 text-white rounded px-3 py-2 disabled:opacity-60"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? t("layout.footer.newsletter.submitting") : t("layout.footer.newsletter.submitBtn")}
-                </button>
-                {newsletterMsg && (
-                  <div className="text-xs mt-1" style={{ color: newsletterMsg.includes("thành công") || newsletterMsg.includes("Successfully") ? '#22c55e' : '#f87171' }}>{newsletterMsg}</div>
-                )}
-              </form>
-              <p className="text-xs text-slate-400 mt-2">{t("layout.footer.newsletter.description")}</p>
+              <h4 className="font-semibold mb-4">{t("layout.footer.contact")}</h4>
+              <ul className="space-y-3 text-sm text-slate-400">
+                <li className="flex items-center gap-3">
+                  <svg className="w-5 h-5 text-blue-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  <a href="mailto:support@bookapp.vn" className="hover:text-white transition-colors">
+                    support@bookapp.vn
+                  </a>
+                </li>
+                <li className="flex items-center gap-3">
+                  <svg className="w-5 h-5 text-blue-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+                  <a href="mailto:contact@bookapp.vn" className="hover:text-white transition-colors">
+                    contact@bookapp.vn
+                  </a>
+                </li>
+              </ul>
+
+              <div className="mt-6">
+                <p className="text-xs text-slate-500 uppercase tracking-wider mb-3">{t("layout.footer.bank")}</p>
+                <div className="flex items-center gap-2">
+                  <div className="h-8 px-3 bg-white rounded flex items-center justify-center text-blue-600 text-xs font-bold border border-slate-200" title="Thanh toán QR tự động">
+                    <svg className="w-5 h-5 mr-1" viewBox="0 0 24 24" fill="currentColor">
+                       <path d="M4 4h6v6H4V4zm2 2v2h2V6H6zm10-2h6v6h-6V4zm2 2v2h2V6h-2zM4 14h6v6H4v-6zm2 2v2h2v-2H6zm10-2h6v6h-6v-6zm2 2v2h2v-2h-2zm-6-8h2v2h-2V6zm0 10h2v2h-2v-2zm-2-2h2v2h-2v-2zm4 0h2v2h-2v-2z" />
+                    </svg>
+                    QR AUTO
+                  </div>
+                  <div className="h-8 px-3 bg-white rounded flex items-center justify-center text-blue-800 text-xs font-bold border border-slate-200">
+                    BANKING
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <div className="border-t border-slate-800 pt-8 text-center text-sm text-slate-500">

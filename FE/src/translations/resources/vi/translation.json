@@ -94,17 +94,8 @@
         "register": "Đăng ký",
         "membership": "Gói Premium"
       },
-      "newsletter": {
-        "title": "Nhận thông báo sách mới",
-        "emailLabel": "Email của bạn",
-        "emailPlaceholder": "Nhập email của bạn",
-        "submitBtn": "Đăng ký",
-        "submitting": "Đang gửi...",
-        "description": "Nhận thông báo về sách mới, ưu đãi và tin tức từ Lybrary.",
-        "successMsg": "Đăng ký thành công! Hãy kiểm tra email của bạn.",
-        "invalidEmail": "Vui lòng nhập email hợp lệ.",
-        "errorMsg": "Đăng ký thất bại. Vui lòng thử lại."
-      },
+      "contact": "Liên hệ & Hỗ trợ",
+      "bank": "Thanh toán trực tuyến",
       "copyright": "© 2026 Lybrary. All rights reserved."
     },
     "searchpage": {

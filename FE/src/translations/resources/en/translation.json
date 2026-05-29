@@ -94,17 +94,8 @@
         "register": "Register",
         "membership": "Premium Plan"
       },
-      "newsletter": {
-        "title": "Get New Book Notifications",
-        "emailLabel": "Your Email",
-        "emailPlaceholder": "Enter your email",
-        "submitBtn": "Subscribe",
-        "submitting": "Sending...",
-        "description": "Get notifications about new books, offers and news from Lybrary.",
-        "successMsg": "Successfully subscribed! Please check your email.",
-        "invalidEmail": "Please enter a valid email address.",
-        "errorMsg": "Subscription failed. Please try again."
-      },
+      "contact": "Contact & Support",
+      "bank": "Transfer Payment",
       "copyright": "© 2026 Lybrary. All rights reserved."
     },
     "searchpage": {
