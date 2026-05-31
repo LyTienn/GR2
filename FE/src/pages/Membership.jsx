@@ -78,6 +78,14 @@ const Membership = () => {
 
     const handleFinish = async () => {
         try {
+            const pendingRes = await PaymentService.getPendingPayment();
+            const pendingOrderId = pendingRes?.data?.orderId;
+
+            if (paymentInfo?.orderId && pendingOrderId === paymentInfo.orderId) {
+                toast.info(t("layout.membership.processing"));
+                return;
+            }
+
             const res = await AuthService.getProfile();
             if (res.success && res.data) {
                 const updatedUser = res.data || res.data.user;
@@ -99,14 +107,10 @@ const Membership = () => {
     const handleCancelPending = async () => {
         try {
             setLoading(true);
-            // Lưu ý: Route BE của bạn là /cancel/:subscriptionId, 
-            // nhưng Controller BE đang update dựa vào user_id & status="PENDING" chứ không dùng params. 
-            // Nên truyền đại id='current' hoặc orderId đều được.
             const res = await PaymentService.cancelPendingPayment();
-            
             if (res.success) {
-                setPaymentInfo(null); // Đóng màn hình QR
-                toast.success(res.message || "Đã hủy giao dịch thành công.");
+                setPaymentInfo(null); 
+                toast.success(t("toasts.success.cancelSubSuccess"));
             }
         } catch (error) {
             console.error("Lỗi hủy đơn:", error);
@@ -119,7 +123,7 @@ const Membership = () => {
     //Check pending subcription
     useEffect(() => {
         const checkPendingPayment = async () => {
-            if (!user || user.tier === 'PREMIUM') return;
+            if (!user) return;
             try {
                 const res = await PaymentService.getPendingPayment();
                 if (res.success && res.data) {
@@ -138,11 +142,19 @@ const Membership = () => {
         if (paymentInfo) {
             interval = setInterval(async () => {
                 try {
+                    const pendingRes = await PaymentService.getPendingPayment();
+                    const pendingOrderId = pendingRes?.data?.orderId;
+
+                    if (paymentInfo?.orderId && pendingOrderId === paymentInfo.orderId) {
+                        return;
+                    }
+
                     const res = await AuthService.getProfile();
                     if (res.success && res.data) {
                         const updatedUser = res.data || res.data.user;
                         console.log("Polling User Tier:", updatedUser.tier);
                         if (updatedUser.tier === 'PREMIUM') {
+                            dispatch(fetchProfileSuccess(updatedUser));
                             setPaymentInfo(null);
                             clearInterval(interval);
                         }
@@ -163,8 +175,8 @@ const Membership = () => {
             <div className="h-screen flex flex-col bg-slate-50 overflow-hidden">
                 <div className="shrink-0"><HeaderBar /></div>
                 
-                <div className="flex-1 overflow-y-auto flex items-center justify-center p-4">
-                    <div className="bg-white p-6 md:p-8 rounded-2xl shadow-xl max-w-lg w-full text-center border border-slate-200 relative mt-8 mb-12">
+                <div className="flex-1 overflow-y-auto flex items-start justify-center px-4 pb-12 md:pt-4">
+                    <div className="bg-white p-6 md:p-8 rounded-2xl shadow-xl max-w-lg w-full text-center border border-slate-200 relative">
                         <Button 
                             onClick={() => setPaymentInfo(null)} 
                             className="absolute top-4 left-4 text-slate-400 hover:text-slate-600 flex items-center text-sm"
@@ -220,7 +232,7 @@ const Membership = () => {
                                 variant="destructive"
                                 className="w-full h-12 text-lg font-semibold bg-red-50 text-red-600 hover:bg-red-100 border border-red-200"
                             >
-                                {loading ? <Loader2 className="animate-spin" /> : t("layout.membership.cancelPayment", "Hủy giao dịch này")}
+                                {loading ? <Loader2 className="animate-spin" /> : t("layout.membership.paymentConfirm.cancelBtn")}
                             </Button>
                             <p className="text-xs text-slate-400">
                                 {t("layout.membership.paymentConfirm.helper")}

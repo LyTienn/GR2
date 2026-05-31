@@ -271,6 +271,7 @@
       },
       "paymentConfirm": {
         "button": "Transfer sent & Activate",
+        "cancelBtn": "Cancel this transaction",
         "helper": "System will automatically activate within 1-3 minutes after receiving payment."
       },
       "security": "Safe & Secure Payment",
@@ -434,6 +435,7 @@
       "changePasswordSuccess": "Password changed successfully",
       "deleteAccountSuccess": "Account deleted. See you later!",
       "handleCopyLink": "Book link copied to clipboard!",
+      "cancelSubSuccess": "Subscription cancelled successfully!",
       "toggleFavorite": {
         "add": "Added to favorites!",
         "remove": "Removed from favorites!"

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Star, Loader2, Trash2, Search, BookOpen, MessageSquare } from 'lucide-react';
 import { firstValueFrom } from 'rxjs';
 import HttpClient from "../../service/HttpClient";
+import ConfirmModal from '@/components/admin/ConfirmModal'; // Đã thêm import
 
 export default function CommentsModeration() {
 
@@ -13,6 +14,11 @@ export default function CommentsModeration() {
   const [loadingComments, setLoadingComments] = useState(true);
   
   const [selectedBook, setSelectedBook] = useState(null);
+
+  // Thêm các state quản lý ConfirmModal
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [commentToDelete, setCommentToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -50,20 +56,34 @@ export default function CommentsModeration() {
     fetchComments();
   }, [selectedBook]);
 
-  const handleDelete = async (id) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa vĩnh viễn bình luận này khỏi hệ thống?")) {
-      try {
-        await firstValueFrom(HttpClient.delete(`/comments/${id}`));
-        setComments(prev => prev.filter(c => c.comment_id !== id));
-        
-        if (selectedBook) {
-           setBooks(prevBooks => prevBooks.map(b => 
-             b.id === selectedBook.id ? { ...b, commentCount: Number(b.commentCount) - 1 } : b
-           ));
-        }
-      } catch (error) {
-        alert("Lỗi khi xóa bình luận");
+  const handleDeleteClick = (id) => {
+    setCommentToDelete(id);
+    setIsConfirmOpen(true);
+  };
+
+  const handleCancelDelete = () => {
+    setIsConfirmOpen(false);
+    setCommentToDelete(null);
+  };
+
+  const handleDelete = async () => {
+    if (!commentToDelete) return;
+    try {
+      setIsDeleting(true);
+      await firstValueFrom(HttpClient.delete(`/comments/${commentToDelete}`));
+      setComments(prev => prev.filter(c => c.comment_id !== commentToDelete));
+      
+      if (selectedBook) {
+         setBooks(prevBooks => prevBooks.map(b => 
+           b.id === selectedBook.id ? { ...b, commentCount: Number(b.commentCount) - 1 } : b
+         ));
       }
+    } catch (error) {
+      alert("Lỗi khi xóa bình luận");
+    } finally {
+      setIsDeleting(false);
+      setIsConfirmOpen(false);
+      setCommentToDelete(null);
     }
   };
 
@@ -187,7 +207,7 @@ export default function CommentsModeration() {
                 <div className="flex flex-col items-end gap-2">
                   <span className="text-xs text-slate-400">{getTimeAgo(c.created_at)}</span>
                   <button
-                    onClick={() => handleDelete(c.comment_id)}
+                    onClick={() => handleDeleteClick(c.comment_id)} 
                     className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100 px-2 py-1.5 text-xs rounded-md bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 flex items-center gap-1 hover:bg-red-100 transition-all"
                   >
                     <Trash2 size={14} /> Xóa
@@ -212,6 +232,19 @@ export default function CommentsModeration() {
           ))}
         </div>
       </div>
+
+      {/* Thêm component ConfirmModal vào giao diện */}
+      <ConfirmModal
+        isOpen={isConfirmOpen}
+        title="Xác nhận xóa bình luận"
+        message="Bạn có chắc chắn muốn xóa vĩnh viễn bình luận này khỏi hệ thống?"
+        confirmText="Xóa"
+        cancelText="Hủy"
+        isLoading={isDeleting}
+        isDangerous={true}
+        onConfirm={handleDelete}
+        onCancel={handleCancelDelete}
+      />
     </div>
   );
 }

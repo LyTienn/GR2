@@ -127,7 +127,6 @@ export default function useChapterNotes(bookId, chapterId, isAuthenticated, t) {
   };
 
   const handleDeleteNote = async () => {
-    if (!window.confirm(t("layout.readpage.note.confirmDeleteNote"))) return;
     try {
       const res = await firstValueFrom(HttpClient.delete(`/chapter-notes/${viewingNote.id}`));
       if (res && res.success) {

@@ -271,6 +271,7 @@
       },
       "paymentConfirm": {
         "button": "Đã chuyển tiền & Kích hoạt",
+        "cancelBtn": "Hủy giao dịch này",
         "helper": "Hệ thống tự động kích hoạt sau 1-3 phút khi nhận tiền."
       },
       "security": "Thanh toán an toàn & bảo mật",
@@ -434,6 +435,7 @@
       "changePasswordSuccess": "Đổi mật khẩu thành công",
       "deleteAccountSuccess": "Tài khoản đã được xóa. Hẹn gặp lại!",
       "handleCopyLink": "Đã sao chép liên kết sách vào clipboard!",
+      "cancelSubSuccess": "Đã hủy đơn thanh toán. Bạn có thể tạo đơn mới.",
       "toggleFavorite": {
         "add": "Đã thêm vào sách yêu thích!",
         "remove": "Đã xóa khỏi sách yêu thích!"

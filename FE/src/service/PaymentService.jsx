@@ -58,7 +58,7 @@ const PaymentService = {
   async cancelPendingPayment() {
     try {
       const res = await firstValueFrom(
-        HttpClient.put(`/payment/subscription/cancel`)
+        HttpClient.put(`/payment/subscription/cancel/current`)
       );
       return res;
     } catch (error) {
