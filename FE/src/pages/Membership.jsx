@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Check, Star, Shield, ArrowLeft, Loader2, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ const Membership = () => {
     const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
     const [paymentInfo, setPaymentInfo] = useState(null); 
+    const hasShownPendingToast = useRef(false);
 
     const packages = [
         {
@@ -128,14 +129,17 @@ const Membership = () => {
                 const res = await PaymentService.getPendingPayment();
                 if (res.success && res.data) {
                     setPaymentInfo(res.data);
-                    toast.info(t("layout.membership.hasPending"));
+                    if (!hasShownPendingToast.current) {
+                        toast.info(t("layout.membership.hasPending"));
+                        hasShownPendingToast.current = true;
+                    }
                 }
             } catch (error) {
                 console.error("Lỗi fetch pending payment:", error);
             }
         };
         checkPendingPayment();
-    }, [user]);
+    }, [user, t]);
 
     useEffect(() => {
         let interval;
