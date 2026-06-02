@@ -34,7 +34,7 @@ const LoginForm = () => {
 
     useEffect(() => {
         if (error) {
-            toast.error(error);
+            toast.error(t("toasts.error.loginFailed"));
         }
     }, [error]);
 

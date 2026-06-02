@@ -131,7 +131,7 @@ export function ReviewsSection({ bookId, refreshKey }) {
 
   const handleLike = async (commentId) => {
     if (!user) {
-      toast.info("Vui lòng đăng nhập để thao tác!");
+      toast.error(t("toasts.error.loginToContinue"));
       return;
     }
     try {

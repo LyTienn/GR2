@@ -249,8 +249,8 @@ export default function ProfilePage() {
                       />
                     </div>
                     <DialogFooter>
-                      <Button variant="outline" className="hover:bg-gray-200" onClick={() => setDeleteDialogOpen(false)}>{t("layout.profile.deleteAccount.cancelButton")}</Button>
-                      <Button variant="destructive" className="hover:bg-gray-200" onClick={handleDeleteAccount}>
+                      <Button variant="destructive" className="hover:bg-gray-200" onClick={() => setDeleteDialogOpen(false)}>{t("layout.profile.deleteAccount.cancelButton")}</Button>
+                      <Button variant="destructive" className="hover:bg-gray-200 text-red-600" onClick={handleDeleteAccount}>
                         {t("layout.profile.deleteAccount.confirmButton")}
                       </Button>
                     </DialogFooter>

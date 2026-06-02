@@ -99,7 +99,6 @@ export default function BookSection({ book: bookProp }) {
   const handleToggleFavorite = async () => {
   if (!isAuthenticated) {
     toast.error(t("toasts.error.loginToContinue"));
-    navigate("/login");
     return;
   }
 
@@ -139,6 +138,10 @@ export default function BookSection({ book: bookProp }) {
 };
 
   const handleReadBook = () => {
+    if (!isAuthenticated) {
+      toast.error(t("toasts.error.loginToContinue"));
+      return;
+    }
     if (book?.id) {
       navigate(`/book/${book.id}/read`);
     }

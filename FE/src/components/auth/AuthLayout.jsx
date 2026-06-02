@@ -7,7 +7,7 @@ export default function AuthLayout() {
             <div className="w-full lg:w-1/2 flex flex-col relative">
                 
                 <div className="absolute top-6 left-6 z-10 shadow-md rounded-lg">
-                    <LanguageSwitcher />
+                    <LanguageSwitcher className="flex items-center shrink-0 bg-slate-200/60 p-1 rounded-lg border border-slate-300/50" />
                 </div>
 
                 <div className="flex-1 flex flex-col items-center justify-center p-6">

@@ -451,7 +451,8 @@
       "passwordTooShort": "Mật khẩu mới phải có ít nhất 6 ký tự",
       "currentPasswordWrong": "Mật khẩu hiện tại không đúng",
       "deleteAccountError": "Mật khẩu không đúng hoặc lỗi server",
-      "loginToContinue": "Vui lòng đăng nhập để tiếp tục"
+      "loginToContinue": "Vui lòng đăng nhập để tiếp tục",
+      "loginFailed": "Đăng nhập thất bại. Vui lòng kiểm tra thông tin và thử lại."
     },
     "warn": {
       "missingFields": "Vui lòng điền đầy đủ thông tin"

@@ -451,7 +451,8 @@
       "passwordTooShort": "New password must be at least 6 characters",
       "currentPasswordWrong": "Current password is incorrect",
       "deleteAccountError": "Password is incorrect or server error",
-      "loginToContinue": "Please log in to continue"
+      "loginToContinue": "Please log in to continue",
+      "loginFailed": "Failed to log in. Please check your information and try again."
     },
     "warn": {
       "missingFields": "Please fill in all required fields"    },
