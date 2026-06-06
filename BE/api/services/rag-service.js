@@ -4,7 +4,6 @@ import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 import sequelize from '../config/db-config.js';
 import Chapter from '../models/chapter-model.js';
 
-// Khởi tạo bộ dịch chữ thành Vector của Google
 const embeddings = new GoogleGenerativeAIEmbeddings({
     model: "gemini-embedding-2",
     apiKey: process.env.GEMINI_API_KEY_1,
@@ -18,40 +17,44 @@ const llm = new ChatGoogleGenerativeAI({
 export const syncBookToVector = async (bookId) => {
     try {
         console.log(`[RAG] Đang lấy dữ liệu các chương của sách ID: ${bookId}...`);
-        
+
         const chapters = await Chapter.findAll({ where: { book_id: bookId } });
         if (!chapters || chapters.length === 0) {
             return { success: false, message: "Không tìm thấy chương nào." };
         }
 
-        // 2. Cấu hình cắt văn bản (Cắt khoảng 1000 ký tự, gối lên nhau 200 ký tự để không lọt ngữ cảnh)
         const textSplitter = new RecursiveCharacterTextSplitter({
             chunkSize: 1000,
             chunkOverlap: 200,
         });
 
         for (const chapter of chapters) {
-            const [existingChapter] = await sequelize.query(
-                `SELECT 1 FROM chapter_embeddings WHERE chapter_id = :chapterId LIMIT 1`,
+            const chunks = await textSplitter.createDocuments([chapter.content]);
+            const expectedChunkCount = chunks.length;
+
+            const [[{ count }]] = await sequelize.query(
+                `SELECT COUNT(*) as count FROM chapter_embeddings WHERE chapter_id = :chapterId`,
                 { replacements: { chapterId: chapter.id } }
             );
-            if (existingChapter.length > 0) {
-                console.log(`  -> Chương ID ${chapter.id} đã có vector -> Bỏ qua chương này.`);
-                continue; 
+            const savedCount = parseInt(count);
+
+            if (savedCount >= expectedChunkCount) {
+                console.log(`  -> Chương ID ${chapter.id} đã đủ ${savedCount}/${expectedChunkCount} chunks -> Bỏ qua.`);
+                continue;
             }
-            console.log(`[RAG] Đang băm nhỏ chương ID: ${chapter.id}...`);
-            
-            // Băm nội dung chương thành nhiều mảng chữ
-            const chunks = await textSplitter.createDocuments([chapter.content]);
 
-            for (let i = 0; i < chunks.length; i++) {
+            if (savedCount > 0) {
+                console.log(`  -> Chương ID ${chapter.id} còn thiếu ${expectedChunkCount - savedCount} chunks, tiếp tục từ index ${savedCount}...`);
+            } else {
+                console.log(`[RAG] Đang băm nhỏ chương ID: ${chapter.id} (${expectedChunkCount} chunks)...`);
+            }
+
+            for (let i = savedCount; i < chunks.length; i++) {
                 const chunkContent = chunks[i].pageContent;
-                
-                // 3. Gọi Gemini dịch đoạn chữ đó thành mảng 768 con số
-                const vector = await embeddings.embedQuery(chunkContent);
-                const vectorString = JSON.stringify(vector); // Đổi thành chuỗi để lưu SQL
 
-                // 4. Lưu thẳng vào Database bằng SQL thuần (Bỏ qua rào cản của Sequelize)
+                const vector = await embeddings.embedQuery(chunkContent);
+                const vectorString = JSON.stringify(vector);
+
                 await sequelize.query(
                     `INSERT INTO chapter_embeddings (chapter_id, chunk_index, chunk_content, embedding)
                      VALUES (:chapterId, :chunkIndex, :chunkContent, :embedding::vector)`,
@@ -60,12 +63,14 @@ export const syncBookToVector = async (bookId) => {
                             chapterId: chapter.id,
                             chunkIndex: i,
                             chunkContent: chunkContent,
-                            embedding: vectorString
+                            embedding: vectorString,
                         }
                     }
                 );
             }
+            console.log(`  -> Chương ID ${chapter.id} hoàn tất (${expectedChunkCount} chunks).`);
         }
+
         console.log(`[RAG] Đồng bộ Vector cho sách ID ${bookId} hoàn tất!`);
         return { success: true, message: "Tạo Vector thành công!" };
 
@@ -77,11 +82,9 @@ export const syncBookToVector = async (bookId) => {
 
 export const chatWithAgent = async (message, currentBookTitle, currentChapterId, userName) => {
     try {
-        // (Metadata) 
         let metaContext = `Cuốn sách người dùng đang đọc: ${currentBookTitle || 'Không rõ'}\n`;
 
         if (currentBookTitle) {
-            // total chapters
             const [[bookMeta]] = await sequelize.query(
                 `SELECT COUNT(c.id) as total_chapters FROM books b JOIN chapters c ON b.id = c.book_id WHERE b.title = :title`,
                 { replacements: { title: currentBookTitle }, logging: false }
@@ -90,7 +93,6 @@ export const chatWithAgent = async (message, currentBookTitle, currentChapterId,
         }
 
         if (currentChapterId) {
-            // Lấy tiêu đề chương hiện tại
             const [[chapterMeta]] = await sequelize.query(
                 `SELECT title FROM chapters WHERE id = :id`,
                 { replacements: { id: currentChapterId }, logging: false }
@@ -98,11 +100,9 @@ export const chatWithAgent = async (message, currentBookTitle, currentChapterId,
             if (chapterMeta) metaContext += `Chương hiện tại người dùng đang đọc: ${chapterMeta.title}\n`;
         }
 
-        // 2. Chuyển câu hỏi thành Vector
         const queryVector = await embeddings.embedQuery(message);
         const vectorString = JSON.stringify(queryVector);
 
-        // 3. Tìm kiếm Vector
         let query = `
             SELECT e.chunk_content, 
                    1 - (e.embedding::vector <=> :queryVector::vector) as similarity
@@ -121,7 +121,7 @@ export const chatWithAgent = async (message, currentBookTitle, currentChapterId,
             `;
             replacements.bookTitle = currentBookTitle;
         } else {
-            query += ` WHERE 1=1`; 
+            query += ` WHERE 1=1`;
         }
 
         query += ` ORDER BY e.embedding::vector <=> :queryVector::vector LIMIT 5;`;
@@ -129,7 +129,6 @@ export const chatWithAgent = async (message, currentBookTitle, currentChapterId,
         const [results] = await sequelize.query(query, { replacements, logging: false });
         const context = results.map(r => r.chunk_content).join("\n\n");
 
-        // Prompt 
         const prompt = `Bạn là trợ lý AI đọc sách. Dựa vào [THÔNG TIN HỆ THỐNG] và [TÀI LIỆU THAM KHẢO] dưới đây để trả lời câu hỏi một cách ngắn gọn, tự nhiên. Nếu thông tin không có, hãy nói là bạn không biết.
         
         [THÔNG TIN HỆ THỐNG]
@@ -141,7 +140,7 @@ export const chatWithAgent = async (message, currentBookTitle, currentChapterId,
         Người hỏi: ${userName || 'Khách'}
         Câu hỏi: ${message}
         `;
-        
+
         const aiResponse = await llm.invoke(prompt);
         return { success: true, reply: aiResponse.content };
     } catch (error) {
