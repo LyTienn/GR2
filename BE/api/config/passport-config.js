@@ -31,8 +31,18 @@ passport.use(
           return done(null, existingByGoogleId);
         }
 
-        // Tìm hoặc tạo user theo email — dùng findOrCreate để tránh race condition
-        // khi 2 request OAuth đến cùng lúc cho cùng 1 user mới
+        const deletedUser = await User.findOne({ where: { email, is_deleted: 1 } });
+
+        if (deletedUser) {
+          // Khôi phục tài khoản 
+          deletedUser.is_deleted = 0;
+          deletedUser.google_id = googleId;
+          deletedUser.full_name = fullName;
+          deletedUser.password_hash = "GOOGLE_OAUTH_NO_PASSWORD";
+          await deletedUser.save();
+          return done(null, deletedUser);
+        }
+
         const [foundUser, created] = await User.findOrCreate({
           where: { email, is_deleted: 0 },
           defaults: {
@@ -44,6 +54,13 @@ passport.use(
             tier: "FREE",
           },
         });
+
+        if (!created && !foundUser.google_id) {
+          foundUser.google_id = googleId;
+          await foundUser.save();
+        }
+
+        return done(null, foundUser);
 
         // User đã tồn tại (đăng ký bằng email/password trước đó) nhưng chưa có google_id
         if (!created && !foundUser.google_id) {

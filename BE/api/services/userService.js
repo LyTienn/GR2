@@ -26,6 +26,22 @@ class UserService {
     return { statusCode: 200, data: { success: true, data: user } };
   }
 
+  static async getAccountType(userId) {
+    const user = await User.findByPk(userId);
+    if (!user) return { statusCode: 404, data: { success: false, message: "User not found" } };
+
+    return {
+      statusCode: 200,
+      data: {
+        success: true,
+        data: {
+          hasPassword: user.password_hash !== "GOOGLE_OAUTH_NO_PASSWORD",
+          hasGoogle: !!user.google_id,
+        }
+      }
+    };
+  }
+
   static async updateProfile(userId, body) {
     const { fullName, email } = body;
     
@@ -50,17 +66,28 @@ class UserService {
 
   static async changePassword(userId, body) {
     const { currentPassword, newPassword } = body;
-    
-    if (!currentPassword || !newPassword) {
-      return { statusCode: 400, data: { success: false, message: "Current password and new password are required" } };
-    }
-    if (newPassword.length < 6) {
+
+    if (!newPassword || newPassword.length < 6) {
       return { statusCode: 400, data: { success: false, message: "New password must be at least 6 characters long" } };
     }
 
-    const userEmailObj = await UserModel.findById(userId);
-    const user = await UserModel.findByEmail(userEmailObj.email);
+    const user = await User.findByPk(userId);
     if (!user) return { statusCode: 404, data: { success: false, message: "User not found" } };
+
+    const isGoogleOnly = !!user.google_id && user.password_hash === "GOOGLE_OAUTH_NO_PASSWORD";
+
+    if (isGoogleOnly) {
+      // Tài khoản Google thuần → không cần xác minh mật khẩu cũ, chỉ cần tạo mới
+      const success = await UserModel.updatePassword(userId, newPassword);
+      if (!success) return { statusCode: 500, data: { success: false, message: "Failed to create password" } };
+
+      return { statusCode: 200, data: { success: true, message: "Password created successfully" } };
+    }
+
+    // Tài khoản thường hoặc đã link Google → bắt buộc currentPassword
+    if (!currentPassword) {
+      return { statusCode: 400, data: { success: false, message: "Current password is required" } };
+    }
 
     const isPasswordValid = await UserModel.comparePassword(currentPassword, user.password_hash);
     if (!isPasswordValid) return { statusCode: 401, data: { success: false, message: "Current password is incorrect" } };
@@ -73,14 +100,24 @@ class UserService {
 
   static async deleteAccount(userId, body) {
     const { password } = body;
-    
+
+    const user = await User.findByPk(userId);
+    if (!user) return { statusCode: 404, data: { success: false, message: "User not found" } };
+
+    const isGoogleOnly = !!user.google_id && user.password_hash === "GOOGLE_OAUTH_NO_PASSWORD";
+
+    if (isGoogleOnly) {
+      // Tài khoản Google thuần → không có password để xác minh, cho xóa thẳng
+      const deleted = await UserModel.delete(userId);
+      if (!deleted) return { statusCode: 404, data: { success: false, message: "User not found" } };
+      return { statusCode: 200, data: { success: true, message: "Account deleted successfully" } };
+    }
+
+    // Tài khoản thường → bắt buộc nhập password
     if (!password) {
       return { statusCode: 400, data: { success: false, message: "Password is required to delete account" } };
     }
 
-    const userEmailObj = await UserModel.findById(userId);
-    const user = await UserModel.findByEmail(userEmailObj.email);
-    
     const isPasswordValid = await UserModel.comparePassword(password, user.password_hash);
     if (!isPasswordValid) return { statusCode: 401, data: { success: false, message: "Incorrect password" } };
 
@@ -140,7 +177,6 @@ class UserService {
     const user = await UserModel.findById(userId);
     if (!user) return { statusCode: 404, data: { success: false, message: "User not found" } };
 
-    // Đã xóa bỏ dynamic import, sử dụng trực tiếp User từ đầu file
     const userInstance = await User.findByPk(userId);
 
     if (role && ["USER", "ADMIN"].includes(role)) userInstance.role = role;

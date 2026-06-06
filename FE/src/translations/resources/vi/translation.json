@@ -351,6 +351,9 @@
       "changePassword": {
         "cardTitle": "Đổi mật khẩu",
         "cardDescription": "Bảo vệ tài khoản bằng mật khẩu mạnh",
+        "createPasswordTitle": "Tạo mật khẩu",
+        "createPasswordDescription": "Tài khoản Google của bạn chưa có mật khẩu. Tạo mật khẩu để có thể đăng nhập bằng email.",
+        "createPasswordBtn": "Tạo mật khẩu",
         "currentPasswordLabel": "Mật khẩu hiện tại",
         "newPasswordLabel": "Mật khẩu mới",
         "newPasswordPlaceholder": "Min 6 ký tự",
@@ -434,6 +437,7 @@
       "logoutSuccess": "Đăng xuất thành công!",
       "registerSuccess": "Đăng ký thành công. Vui lòng đăng nhập.",
       "updateProfileSuccess": "Cập nhật hồ sơ thành công",
+      "createPasswordSuccess": "Tạo mật khẩu thành công",
       "changePasswordSuccess": "Đổi mật khẩu thành công",
       "deleteAccountSuccess": "Tài khoản đã được xóa. Hẹn gặp lại!",
       "handleCopyLink": "Đã sao chép liên kết sách vào clipboard!",

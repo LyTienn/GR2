@@ -25,9 +25,9 @@ const changePassword = async (passwordData) => {
     return await firstValueFrom(HttpClient.post('/users/change-password', passwordData));
 };
 
-//USER XÓA
+
 const deleteAccount = async (password) => {
-    return await firstValueFrom(HttpClient.delete('/users/account', { body: { password } }));
+    return await firstValueFrom(HttpClient.post('/users/delete-account', { password }));
 };
 
 const AuthService = {
@@ -37,7 +37,7 @@ const AuthService = {
     getProfile,
     updateProfile,
     changePassword,
-    deleteAccount
+    deleteAccount,
 };
 
 export default AuthService;

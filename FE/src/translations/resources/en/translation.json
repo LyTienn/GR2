@@ -351,6 +351,9 @@
       "changePassword": {
         "cardTitle": "Change Password",
         "cardDescription": "Protect your account with a strong password",
+        "createPasswordTitle": "Create Password",
+        "createPasswordDescription": "Your Google account doesn't have a password. Create one to enable email login.",
+        "createPasswordBtn": "Create",
         "currentPasswordLabel": "Current Password",
         "newPasswordLabel": "New Password",
         "newPasswordPlaceholder": "Min 6 characters",
@@ -434,6 +437,7 @@
       "logoutSuccess": "Logged out successfully!",
       "registerSuccess": "Registration successful. Please log in.",
       "updateProfileSuccess": "Profile updated successfully",
+      "createPasswordSuccess": "Password created successfully",
       "changePasswordSuccess": "Password changed successfully",
       "deleteAccountSuccess": "Account deleted. See you later!",
       "handleCopyLink": "Book link copied to clipboard!",

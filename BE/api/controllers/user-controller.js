@@ -13,6 +13,16 @@ class UserController {
     }
   }
 
+  static async getAccountType(req, res) {
+    try {
+      const result = await UserService.getAccountType(req.user.userId);
+      return res.status(result.statusCode).json(result.data);
+    } catch (error) {
+      console.error("Get account type error:", error);
+      res.status(500).json({ success: false, message: "Server error" });
+    }
+  }
+
   static async updateProfile(req, res) {
     try {
       const result = await UserService.updateProfile(req.user.userId, req.body);

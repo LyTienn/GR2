@@ -8,8 +8,10 @@ import { body } from "express-validator";
 
 const router = express.Router();
 
-// User routes (protected - require authentication)
+// ── User routes (protected - require authentication) ────────────────────────
+
 router.get("/profile", authenticate, UserController.getProfile);
+
 router.put(
   "/profile",
   authenticate,
@@ -28,9 +30,6 @@ router.post(
   "/change-password",
   authenticate,
   [
-    body("currentPassword")
-      .notEmpty()
-      .withMessage("Current password is required"),
     body("newPassword")
       .isLength({ min: 6 })
       .withMessage("New password must be at least 6 characters long"),
@@ -38,9 +37,17 @@ router.post(
   UserController.changePassword
 );
 
+// Đổi từ DELETE /account → POST /delete-account vì HTTP DELETE không có body
+// AuthService.deleteAccount gửi password trong body nên cần POST
+router.post("/delete-account", authenticate, UserController.deleteAccount);
+
+// Giữ lại route cũ để không break nếu còn nơi nào dùng (optional)
 router.delete("/account", authenticate, UserController.deleteAccount);
 
-// Admin routes (protected - require ADMIN role)
+router.get("/account-type", authenticate, UserController.getAccountType);
+
+// ── Admin routes (protected - require ADMIN role) ───────────────────────────
+
 router.get(
   "/",
   authenticate,
