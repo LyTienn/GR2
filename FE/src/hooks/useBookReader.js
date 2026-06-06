@@ -3,6 +3,8 @@ import { firstValueFrom } from 'rxjs';
 import HttpClient from "@/service/HttpClient"; 
 import { toast } from "react-toastify";
 
+const isChapterLocked = (chapter) => Boolean(chapter?.isLocked || chapter?.is_premium);
+
 export default function useBookReader(bookId, isAuthenticated, t) {
   const [book, setBook] = useState(null);
   const [chapters, setChapters] = useState([]);
@@ -38,7 +40,8 @@ export default function useBookReader(bookId, isAuthenticated, t) {
         }
         setChapters(finalChapters);
 
-        let chapterToLoad = finalChapters.length > 0 ? finalChapters[0] : null;
+        const firstReadableChapter = finalChapters.find(ch => !isChapterLocked(ch)) ?? finalChapters[0] ?? null;
+        let chapterToLoad = firstReadableChapter;
         let scrollPosToLoad = 0;
 
         if (isAuthenticated) {
@@ -51,13 +54,20 @@ export default function useBookReader(bookId, isAuthenticated, t) {
                 if (resProgress?.data) {
                   const { lastChapterId, lastReadScrollPosition } = resProgress.data;
                   if (lastChapterId) {
-                    chapterToLoad = finalChapters.find(ch => ch.id === lastChapterId) || chapterToLoad;
-                    if (lastReadScrollPosition != null) scrollPosToLoad = lastReadScrollPosition;
-                    
-                    toast.info(`${t("toasts.info.continueReading")} ${chapterToLoad?.title ?? ''}`, {
-                      autoClose: 2000,
-                      toastId: 'resume-toast'
-                    });
+                    const savedChapter = finalChapters.find(ch => ch.id === lastChapterId);
+                    if (savedChapter && isChapterLocked(savedChapter)) {
+                      chapterToLoad = firstReadableChapter;
+                      scrollPosToLoad = 0;
+                      setShowUpgradeModal(true);
+                    } else {
+                      chapterToLoad = savedChapter || chapterToLoad;
+                      if (lastReadScrollPosition != null) scrollPosToLoad = lastReadScrollPosition;
+                      
+                      toast.info(`${t("toasts.info.continueReading")} ${chapterToLoad?.title ?? ''}`, {
+                        autoClose: 2000,
+                        toastId: 'resume-toast'
+                      });
+                    }
                   }
                 }
               } catch (progressErr) {

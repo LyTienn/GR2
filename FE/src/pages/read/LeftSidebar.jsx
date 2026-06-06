@@ -16,6 +16,7 @@ export default function LeftSidebar({
   const sidebarBorder = currentTheme === THEMES.light ? 'border-slate-200' 
                        : currentTheme === THEMES.sepia ? 'border-[#d5c7a3]'
                        : 'border-slate-700';
+  const isChapterLocked = (chapter) => Boolean(chapter?.isLocked || chapter?.is_premium);
 
   return (
     <div className={`flex flex-col shrink-0 ease-in-out h-screen sticky top-0 ${themeClasses} ${isOpen ? 'w-64' : 'w-14'}`}>
@@ -40,11 +41,12 @@ export default function LeftSidebar({
         <div className="flex-1 overflow-y-auto py-2 custom-scrollbar">
           {chapters?.map((chapter) => {
             const isSelected = selectedChapter?.id === chapter.id;
+            const locked = isChapterLocked(chapter);
             return (
               <button
                 key={chapter.id}
                 onClick={() => {
-                  if (chapter.is_premium) {
+                  if (locked) {
                     setShowUpgradeModal(true);
                   } else {
                     setSelectedChapter(chapter);
@@ -57,7 +59,7 @@ export default function LeftSidebar({
                 }`}
               >
                 <span className="truncate pr-2">{chapter.title}</span>
-                {chapter.is_premium && (
+                {locked && (
                   <Lock className="w-3.5 h-3.5 text-amber-500 shrink-0" />
                 )}
               </button>

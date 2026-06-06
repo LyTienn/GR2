@@ -80,10 +80,8 @@ function App() {
   const dispatch = useDispatch();
   const isAuthenticated = useSelector(selectIsAuthenticated);
   useEffect(() => {
-    if (isAuthenticated) {
-      dispatch(fetchProfileStart());
-    }
-  }, [dispatch, isAuthenticated]);
+    dispatch(fetchProfileStart());
+  }, [dispatch]);
   return (
     <ProgressProvider>
       <AppContent />

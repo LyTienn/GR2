@@ -47,10 +47,12 @@ export default function ReadBookPage() {
   const currentChapterIndex = chapters?.findIndex(c => c.id === selectedChapter?.id) ?? 0;
   const currentPage = currentChapterIndex + 1;
   const totalPages = chapters?.length || 0;
+  const isChapterLocked = (chapter) => Boolean(chapter?.isLocked || chapter?.is_premium);
+
   const handlePageChange = (page) => {
     const targetChapter = chapters[page - 1]; 
     if (targetChapter) {
-      if (targetChapter.is_premium) {
+      if (isChapterLocked(targetChapter)) {
         setShowUpgradeModal(true);
       } else {
         setSelectedChapter(targetChapter);
@@ -95,7 +97,7 @@ export default function ReadBookPage() {
     if (note.chapter_id !== selectedChapter?.id) {
       const targetChapter = chapters.find(c => c.id === note.chapter_id);
       if (targetChapter) {
-        if (targetChapter.is_premium) {
+        if (isChapterLocked(targetChapter)) {
           setShowUpgradeModal(true);
           return;
         }
@@ -111,7 +113,7 @@ export default function ReadBookPage() {
   };
 
   const handleScroll = (e) => {
-  if (!isAuthenticated || !selectedChapter || loading) return;
+  if (!isAuthenticated || !selectedChapter || isChapterLocked(selectedChapter) || loading) return;
   
   requestAnimationFrame(() => {
     const currentPos = Math.round(e.target.scrollTop);
@@ -394,7 +396,7 @@ export default function ReadBookPage() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="sm:justify-center mt-4 gap-2">
-            <Button variant="outline" onClick={() => setShowUpgradeModal(false)}>
+            <Button className="hover:bg-gray-300 dark:hover:bg-slate-700" variant="outline" onClick={() => setShowUpgradeModal(false)}>
               {t("layout.readpage.showUpgradeModal.laterBtn")}
             </Button>
             <Button className="bg-yellow-500 hover:bg-yellow-600 text-white" onClick={() => navigate('/membership')}>

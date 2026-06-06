@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
+import passport from "./config/passport-config.js";
 import "./models/index.js";
 import sequelize from "./config/db-config.js";
 import authRoutes from "./routes/auth-route.js";
@@ -51,6 +52,7 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(passport.initialize());
 
 // Routes
 app.use("/api/auth", authRoutes);

@@ -6,9 +6,12 @@ import { toast } from "react-toastify";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import GoogleLoginButton from "./GoogleLoginButton";
+
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 const LoginForm = () => {
     const { t } = useTranslation();
@@ -47,6 +50,10 @@ const LoginForm = () => {
         dispatch(loginStart({ email, password }));
     };
 
+    const handleGoogleLogin = () => {
+        window.location.href = `${API_BASE}/auth/google`;
+    };
+
     return (
         <Card className="w-full max-w-md shadow-lg border-slate-200">
             <CardHeader className="space-y-1">
@@ -76,8 +83,8 @@ const LoginForm = () => {
                     <div className="space-y-2">
                         <div className="flex items-center justify-between">
                             <Label htmlFor="password">{t("layout.login.password")}</Label>
-                            <Link 
-                                to="/forgot-password" 
+                            <Link
+                                to="/forgot-password"
                                 className="text-sm font-medium text-black hover:text-blue-500 transition-colors"
                             >
                                 {t("layout.login.forgotPassword")}
@@ -90,7 +97,7 @@ const LoginForm = () => {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
-                                className="pr-10" 
+                                className="pr-10"
                             />
                             <button
                                 type="button"
@@ -106,8 +113,8 @@ const LoginForm = () => {
                         </div>
                     </div>
 
-                    <Button 
-                        type="submit" 
+                    <Button
+                        type="submit"
                         className="w-full mt-2 transition-all hover:shadow-md"
                         disabled={isLoading}
                     >
@@ -121,6 +128,21 @@ const LoginForm = () => {
                         )}
                     </Button>
                 </form>
+
+                {/* Divider */}
+                <div className="relative my-4">
+                    <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t border-slate-200" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-white px-2 text-slate-400">
+                            {t("layout.login.divider")}
+                        </span>
+                    </div>
+                </div>
+
+                {/* Google Login */}
+                <GoogleLoginButton disabled={isLoading} />
             </CardContent>
         </Card>
     );

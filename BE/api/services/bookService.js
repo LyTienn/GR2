@@ -4,7 +4,7 @@ import Author from "../models/author-model.js";
 import BookSubject from "../models/book_subject-model.js";
 import BookShelf from "../models/bookshelf-model.js";
 import BookBookshelf from "../models/book_bookshelf-model.js";
-import User from "../models/user-model.js";
+import { User } from "../models/user-model.js";
 import Chapter from "../models/chapter-model.js";
 import { Op } from "sequelize";
 import sequelize from "../config/db-config.js";
@@ -111,7 +111,7 @@ export const fetchBookById = async (id) => {
 export const fetchBookChapters = async (bookId, userId) => {
   const book = await Book.findOne({ where: { id: bookId, is_deleted: 0 } });
   if (!book) throw new Error("Sách không tồn tại");
-  const chapters = await Chapter.findAll({ where: { book_id: bookId }, order: [['id', 'ASC']] });
+  const chapters = await Chapter.findAll({ where: { book_id: bookId }, order: [['chapter_number', 'ASC'], ['id', 'ASC']] });
 
   if (book.type === "PREMIUM") {
     if (!userId) throw new Error("Vui lòng đăng nhập để đọc sách");

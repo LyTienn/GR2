@@ -13,6 +13,8 @@
     },
     "login": {
       "title": "Login",
+      "loginGoogle": "Login with Google",
+      "divider": "Or",
       "description": "Log in to your account",
       "email": "Email",
       "emailPlaceholder": "abc@example.com",

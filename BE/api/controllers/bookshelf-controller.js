@@ -1,10 +1,16 @@
 import BookshelfService from "../services/bookshelfService.js";
 
+const getRequestUserId = (req) => {
+  const userId = req.user?.userId || req.user?.id;
+  if (!userId) throw new Error("User ID not found in request");
+  return userId;
+};
+
 class BookshelfController {
   
   static async addToBookshelf(req, res) {
     try {
-      const result = await BookshelfService.addToBookshelf(req.user.userId, req.params.bookId, req.body.status);
+      const result = await BookshelfService.addToBookshelf(getRequestUserId(req), req.params.bookId, req.body.status);
       return res.status(result.statusCode).json(result.data);
     } catch (error) {
       console.error("Add to bookshelf error:", error);
@@ -14,7 +20,7 @@ class BookshelfController {
 
   static async getUserBookshelf(req, res) {
     try {
-      const result = await BookshelfService.getUserBookshelf(req.user.userId, req.query.status);
+      const result = await BookshelfService.getUserBookshelf(getRequestUserId(req), req.query.status);
       return res.status(result.statusCode).json(result.data);
     } catch (error) {
       console.error("Get user bookshelf error:", error);
@@ -54,7 +60,7 @@ class BookshelfController {
 
   static async removeFromBookshelf(req, res) {
     try {
-      const result = await BookshelfService.removeFromBookshelf(req.user.userId, req.params.bookId, req.query.status);
+      const result = await BookshelfService.removeFromBookshelf(getRequestUserId(req), req.params.bookId, req.query.status);
       return res.status(result.statusCode).json(result.data);
     } catch (error) {
       console.error("Remove from bookshelf error:", error);
@@ -64,7 +70,7 @@ class BookshelfController {
 
   static async checkBookInBookshelf(req, res) {
     try {
-      const result = await BookshelfService.checkBookInBookshelf(req.user.userId, req.params.bookId);
+      const result = await BookshelfService.checkBookInBookshelf(getRequestUserId(req), req.params.bookId);
       return res.status(result.statusCode).json(result.data);
     } catch (error) {
       console.error("Check book in bookshelf error:", error);
@@ -75,7 +81,7 @@ class BookshelfController {
   static async saveReadingProgress(req, res) {
     try {
       const { chapterId, scrollPosition } = req.body;
-      const result = await BookshelfService.saveReadingProgress(req.user.userId, req.params.bookId, chapterId, scrollPosition);
+      const result = await BookshelfService.saveReadingProgress(getRequestUserId(req), req.params.bookId, chapterId, scrollPosition);
       return res.status(result.statusCode).json(result.data);
     } catch (error) {
       console.error("Save progress error:", error);
@@ -85,7 +91,7 @@ class BookshelfController {
 
   static async getReadingProgress(req, res) {
     try {
-      const result = await BookshelfService.getReadingProgress(req.user.userId, req.params.bookId);
+      const result = await BookshelfService.getReadingProgress(getRequestUserId(req), req.params.bookId);
       return res.status(result.statusCode).json(result.data);
     } catch (error) {
       console.error("Get progress error:", error);

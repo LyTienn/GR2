@@ -13,6 +13,8 @@
     },
     "login": {
       "title": "Đăng nhập",
+      "loginGoogle": "Đăng nhập bằng Google",
+      "divider": "Hoặc",
       "description": "Đăng nhập vào tài khoản của bạn",
       "email": "Email",
       "emailPlaceholder": "abc@example.com",
