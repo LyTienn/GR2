@@ -160,7 +160,9 @@
     "readpage": {
       "leftSidebar": {
         "collapse": "Thu gọn",
-        "expand": "Mở rộng"
+        "expand": "Mở rộng",
+        "locked": "Premium",
+        "empty": "Chưa có chương nào"
       },
       "tableOfContents": "Mục lục",
       "fullscreenOn": "Toàn màn hình",
@@ -428,7 +430,22 @@
       "thinkingLoading": "Đang suy nghĩ...",
       "placeholder": "Hỏi AI về sách này...",
       "errorFormat": "❌ Lỗi:",
-      "connectionError": "❌ Không thể kết nối đến máy chủ AI."
+      "connectionError": "❌ Không thể kết nối đến máy chủ AI.",
+      "newConversation": "Tạo mới",
+      "loadingConversations": "Đang tải cuộc trò chuyện...",
+      "loadingMessages": "Đang tải tin nhắn...",
+      "conversationsTitle": "Cuộc trò chuyện",
+      "noConversationsTitle": "Chưa có cuộc trò chuyện",
+      "noConversationsDescription": "Tạo cuộc trò chuyện mới để hỏi AI về cuốn sách này.",
+      "backToConversations": "Cuộc trò chuyện",
+      "loadConversationsError": "Không thể tải danh sách cuộc trò chuyện.",
+      "loadMessagesError": "Không thể tải tin nhắn.",
+      "createConversationError": "Không thể tạo cuộc trò chuyện mới.",
+      "deleteConversation": "Xóa cuộc trò chuyện",
+      "deleteConversationError": "Không thể xóa cuộc trò chuyện này.",
+      "confirmDeleteConversation": "Bạn có chắc chắn muốn xóa cuộc trò chuyện này không?",
+      "untitledConversation": "Cuộc trò chuyện mới",
+      "noBookTitle": "Sách hiện tại"
     }
   },
   "toasts": {

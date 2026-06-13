@@ -58,12 +58,26 @@ export const fetchAllBooks = async (queryParams) => {
       attributes: ['id']
     });
     const matchedAuthorIds = authors.map(a => a.id);
-
+    const subjects = await Subject.findAll({
+      where: { name: { [Op.iLike]: `%${searchTerm}%` } },
+      attributes: ['id']
+    });
+    const matchedSubjectIds = subjects.map(s => s.id);
+    let booksBySubject = [];
+    if (matchedSubjectIds.length > 0) {
+      booksBySubject = await BookSubject.findAll({
+        where: { subject_id: { [Op.in]: matchedSubjectIds } },
+        attributes: ['book_id'],
+        raw: true
+      });
+    }
+    const bookIdsBySubject = booksBySubject.map(bs => bs.book_id);
     where = {
       ...where,
       [Op.or]: [
         { title: { [Op.iLike]: `%${searchTerm}%` } },
-        { author_id: { [Op.in]: matchedAuthorIds } }
+        { author_id: { [Op.in]: matchedAuthorIds } },
+        { id: { [Op.in]: bookIdsBySubject } }
       ]
     };
   }

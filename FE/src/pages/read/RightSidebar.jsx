@@ -1,5 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Settings2, BookOpen, Maximize, Minimize, X, ChevronRight, Bot } from "lucide-react";
+import { useTranslation } from 'react-i18next';
+import viFlag from "@/assets/viFlag.png";
+import enFlag from "@/assets/enFlag.png";
 import SettingsPanel from './SettingsPanel';
 import NotesPanel from './NotesPanel';
 import ChatPanel from './ChatPanel';
@@ -16,11 +19,20 @@ export default function RightSidebar({
   chapterId,
   t 
 }) {
+  const { i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('notes');
   const [sidebarWidth, setSidebarWidth] = useState(320); 
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef(null);
+
+  const isVietnamese = i18n.language === 'vi';
+  const currentLanguageFlag = isVietnamese ? viFlag : enFlag;
+  const currentLanguageLabel = isVietnamese ? 'VI' : 'EN';
+
+  const handleToggleLanguage = () => {
+    i18n.changeLanguage(isVietnamese ? 'en' : 'vi');
+  };
 
   const handleMouseDown = () => {
     setIsResizing(true);
@@ -113,6 +125,19 @@ export default function RightSidebar({
         >
           <Bot className="w-5 h-5" />
         </button>
+        <button
+          type="button"
+          onClick={handleToggleLanguage}
+          className="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/15 transition-colors"
+          title={currentLanguageLabel}
+          aria-label={currentLanguageLabel}
+        >
+          <img
+            src={currentLanguageFlag}
+            alt={currentLanguageLabel}
+            className="w-5 h-5 rounded-sm object-cover"
+          />
+        </button>
         <div className="flex-1" />
       </div>
 
@@ -122,7 +147,7 @@ export default function RightSidebar({
             <h3 className="font-semibold uppercase tracking-wider text-sm opacity-80">
               {activeTab === 'notes' ? t("layout.readpage.note.title") 
               : activeTab === 'settings' ? t("layout.readpage.showSetting.label")
-              : 'AI Chatbot'}
+              : 'BOOKEX CHAT'}
             </h3>
           </div>
 

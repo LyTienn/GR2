@@ -18,6 +18,8 @@ import Subscription from "./subscription-model.js"
 import CommentReaction from "./comment-reaction-model.js";
 import ChapterNote from "./chapterNote-model.js";
 import ChapterEmbedding from "./chapterEmbedding_model.js";
+import Conversation from "./conversation-model.js";
+import ConversationMessage from "./conversation_message-model.js";
 
 // Định nghĩa tất cả associations tại ĐÂY
 const setupAssociations = () => {
@@ -89,14 +91,6 @@ const setupAssociations = () => {
   User.hasMany(Subscription, { foreignKey: "user_id", as: "subscriptions" });
   Subscription.belongsTo(User, { foreignKey: "user_id", as: "user" });
 
-  // Task - Chapter
-  // Task.belongsTo(Chapter, { foreignKey: "chapter_id", as: "chapter" });
-  // Chapter.hasMany(Task, { foreignKey: "chapter_id", as: "tasks" });
-
-  // // Chapter - Translation
-  // Chapter.hasMany(Translation, { foreignKey: "chapter_id", as: "translations" });
-  // Translation.belongsTo(Chapter, { foreignKey: "chapter_id", as: "chapter" });
-
   // User - CommentReaction
   User.hasMany(CommentReaction, { foreignKey: "user_id", as: "reactions", onDelete: 'CASCADE' });
   CommentReaction.belongsTo(User, { foreignKey: "user_id", as: "user" });
@@ -116,6 +110,18 @@ const setupAssociations = () => {
   // Chapter - ChapterEmbedding
   Chapter.hasMany(ChapterEmbedding, { foreignKey: "chapter_id", as: "embeddings", onDelete: 'CASCADE' });
   ChapterEmbedding.belongsTo(Chapter, { foreignKey: "chapter_id", as: "chapter" });
+
+  // User - Conversation
+  Conversation.belongsTo(User, { foreignKey: "user_id" });
+  User.hasMany(Conversation, { foreignKey: "user_id", onDelete: "CASCADE" });
+
+  // Conversation - ConversationMessage
+  Conversation.hasMany(ConversationMessage, {
+    foreignKey: "conversation_id",
+    as: "messages",
+    onDelete: "CASCADE",
+  });
+  ConversationMessage.belongsTo(Conversation, { foreignKey: "conversation_id" });
 };
 
 // Gọi setup associations
@@ -140,6 +146,8 @@ export {
   CommentReaction,
   ChapterNote,
   ChapterEmbedding,
+  Conversation,
+  ConversationMessage,
 };
 
 export default {
@@ -160,4 +168,6 @@ export default {
   CommentReaction,
   ChapterNote,
   ChapterEmbedding,
+  Conversation,
+  ConversationMessage,
 };
