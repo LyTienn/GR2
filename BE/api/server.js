@@ -84,7 +84,7 @@ app.get("/api/health", async (req, res) => {
     await sequelize.authenticate();
     res.json({
       status: "OK",
-      message: "Server is running",
+      message: "Server is running with CI/CD",
       database: "Connected",
     });
   } catch (error) {
