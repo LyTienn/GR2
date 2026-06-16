@@ -5,6 +5,8 @@ import AuthController from "../controllers/auth-controller.js";
 import {
   validateRegister,
   validateLogin,
+  validateForgotPassword,
+  validateResetPassword
 } from "../middlewares/validation-middleware.js";
 import { optionalAuth } from "../middlewares/auth-middleware.js";
 
@@ -14,6 +16,9 @@ router.post("/register", validateRegister, AuthController.register);
 router.post("/login", validateLogin, AuthController.login);
 router.post("/refresh", AuthController.refreshToken);
 router.post("/logout", optionalAuth, AuthController.logout);
+router.post("/forgot-password", validateForgotPassword, AuthController.forgotPassword);
+router.post("/reset-password", validateResetPassword, AuthController.resetPassword);
+router.get("/verify-email", AuthController.verifyEmail);
 
 // * Bước 1: Frontend redirect window.location.href đến đây.
 // * Passport tự mở màn hình đăng nhập Google với scope profile + email.

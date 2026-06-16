@@ -25,6 +25,41 @@
       "haventAccount": "Don't have an account? ",
       "register": "Register now"
     },
+    "forgotPassword": {
+      "title": "Forgot password",
+      "description": "Enter your email to receive a password reset link",
+      "submitButton": "Confirm",
+      "successMessage": "If this email exists in our system, please check your inbox for a password reset link."
+    },
+    "resetPassword": {
+      "title": "Reset password",
+      "description": "Please enter a secure new password for your account",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm new password",
+      "submitButton": "Change password",
+      "missingToken": "The verification code is invalid or has expired.",
+      "passwordLength": "New password must be at least 6 characters",
+      "passwordMismatch": "Password confirmation does not match",
+      "invalidTokenTitle": "Invalid token",
+      "invalidTokenDescription": "The password reset request is missing a token or the link is incorrect.",
+      "successTitle": "Password reset successfully!",
+      "redirecting": "Redirecting to the login page in a few seconds...",
+      "loginNow": "Log in now"
+    },
+    "verifyEmail": {
+      "processingTitle": "Processing...",
+      "processingDesc": "Please use the verification link from your registration email.",
+      "backToLogin": "Back to login",
+      "successTitle": "Verification successful!",
+      "failedTitle": "Verification failed",
+      "successDesc": "Your account has been activated. You can log in now.",
+      "failedDesc": "The verification link is invalid or has expired. Please register again to receive a new email.",
+      "loginButton": "Log in now",
+      "registerAgain": "Register again",
+      "invalidOrUsedToken": "The verification link is invalid or has been used. Please register again to receive a new email.",
+      "alreadyActivated": "The account has already been activated. Please log in.",
+      "verificationLinkExpired": "The verification link has expired. Please register again to receive a new email."
+    },
     "loading": "Loading...",
     "header": {
       "title": "Lybrary",
@@ -452,13 +487,15 @@
     "success": {
       "loginSuccess": "Logged in successfully. Welcome back!",
       "logoutSuccess": "Logged out successfully!",
-      "registerSuccess": "Registration successful. Please log in.",
+      "registerSuccess": "Registration successful! Please check your email to verify your account.",
       "updateProfileSuccess": "Profile updated successfully",
       "createPasswordSuccess": "Password created successfully",
       "changePasswordSuccess": "Password changed successfully",
+      "resetPasswordSuccess": "Password reset successfully!",
       "deleteAccountSuccess": "Account deleted. See you later!",
       "handleCopyLink": "Book link copied to clipboard!",
       "cancelSubSuccess": "Subscription cancelled successfully!",
+      "requestSent": "Request received. Please check your email!",
       "toggleFavorite": {
         "add": "Added to favorites!",
         "remove": "Removed from favorites!"
@@ -475,7 +512,19 @@
       "currentPasswordWrong": "Current password is incorrect",
       "deleteAccountError": "Password is incorrect or server error",
       "loginToContinue": "Please log in to continue",
-      "loginFailed": "Failed to log in. Please check your information and try again."
+      "loginFailed": "Failed to log in. Please check your information and try again.",
+      "emailAlreadyRegistered": "This email is already registered.",
+      "registerFailed": "Registration failed. Please try again.",
+      "requestFailed": "Unable to process your request. Please try again.",
+      "resetPasswordFailed": "Unable to reset password. Please try again.",
+      "RESET_TOKEN_INVALID": "The password reset link is invalid or has already been used.",
+      "RESET_TOKEN_EXPIRED": "The password reset link has expired. Please request a new one.",
+      "INVALID_EMAIL": "Please provide a valid email",
+      "PASSWORD_TOO_SHORT": "Password must be at least 6 characters long",
+      "PASSWORD_REQUIRED": "Password is required",
+      "FULL_NAME_REQUIRED": "Full name is required",
+      "FULL_NAME_LENGTH_INVALID": "Full name must be between 2 and 255 characters",
+      "TOKEN_REQUIRED": "Token is required"
     },
     "warn": {
       "missingFields": "Please fill in all required fields"    },

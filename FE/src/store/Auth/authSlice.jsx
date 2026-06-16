@@ -53,6 +53,28 @@ const AuthSlice = createSlice({
             state.isLoading = false;
             state.error = action.payload;
         },
+        forgotPasswordStart: (state) => {
+            state.isLoading = true;
+            state.error = null;
+        },
+        forgotPasswordSuccess: (state) => {
+            state.isLoading = false;
+        },
+        forgotPasswordFailure: (state, action) => {
+            state.isLoading = false;
+            state.error = action.payload;
+        },
+        resetPasswordStart: (state) => {
+            state.isLoading = true;
+            state.error = null;
+        },
+        resetPasswordSuccess: (state) => {
+            state.isLoading = false;
+        },
+        resetPasswordFailure: (state, action) => {
+            state.isLoading = false;
+            state.error = action.payload;
+        },
         fetchProfileStart: (state) => {
             state.isLoading = true;
             state.error = null;
@@ -74,6 +96,8 @@ export const { clearAuthError,
     loginStart, loginSuccess, loginFailure,
     logoutStart, logoutSuccess, logoutFailure,
     registerStart, registerSuccess, registerFailure,
+    forgotPasswordStart, forgotPasswordSuccess, forgotPasswordFailure, 
+    resetPasswordStart, resetPasswordSuccess, resetPasswordFailure,
     fetchProfileStart, fetchProfileSuccess, fetchProfileFailure
  } = AuthSlice.actions;
 export default AuthSlice.reducer;

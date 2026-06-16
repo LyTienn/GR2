@@ -3,13 +3,15 @@ import { Routes, Route } from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import AuthLayout from './components/auth/AuthLayout';
-import { ToastContainer } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { ProgressProvider } from './contexts/ProgressContext';
-// import GlobalProgressTracker from './components/GlobalProgressTracker';
+import VerifyEmail from './components/auth/VerifyEmail';
+import ForgotPasswordForm from './components/auth/ForgotPasswordForm';
+import ResetPasswordForm from './components/auth/ResetPasswordForm';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProfileStart, selectIsAuthenticated } from './store/Auth';
-// import Chatbot from './components/Chatbot/Chatbot';
+import { useTranslation } from 'react-i18next';
 // Admin imports
 import AdminLayout from './components/admin/AdminLayout';
 import RequireAdmin from './components/admin/RequireAdmin';
@@ -31,6 +33,8 @@ const Profile = lazy(() => import('./pages/Profile'));
 const SearchPage = lazy(() => import('./pages/SearchPage'));
 const Membership = lazy(() => import('./pages/Membership'));
 const Transactions = lazy(() => import('./pages/transaction/Transactions'))
+const GOOGLE_LOGIN_PENDING_KEY = "googleLoginPending";
+const GOOGLE_LOGIN_TOAST_MAX_AGE = 5 * 60 * 1000;
 
 const MainLayout = () => {
   return (
@@ -58,6 +62,9 @@ function AppContent() {
       <Route element={<AuthLayout />}>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
+        <Route path="/forgot-password" element={<ForgotPasswordForm />} /> 
+        <Route path="/reset-password" element={<ResetPasswordForm />} />
       </Route>
       {/* Admin routes */}
       <Route path='/admin' element={<RequireAdmin><AdminLayout /></RequireAdmin>}>
@@ -79,9 +86,24 @@ function AppContent() {
 function App() {
   const dispatch = useDispatch();
   const isAuthenticated = useSelector(selectIsAuthenticated);
+  const { t } = useTranslation();
+
   useEffect(() => {
     dispatch(fetchProfileStart());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const pendingAt = Number(sessionStorage.getItem(GOOGLE_LOGIN_PENDING_KEY));
+    if (!pendingAt) return;
+
+    sessionStorage.removeItem(GOOGLE_LOGIN_PENDING_KEY);
+    if (Date.now() - pendingAt <= GOOGLE_LOGIN_TOAST_MAX_AGE) {
+      toast.success(t("toasts.success.loginSuccess"));
+    }
+  }, [isAuthenticated, t]);
+
   return (
     <ProgressProvider>
       <AppContent />

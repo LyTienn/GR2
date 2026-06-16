@@ -25,6 +25,41 @@
       "haventAccount": "Chưa có tài khoản? ",
       "register": "Đăng ký ngay"
     },
+    "forgotPassword": {
+      "title": "Quên mật khẩu",
+      "description": "Nhập email của bạn để nhận liên kết đặt lại mật khẩu",
+      "submitButton": "Xác nhận",
+      "successMessage": "Nếu email tồn tại trong hệ thống, vui lòng kiểm tra hộp thư để đặt lại mật khẩu."
+    },
+    "resetPassword": {
+      "title": "Đặt lại mật khẩu",
+      "description": "Vui lòng nhập mật khẩu an toàn mới cho tài khoản của bạn",
+      "newPassword": "Mật khẩu mới",
+      "confirmPassword": "Xác nhận mật khẩu mới",
+      "submitButton": "Đổi mật khẩu",
+      "missingToken": "Mã xác thực không hợp lệ hoặc đã hết hạn.",
+      "passwordLength": "Mật khẩu mới phải có tối thiểu 6 ký tự",
+      "passwordMismatch": "Mật khẩu xác nhận không khớp",
+      "invalidTokenTitle": "Mã token không hợp lệ",
+      "invalidTokenDescription": "Yêu cầu đặt lại mật khẩu thiếu token hoặc liên kết không chính xác.",
+      "successTitle": "Mật khẩu đã đặt lại thành công!",
+      "redirecting": "Đang tự động chuyển hướng về trang đăng nhập sau vài giây...",
+      "loginNow": "Đăng nhập ngay"
+    },
+    "verifyEmail": {
+      "processingTitle": "Đang xử lý...",
+      "processingDesc": "Vui lòng dùng link xác thực từ email đăng ký.",
+      "backToLogin": "Về trang đăng nhập",
+      "successTitle": "Xác thực thành công!",
+      "failedTitle": "Xác thực thất bại",
+      "successDesc": "Tài khoản của bạn đã được kích hoạt. Bạn có thể đăng nhập ngay bây giờ.",
+      "failedDesc": "Link xác thực không hợp lệ hoặc đã hết hạn. Vui lòng đăng ký lại để nhận email mới.",
+      "loginButton": "Đăng nhập ngay",
+      "registerAgain": "Đăng ký lại",
+      "invalidOrUsedToken": "Liên kết xác thực không hợp lệ hoặc đã được sử dụng. Vui lòng đăng ký lại để nhận email mới.",
+      "alreadyActivated": "Tài khoản đã được kích hoạt trước đó. Vui lòng đăng nhập.",
+      "verificationLinkExpired": "Liên kết xác thực đã hết hạn. Vui lòng đăng ký lại để nhận email mới."
+    },
     "loading": "Đang tải thư viện...",
     "header": {
       "title": "Lybrary",
@@ -452,13 +487,15 @@
     "success": {
       "loginSuccess": "Đăng nhập thành công. Chào mừng bạn quay trở lại!",
       "logoutSuccess": "Đăng xuất thành công!",
-      "registerSuccess": "Đăng ký thành công. Vui lòng đăng nhập.",
+      "registerSuccess": "Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.",
       "updateProfileSuccess": "Cập nhật hồ sơ thành công",
       "createPasswordSuccess": "Tạo mật khẩu thành công",
       "changePasswordSuccess": "Đổi mật khẩu thành công",
+      "resetPasswordSuccess": "Đặt lại mật khẩu thành công!",
       "deleteAccountSuccess": "Tài khoản đã được xóa. Hẹn gặp lại!",
       "handleCopyLink": "Đã sao chép liên kết sách vào clipboard!",
       "cancelSubSuccess": "Đã hủy đơn thanh toán. Bạn có thể tạo đơn mới.",
+      "requestSent": "Yêu cầu đã được ghi nhận. Vui lòng kiểm tra email!",
       "toggleFavorite": {
         "add": "Đã thêm vào sách yêu thích!",
         "remove": "Đã xóa khỏi sách yêu thích!"
@@ -475,7 +512,19 @@
       "currentPasswordWrong": "Mật khẩu hiện tại không đúng",
       "deleteAccountError": "Mật khẩu không đúng hoặc lỗi server",
       "loginToContinue": "Vui lòng đăng nhập để tiếp tục",
-      "loginFailed": "Đăng nhập thất bại. Vui lòng kiểm tra thông tin và thử lại."
+      "loginFailed": "Đăng nhập thất bại. Vui lòng kiểm tra thông tin và thử lại.",
+      "emailAlreadyRegistered": "Email này đã được đăng ký.",
+      "registerFailed": "Đăng ký thất bại. Vui lòng thử lại.",
+      "requestFailed": "Không thể xử lý yêu cầu. Vui lòng thử lại.",
+      "resetPasswordFailed": "Không thể đặt lại mật khẩu. Vui lòng thử lại.",
+      "RESET_TOKEN_INVALID": "Liên kết đặt lại mật khẩu không hợp lệ hoặc đã được sử dụng.",
+      "RESET_TOKEN_EXPIRED": "Liên kết đặt lại mật khẩu đã hết hạn. Vui lòng yêu cầu liên kết mới.",
+      "INVALID_EMAIL": "Vui lòng cung cấp một email hợp lệ",
+      "PASSWORD_TOO_SHORT": "Mật khẩu phải có ít nhất 6 ký tự",
+      "PASSWORD_REQUIRED": "Mật khẩu là bắt buộc",
+      "FULL_NAME_REQUIRED": "Họ tên là bắt buộc",
+      "FULL_NAME_LENGTH_INVALID": "Họ tên phải từ 2 đến 255 ký tự",
+      "TOKEN_REQUIRED": "Token là bắt buộc"
     },
     "warn": {
       "missingFields": "Vui lòng điền đầy đủ thông tin"

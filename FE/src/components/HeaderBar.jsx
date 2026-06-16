@@ -52,9 +52,7 @@ const HeaderBar = () => {
 
   useEffect(() => {
     if (wasAuthenticated.current && !isAuthenticated) {
-      toast.success(t("toasts.success.logoutSuccess"), {
-        toastId: 'logout-success-toast' 
-      });
+      // Toast đăng xuất được xử lý tập trung trong logoutEpic
       navigate('/homepage');
     }
     if (error) {

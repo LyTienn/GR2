@@ -20,7 +20,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import AuthService from "@/service/AuthService";
-import { fetchProfileStart, logoutStart } from "@/store/Auth/authSlice";
+import { fetchProfileStart, logoutSuccess } from "@/store/Auth/authSlice";
 import HttpClient from "@/service/HttpClient";
 
 export default function ProfilePage() {
@@ -131,7 +131,9 @@ export default function ProfilePage() {
       await AuthService.deleteAccount(accountType.hasPassword ? deletePassword : undefined);
       toast.success(t("toasts.success.deleteAccountSuccess"));
       setDeleteDialogOpen(false);
-      dispatch(logoutStart());
+      // Tài khoản đã bị xóa ở server → chỉ reset state client, không gọi logoutEpic
+      // để tránh hiển thị trùng toast đăng xuất.
+      dispatch(logoutSuccess());
       navigate("/login");
     } catch (error) {
       toast.error(error.response?.message || error.response?.data?.message || t("toasts.error.deleteAccountError"));

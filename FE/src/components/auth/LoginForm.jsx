@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
-import { loginStart } from "@/store/Auth";
+import { clearAuthError, loginStart } from "@/store/Auth";
 import { toast } from "react-toastify";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,8 +10,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import GoogleLoginButton from "./GoogleLoginButton";
-
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 const LoginForm = () => {
     const { t } = useTranslation();
@@ -38,8 +36,9 @@ const LoginForm = () => {
     useEffect(() => {
         if (error) {
             toast.error(t("toasts.error.loginFailed"));
+            dispatch(clearAuthError());
         }
-    }, [error]);
+    }, [dispatch, error, t]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -48,10 +47,6 @@ const LoginForm = () => {
             return;
         }
         dispatch(loginStart({ email, password }));
-    };
-
-    const handleGoogleLogin = () => {
-        window.location.href = `${API_BASE}/auth/google`;
     };
 
     return (
@@ -66,7 +61,6 @@ const LoginForm = () => {
             </CardHeader>
             <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Email */}
                     <div className="space-y-2">
                         <Label htmlFor="email">{t("layout.login.email")}</Label>
                         <Input
@@ -79,7 +73,6 @@ const LoginForm = () => {
                         />
                     </div>
 
-                    {/* Mật khẩu */}
                     <div className="space-y-2">
                         <div className="flex items-center justify-between">
                             <Label htmlFor="password">{t("layout.login.password")}</Label>
@@ -104,11 +97,7 @@ const LoginForm = () => {
                                 onClick={() => setShowPassword(!showPassword)}
                                 className="absolute right-0 top-0 h-full px-3 py-2 text-slate-400 hover:text-slate-600 focus:outline-none transition-colors"
                             >
-                                {showPassword ? (
-                                    <EyeOff className="h-4 w-4" />
-                                ) : (
-                                    <Eye className="h-4 w-4" />
-                                )}
+                                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                             </button>
                         </div>
                     </div>
@@ -129,7 +118,6 @@ const LoginForm = () => {
                     </Button>
                 </form>
 
-                {/* Divider */}
                 <div className="relative my-4">
                     <div className="absolute inset-0 flex items-center">
                         <span className="w-full border-t border-slate-200" />
@@ -141,7 +129,7 @@ const LoginForm = () => {
                     </div>
                 </div>
 
-                {/* Google Login */}
+                {/* GoogleLoginButton tự handle redirect, không cần thêm handler */}
                 <GoogleLoginButton disabled={isLoading} />
             </CardContent>
         </Card>

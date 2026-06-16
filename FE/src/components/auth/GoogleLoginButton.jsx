@@ -4,11 +4,13 @@ import { useTranslation } from "react-i18next";
 // toàn trang sang Backend, kích hoạt luồng OAuth2.
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const GOOGLE_LOGIN_PENDING_KEY = "googleLoginPending";
 
 function GoogleLoginButton({ disabled = false }) {
   const { t } = useTranslation();
   function handleGoogleLogin() {
     // Redirect toàn trang → Backend sẽ redirect tiếp sang Google
+    sessionStorage.setItem(GOOGLE_LOGIN_PENDING_KEY, String(Date.now()));
     window.location.href = `${API_BASE}/auth/google`;
   }
 

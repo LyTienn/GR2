@@ -21,6 +21,20 @@ body {
   color: rgba(0, 0, 0, 0.87);
 }
 
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
+input[type="password"]::-webkit-credentials-auto-fill-button,
+input[type="password"]::-webkit-contacts-auto-fill-button {
+  display: none !important;
+  visibility: hidden;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+}
+
 .hover-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: transparent transparent;

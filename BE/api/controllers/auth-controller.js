@@ -79,16 +79,49 @@ class AuthController {
     }
   }
 
+  /**
+   * GET /auth/verify-email?token=xxxx
+   * Người dùng bấm link trong email -> redirect về Frontend kèm trạng thái
+   * để FE hiển thị thông báo và tự chuyển hướng về trang đăng nhập.
+   */
   static async verifyEmail(req, res) {
-    res.status(501).json({ success: false, message: "Email verification not implemented yet" });
+    const clientUrl = process.env.NODE_ENV === "production"
+    ? process.env.CLIENT_URL_PROD
+    : process.env.CLIENT_URL_DEV || "http://localhost:5173";
+
+    try {
+      const { token } = req.query;
+      const result = await AuthService.verifyEmail(token);
+
+      if (result.statusCode === 200) {
+        return res.redirect(`${clientUrl}/verify-email?status=success`);
+      }
+
+      const errorCode = result.data.errorCode || "VERIFICATION_FAILED";
+      return res.redirect(`${clientUrl}/verify-email?status=failed&errorCode=${errorCode}`);    } catch (error) {
+      console.error("Verify email error:", error);
+      return res.redirect(`${clientUrl}/verify-email?status=failed`);
+    }
   }
 
   static async forgotPassword(req, res) {
-    res.status(501).json({ success: false, message: "Forgot password not implemented yet" });
+    try {
+      const result = await AuthService.forgotPassword(req.body);
+      return res.status(result.statusCode).json(result.data);
+    } catch (error) {
+      console.error("Forgot password error:", error);
+      res.status(500).json({ success: false, message: "Server error during forgot password process" });
+    }
   }
 
   static async resetPassword(req, res) {
-    res.status(501).json({ success: false, message: "Reset password not implemented yet" });
+    try {
+      const result = await AuthService.resetPassword(req.body);
+      return res.status(result.statusCode).json(result.data);
+    } catch (error) {
+      console.error("Reset password error:", error);
+      res.status(500).json({ success: false, message: "Server error during reset password process" });
+    }
   }
 }
 

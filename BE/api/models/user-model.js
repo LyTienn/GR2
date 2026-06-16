@@ -43,6 +43,33 @@ const User = sequelize.define(
       type: DataTypes.ENUM("FREE", "PREMIUM"),
       defaultValue: "FREE",
     },
+    status: {
+      type: DataTypes.ENUM("ACTIVE", "INACTIVE"),
+      allowNull: false,
+      defaultValue: "ACTIVE",
+    },
+    // Token xác thực email (random string)
+    verification_token: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+      field: "verification_token",
+    },
+    // Thời điểm token xác thực hết hạn
+    verification_expired_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      field: "verification_expired_at",
+    },
+    reset_password_token: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+      field: "reset_password_token",
+    },
+    reset_password_expired_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      field: "reset_password_expired_at",
+    },
     refresh_token: {
       type: DataTypes.TEXT,
       allowNull: true,
@@ -72,12 +99,33 @@ User.prototype.toJSON = function () {
   const values = { ...this.get() };
   delete values.password_hash;
   delete values.refresh_token;
+  delete values.verification_token;
+  delete values.reset_password_token;     
+  delete values.reset_password_expired_at;
   return values;
 };
 
 class UserModel {
-  static async create({ email, password, fullName, role = "USER", tier = "FREE" }) {
-    const passwordHash = await bcrypt.hash(password, 10);
+  /**
+   * Tạo user mới.
+   * status mặc định "ACTIVE" để không phá vỡ các luồng tạo user khác
+   * (Google OAuth, Admin tạo user...). Luồng đăng ký thường (authService.register)
+   * sẽ truyền status: "INACTIVE" + verificationToken + verificationExpiredAt.
+   */
+  static async create({
+    email,
+    password,
+    fullName,
+    role = "USER",
+    tier = "FREE",
+    status = "ACTIVE",
+    googleId = null,
+    verificationToken = null,
+    verificationExpiredAt = null,
+  }) {
+    const passwordHash = password
+      ? await bcrypt.hash(password, 10)
+      : "GOOGLE_OAUTH_NO_PASSWORD";
 
     const user = await User.create({
       email,
@@ -85,15 +133,13 @@ class UserModel {
       full_name: fullName,
       role,
       tier,
+      status,
+      google_id: googleId,
+      verification_token: verificationToken,
+      verification_expired_at: verificationExpiredAt,
     });
 
-    return {
-      user_id: user.user_id,
-      email: user.email,
-      full_name: user.full_name,
-      role: user.role,
-      created_at: user.created_at,
-    };
+    return user;
   }
 
   static async findByEmail(email) {
@@ -106,7 +152,7 @@ class UserModel {
   static async findById(userId) {
     return await User.findOne({
       where: { user_id: userId, is_deleted: 0 },
-      attributes: ["user_id", "email", "full_name", "role", "tier", "created_at"],
+      attributes: ["user_id", "email", "full_name", "role", "tier", "status", "created_at"],
       raw: true,
     });
   }
@@ -222,7 +268,7 @@ class UserModel {
 
     const { count, rows } = await User.findAndCountAll({
       where,
-      attributes: ["user_id", "email", "full_name", "role", "tier", "created_at"],
+      attributes: ["user_id", "email", "full_name", "role", "tier", "status", "created_at"],
       limit,
       offset,
       order: [["created_at", "DESC"]],
@@ -248,8 +294,71 @@ class UserModel {
           { full_name: { [Op.iLike]: `%${searchTerm}%` } },
         ],
       },
-      attributes: ["user_id", "email", "full_name", "role", "tier", "created_at"],
+      attributes: ["user_id", "email", "full_name", "role", "tier", "status", "created_at"],
       limit: 10,
+    });
+  }
+
+  static async setResetPasswordToken(userId, token, expiredAt) {
+    const user = await User.findByPk(userId);
+    if (!user) return false;
+
+    user.reset_password_token = token;
+    user.reset_password_expired_at = expiredAt;
+    await user.save();
+    return true;
+  }
+
+  static async findByResetPasswordToken(token) {
+    return await User.findOne({ where: { reset_password_token: token, is_deleted: 0 } });
+  }
+
+  static async clearResetPasswordToken(userId) {
+    const user = await User.findByPk(userId);
+    if (!user) return false;
+
+    user.reset_password_token = null;
+    user.reset_password_expired_at = null;
+    await user.save();
+    return true;
+  }
+
+  // Lưu/refresh token xác thực email
+  static async setVerificationToken(userId, token, expiredAt) {
+    const user = await User.findByPk(userId);
+    if (!user) return false;
+
+    user.verification_token = token;
+    user.verification_expired_at = expiredAt;
+    await user.save();
+    return true;
+  }
+
+  // Tìm user theo verification token
+  static async findByVerificationToken(token) {
+    return await User.findOne({ where: { verification_token: token, is_deleted: 0 } });
+  }
+
+  // Kích hoạt tài khoản sau khi verify thành công
+  static async activateUser(userId) {
+    const user = await User.findOne({ where: { user_id: userId, is_deleted: 0 } });
+    if (!user) return false;
+
+    user.status = "ACTIVE";
+    user.verification_token = null;
+    user.verification_expired_at = null;
+    await user.save();
+    return true;
+  }
+
+  static async deleteExpiredInactiveUsers() {
+    const { Op } = await import("sequelize");
+
+    return await User.destroy({
+      where: {
+        status: "INACTIVE",
+        verification_expired_at: { [Op.lt]: new Date() },
+      },
     });
   }
 }
