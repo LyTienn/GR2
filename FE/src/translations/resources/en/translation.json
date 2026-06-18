@@ -405,7 +405,8 @@
         "dialogDescription": "Enter your password to confirm this action. Data will be permanently lost.",
         "passwordPlaceholder": "Enter your password",
         "cancelButton": "Cancel",
-        "confirmButton": "Confirm Delete"
+        "confirmButton": "Confirm Delete",
+        "googleAccountNote": "Google accounts do not require password verification."
       }
     }
   },

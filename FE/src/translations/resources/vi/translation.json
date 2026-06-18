@@ -405,7 +405,8 @@
         "dialogDescription": "Nhập mật khẩu của bạn để xác nhận hành động này. Dữ liệu sẽ mất vĩnh viễn.",
         "passwordPlaceholder": "Nhập mật khẩu của bạn",
         "cancelButton": "Hủy",
-        "confirmButton": "Xác nhận xóa"
+        "confirmButton": "Xác nhận xóa",
+        "googleAccountNote": "Tài khoản Google không cần xác minh mật khẩu."
       }
     }
   },

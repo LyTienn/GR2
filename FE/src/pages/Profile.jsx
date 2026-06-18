@@ -293,7 +293,7 @@ export default function ProfilePage() {
                         />
                       ) : (
                         <p className="text-sm text-muted-foreground">
-                          {t("layout.profile.deleteAccount.googleAccountNote", "Tài khoản Google không cần xác minh mật khẩu.")}
+                          {t("layout.profile.deleteAccount.googleAccountNote")}
                         </p>
                       )}
                     </div>
