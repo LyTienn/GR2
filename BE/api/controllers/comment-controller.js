@@ -84,7 +84,7 @@ class CommentController {
 
   static async getBooksWithComments(req, res) {
     try {
-      const result = await CommentService.getBooksWithComments(req.query.limit);
+      const result = await CommentService.getBooksWithComments(req.query.limit, req.query.search, req.query.page);
       return res.status(result.statusCode).json(result.data);
     } catch (error) {
       console.error("Get books with comments error:", error);

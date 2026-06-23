@@ -210,9 +210,10 @@ class CommentService {
     return { statusCode: 200, data: { success: true, message: "Comment deleted successfully" } };
   }
 
+  // #region ADMIN COMMENT
   static async getAllComments(query) {
-    const page = Math.max(1, parseInt(query.page, 10) || 1);
-    const limit = Math.min(100, Math.max(1, parseInt(query.limit, 10) || 10));
+    const page = Math.max(1, parseInt(query.page || 1, 10) || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(query.limit || 50, 10) || 50));
     const offset = (page - 1) * limit;
 
     const where = { is_deleted: 0 };
@@ -302,10 +303,20 @@ class CommentService {
     return { statusCode: 200, data: { success: true, data: formattedStats } };
   }
 
-  static async getBooksWithComments(queryLimit) {
-    const limit = Math.min(100, Math.max(1, parseInt(queryLimit, 10) || 100));
+  static async getBooksWithComments(queryLimit, querySearch, queryPage) {
+    const page = Math.max(1, parseInt(queryPage, 10) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(queryLimit, 10) || 30));
+    const offset = (page - 1) * limit;
+
+    const where = {};
+    if (querySearch) {
+      where.title = { [Op.iLike]: `%${querySearch}%` };
+    }
+
+    const totalCount = await Book.count({ where });
 
     const books = await Book.findAll({
+      where,
       attributes: [
         'id',
         'title',
@@ -317,15 +328,33 @@ class CommentService {
         as: 'comments',
         attributes: [],
         where: { is_deleted: 0 },
-        required: true 
+        required: false 
       }],
       group: ['id', 'title', 'image_url'],
       limit: limit,
-      order: [[sequelize.literal('"commentCount"'), 'DESC']],
+      offset: offset,
+      order: [
+        [sequelize.literal('"commentCount"'), 'DESC'],
+        ['title', 'ASC']
+      ],
       subQuery: false
     });
 
-    return { statusCode: 200, data: { success: true, data: books } };
+    return { 
+      statusCode: 200, 
+      data: { 
+        success: true, 
+        data: {
+          books,
+          pagination: {
+            total: totalCount,
+            page,
+            limit,
+            totalPages: Math.ceil(totalCount / limit)
+          }
+        }
+      } 
+    };
   }
 }
 

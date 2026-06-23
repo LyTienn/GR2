@@ -314,10 +314,12 @@
         "helper": "Hệ thống tự động kích hoạt sau 1-3 phút khi nhận tiền."
       },
       "security": "Thanh toán an toàn & bảo mật",
+      "processing": "Hệ thống đang xử lý giao dịch. Vui lòng giữ màn hình và đợi trong giây lát...",
       "notLogin": "Vui lòng đăng nhập để nâng cấp gói thành viên.",
       "orderCreated": "Đơn hàng đã được tạo. Vui lòng chuyển khoản theo thông tin dưới đây.",
       "orderError": "Đã xảy ra lỗi khi tạo đơn hàng. Vui lòng thử lại.",
-      "copiedSuccess": "Đã sao chép nội dung chuyển khoản!"
+      "copiedSuccess": "Đã sao chép nội dung chuyển khoản!",
+      "upgradeSuccess": "Nâng cấp Premium thành công!"
     },
     "transactions": {
       "title": "Lịch sử giao dịch",

@@ -94,9 +94,9 @@ const Membership = () => {
                 if (updatedUser.tier === 'PREMIUM') {
                     dispatch(fetchProfileSuccess(updatedUser));
                     setPaymentInfo(null);
-                    toast.success(t("layout.membership.upgradeSuccess", "Nâng cấp Premium thành công!"));
+                    toast.success(t("layout.membership.upgradeSuccess"));
                 } else {
-                    toast.info(t("layout.membership.processing", "Hệ thống đang xử lý giao dịch. Vui lòng giữ màn hình và đợi trong giây lát..."));
+                    toast.info(t("layout.membership.processing"));
                 }
             }
         } catch (error) {
