@@ -15,6 +15,9 @@ const llm = new ChatGoogleGenerativeAI({
 });
 
 export const syncBookToVector = async (bookId) => {
+    if (process.env.NODE_ENV === "test") {
+        return { success: true, message: "Tạo Vector thành công! (Mocked)" };
+    }
     try {
         console.log(`[RAG] Đang lấy dữ liệu các chương của sách ID: ${bookId}...`);
 
@@ -81,6 +84,9 @@ export const syncBookToVector = async (bookId) => {
 };
 
 export const chatWithAgent = async (message, currentBookTitle, currentChapterId, userName) => {
+    if (process.env.NODE_ENV === "test") {
+        return { success: true, reply: `Hệ thống phản hồi giả lập cho câu hỏi: "${message}"` };
+    }
     try {
         let metaContext = `Cuốn sách người dùng đang đọc: ${currentBookTitle || 'Không rõ'}\n`;
 

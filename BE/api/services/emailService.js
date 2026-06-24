@@ -1,24 +1,35 @@
 import nodemailer from "nodemailer";
 
-if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-  console.error("❌ [Error] EMAIL_USER và EMAIL_PASS bắt buộc phải được cấu hình trong file .env.");
-  process.exit(1);
-}
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS, 
-  },
-});
+let transporter;
 
-transporter.verify((error, success) => {
-  if (error) {
-    console.error("❌ [Error] Cấu hình Email transporter lỗi:", error.message);
-  } else {
-    console.log("✅ [Success] Email transporter đã sẵn sàng kết nối máy chủ SMTP");
+if (process.env.NODE_ENV === "test") {
+  // Tạo transporter giả lập khi chạy kiểm thử (không kết nối internet)
+  transporter = {
+    verify: (callback) => callback(null, true),
+    sendMail: async () => ({ messageId: "mock-email-id" }),
+  };
+} else {
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    console.error("❌ [Error] EMAIL_USER và EMAIL_PASS bắt buộc phải được cấu hình trong file .env.");
+    process.exit(1);
   }
-});
+
+  transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS, 
+    },
+  });
+
+  transporter.verify((error, success) => {
+    if (error) {
+      console.error("❌ [Error] Cấu hình Email transporter lỗi:", error.message);
+    } else {
+      console.log("✅ [Success] Email transporter đã sẵn sàng kết nối máy chủ SMTP");
+    }
+  });
+}
 
 /**
  * Gửi email xác thực tài khoản (HTML).
