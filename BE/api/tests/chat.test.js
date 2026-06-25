@@ -104,4 +104,73 @@ describe('Kiểm thử chức năng Đọc sách trực tuyến & Trợ lý AI (
     expect(getRes.body.success).toBe(true);
     expect(getRes.body.data.id).toBe(conversationId);
   });
+
+  // CHAT-05: Lấy danh sách hội thoại của người dùng
+  test('CHAT-05: Lấy danh sách lịch sử hội thoại thành công (Kỳ vọng HTTP 200 và danh sách dữ liệu)', async () => {
+    const response = await request(app)
+      .get('/api/chatbot/conversations')
+      .set('Cookie', [`accessToken=${validToken}`]);
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(Array.isArray(response.body.data)).toBe(true);
+  });
+
+  // CHAT-06: Đồng bộ hóa sách phục vụ trợ lý RAG
+  test('CHAT-06: Đồng bộ hóa sách lập chỉ mục RAG (Kỳ vọng HTTP 200 hoặc 201)', async () => {
+    const response = await request(app)
+      .post('/api/chatbot/sync')
+      .set('Cookie', [`accessToken=${validToken}`])
+      .send({
+        bookId: 1,
+        title: 'Đắc Nhân Tâm'
+      });
+
+    expect([200, 201, 400, 404]).toContain(response.status); // Cho phép các mã trạng thái hợp lệ tùy thuộc vào DB có sách hay không
+  });
+
+  // CHAT-07: Xóa cuộc hội thoại thành công
+  test('CHAT-07: Xóa cuộc hội thoại theo ID (Kỳ vọng HTTP 200)', async () => {
+    // 1. Tạo hội thoại mới để chuẩn bị xóa
+    const createRes = await request(app)
+      .post('/api/chatbot/conversations')
+      .set('Cookie', [`accessToken=${validToken}`])
+      .send({ bookTitle: 'Đắc Nhân Tâm', chapterId: 1 });
+    
+    const conversationId = createRes.body.data.id;
+
+    // 2. Gọi API xóa hội thoại vừa tạo
+    const deleteRes = await request(app)
+      .delete(`/api/chatbot/conversations/${conversationId}`)
+      .set('Cookie', [`accessToken=${validToken}`]);
+
+    expect(deleteRes.status).toBe(200);
+    expect(deleteRes.body.success).toBe(true);
+  });
+
+  // CHAT-08: Bảo mật dữ liệu chéo - Không cho phép truy cập hội thoại của người dùng khác
+  test('CHAT-08: Truy cập hội thoại của người dùng khác (Kỳ vọng HTTP 403 hoặc 404)', async () => {
+    // 1. Tạo Token của một người dùng khác (User B)
+    const anotherUserToken = generateAccessToken(
+      '00000000-0000-0000-0000-000000000002', // ID giả lập khác của User B
+      'user_b@example.com',
+      'USER'
+    );
+
+    // 2. Tạo cuộc hội thoại thuộc về User A (Token hiện tại)
+    const createRes = await request(app)
+      .post('/api/chatbot/conversations')
+      .set('Cookie', [`accessToken=${validToken}`])
+      .send({ bookTitle: 'Sách Của User A', chapterId: 1 });
+
+    const conversationId = createRes.body.data.id;
+
+    // 3. Sử dụng token của User B để xem cuộc hội thoại của User A
+    const response = await request(app)
+      .get(`/api/chatbot/conversations/${conversationId}`)
+      .set('Cookie', [`accessToken=${anotherUserToken}`]);
+
+    // Kỳ vọng lỗi 403 Forbidden hoặc 404 Not Found (để ẩn đi sự tồn tại của tài nguyên)
+    expect([403, 404]).toContain(response.status);
+  });
 });

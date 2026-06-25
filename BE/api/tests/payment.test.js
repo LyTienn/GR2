@@ -152,4 +152,60 @@ describe('Kiểm thử chức năng Thanh toán tự động qua SePay (Payment 
     const updatedUser = await User.findByPk(testUser.user_id);
     expect(updatedUser.tier).toBe('PREMIUM');
   });
+
+  // PAY-05: Lấy lịch sử giao dịch thanh toán của người dùng
+  test('PAY-05: Truy cập danh sách lịch sử giao dịch thanh toán (Kỳ vọng HTTP 200)', async () => {
+    const response = await request(app)
+      .get('/api/payment/history')
+      .set('Cookie', [`accessToken=${validToken}`]);
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(Array.isArray(response.body.data)).toBe(true);
+  });
+
+  // PAY-06: Lấy thông tin gói hội viên Premium hiện tại
+  test('PAY-06: Truy vấn thông tin gói Subscription hiện tại (Kỳ vọng HTTP 200)', async () => {
+    const response = await request(app)
+      .get('/api/payment/subscription/current')
+      .set('Cookie', [`accessToken=${validToken}`]);
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+  });
+
+  // PAY-07: Lấy thông tin đơn hàng đang chờ thanh toán
+  test('PAY-07: Truy vấn thông tin đơn hàng đang chờ (Kỳ vọng HTTP 200)', async () => {
+    const response = await request(app)
+      .get('/api/payment/subscription/pending')
+      .set('Cookie', [`accessToken=${validToken}`]);
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+  });
+
+  // PAY-08: Hủy đơn hàng Premium đang ở trạng thái chờ thanh toán (PENDING)
+  test('PAY-08: Hủy thành công đơn hàng đang chờ thanh toán (Kỳ vọng HTTP 200 và trạng thái chuyển sang CANCELLED)', async () => {
+    // 1. Tạo đơn hàng PENDING mới
+    const createRes = await request(app)
+      .post('/api/payment/sepay/create')
+      .set('Cookie', [`accessToken=${validToken}`])
+      .send({ package_details: '3_THANG' });
+
+    const orderId = createRes.body.data.orderId;
+    expect(orderId).toBeDefined();
+
+    // 2. Thực hiện gọi API hủy đơn hàng. 
+    // Backend sử dụng userId từ Token để tìm và hủy đơn PENDING nên ta chỉ cần truyền orderId làm tham số đường dẫn giả lập.
+    const response = await request(app)
+      .put(`/api/payment/subscription/cancel/${orderId}`)
+      .set('Cookie', [`accessToken=${validToken}`]);
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+
+    // 3. Kiểm chứng trạng thái trong CSDL đã chuyển sang CANCELLED thành công
+    const updatedSub = await Subscription.findOne({ where: { payment_transaction_id: orderId } });
+    expect(updatedSub.status).toBe('CANCELLED');
+  });
 });
