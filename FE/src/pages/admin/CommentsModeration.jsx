@@ -155,7 +155,7 @@ export default function CommentsModeration() {
   const filteredBooks = books;
 
   return (
-    <div className="flex flex-col lg:flex-row h-auto lg:h-[calc(100vh-70px)] min-h-[calc(100vh-100px)] gap-4 lg:gap-6 p-4 lg:p-6 bg-slate-50 dark:bg-[#0f111a]">
+    <div className="flex flex-col lg:flex-row h-auto lg:h-[calc(100vh-70px)] min-h-[calc(100vh-100px)] gap-4 lg:gap-6">
       <div className="w-full lg:w-1/3 xl:w-1/4 bg-white dark:bg-card-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col h-[400px] lg:h-full shrink-0">
         <div className="p-4 border-b border-slate-100 dark:border-slate-800">
           <h2 className="font-bold flex items-center gap-2 mb-3 text-slate-800 dark:text-slate-200">

@@ -2,6 +2,28 @@ import React, { useState, useEffect } from 'react';
 import { Download, Plus, Users as UsersIcon, Library, UserPlus, MessageSquare, Crown, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import AdminStatsService from '../../service/AdminStatsService';
+import * as XLSX from 'xlsx';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import useDashboard, { csvCell, csvRow } from '../../hooks/useDashboard';
+
+const fetchFontBase64 = async () => {
+  try {
+    const response = await fetch('https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Regular.ttf');
+    if (!response.ok) throw new Error('Network response was not ok');
+    const arrayBuffer = await response.arrayBuffer();
+    let binary = '';
+    const bytes = new Uint8Array(arrayBuffer);
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary);
+  } catch (error) {
+    console.error('Failed to load Vietnamese font, falling back to standard font:', error);
+    return null;
+  }
+};
 
 export default function Dashboard() {
   const [stats, setStats] = useState(null);
@@ -10,6 +32,23 @@ export default function Dashboard() {
   const [recentComments, setRecentComments] = useState([]);
   const [registrationData, setRegistrationData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
+
+  const {
+    showExportDropdown,
+    setShowExportDropdown,
+    showQuickActionDropdown,
+    setShowQuickActionDropdown,
+    currentDateTime,
+    processedRegistrationData,
+    chartTicks,
+    maxRegistrationCount,
+    svgRef,
+    activeTooltipPoint,
+    tooltipPos,
+    handleMouseMove,
+    handleMouseLeave
+  } = useDashboard(registrationData);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -67,77 +106,266 @@ export default function Dashboard() {
     return name.substring(0, 2).toUpperCase();
   };
 
-  const exportReport = () => {
-    // Prepare data for CSV
+  const exportReport = async (format = 'csv') => {
     const now = new Date();
     const dateStr = now.toLocaleDateString('vi-VN');
     const timeStr = now.toLocaleTimeString('vi-VN');
+    const fileDateStr = now.toISOString().split('T')[0];
+    
+    setExporting(true);
+    try {
+      if (format === 'csv') {
+        // --- CSV EXPORT ---
+        let csvContent = "";
+        csvContent += csvRow(["BÁO CÁO TỔNG QUAN HỆ THỐNG"]);
+        csvContent += csvRow(["Ngày xuất", `${dateStr} ${timeStr}`]) + "\n";
 
-    let csvContent = "";
+        csvContent += csvRow(["=== THỐNG KÊ NGƯỜI DÙNG ==="]);
+        csvContent += csvRow(["Tổng số thành viên", stats?.users?.total || 0]);
+        csvContent += csvRow(["Thành viên Premium", stats?.users?.premium || 0]);
+        csvContent += csvRow(["Thành viên Free", stats?.users?.free || 0]);
+        csvContent += csvRow(["Đăng ký mới 24h", stats?.users?.newLast24h || 0]);
+        csvContent += csvRow(["Đăng ký mới 7 ngày", stats?.users?.newLastWeek || 0]) + "\n";
 
-    // Header
-    csvContent += "BÁO CÁO TỔNG QUAN HỆ THỐNG\n";
-    csvContent += `Ngày xuất: ${dateStr} ${timeStr}\n\n`;
+        csvContent += csvRow(["=== THỐNG KÊ SÁCH ==="]);
+        csvContent += csvRow(["Tổng số sách", stats?.books?.total || 0]);
+        csvContent += csvRow(["Sách Premium", stats?.books?.premium || 0]);
+        csvContent += csvRow(["Sách Free", stats?.books?.free || 0]) + "\n";
 
-    // User Stats
-    csvContent += "=== THỐNG KÊ NGƯỜI DÙNG ===\n";
-    csvContent += `Tổng số thành viên,${stats?.users?.total || 0}\n`;
-    csvContent += `Thành viên Premium,${stats?.users?.premium || 0}\n`;
-    csvContent += `Thành viên Free,${stats?.users?.free || 0}\n`;
-    csvContent += `Đăng ký mới 24h,${stats?.users?.newLast24h || 0}\n`;
-    csvContent += `Đăng ký mới 7 ngày,${stats?.users?.newLastWeek || 0}\n\n`;
+        csvContent += csvRow(["=== THỐNG KÊ BÌNH LUẬN ==="]);
+        csvContent += csvRow(["Tổng số bình luận", stats?.comments?.total || 0]) + "\n";
 
-    // Book Stats
-    csvContent += "=== THỐNG KÊ SÁCH ===\n";
-    csvContent += `Tổng số sách,${stats?.books?.total || 0}\n`;
-    csvContent += `Sách Premium,${stats?.books?.premium || 0}\n`;
-    csvContent += `Sách Free,${stats?.books?.free || 0}\n\n`;
+        if (processedRegistrationData.length > 0) {
+          csvContent += csvRow(["=== XU HƯỚNG ĐĂNG KÝ (30 NGÀY) ==="]);
+          csvContent += csvRow(["Ngày", "Số lượng đăng ký"]);
+          processedRegistrationData.forEach(item => {
+            csvContent += csvRow([item.date, item.count]);
+          });
+          csvContent += "\n";
+        }
 
-    // Comment Stats
-    csvContent += "=== THỐNG KÊ BÌNH LUẬN ===\n";
-    csvContent += `Tổng số bình luận,${stats?.comments?.total || 0}\n\n`;
+        if (subjectStats?.distribution?.length > 0) {
+          csvContent += csvRow(["=== PHÂN BỔ DANH MỤC SÁCH ==="]);
+          csvContent += csvRow(["Thể loại", "Số lượng", "Phần trăm"]);
+          subjectStats.distribution.forEach(item => {
+            csvContent += csvRow([item.name, item.count, `${item.percent}%`]);
+          });
+          csvContent += "\n";
+        }
 
-    // Registration Trend
-    if (registrationData.length > 0) {
-      csvContent += "=== XU HƯỚNG ĐĂNG KÝ (30 NGÀY) ===\n";
-      csvContent += "Ngày,Số lượng đăng ký\n";
-      registrationData.forEach(item => {
-        csvContent += `${item.date},${item.count}\n`;
-      });
-      csvContent += "\n";
+        if (recentUsers.length > 0) {
+          csvContent += csvRow(["=== THÀNH VIÊN MỚI NHẤT ==="]);
+          csvContent += csvRow(["Tên", "Email", "Ngày đăng ký", "Gói"]);
+          recentUsers.forEach(user => {
+            csvContent += csvRow([
+              user.full_name || 'Chưa đặt tên',
+              user.email,
+              formatDate(user.created_at),
+              user.tier
+            ]);
+          });
+        }
+
+        const BOM = "\uFEFF";
+        const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `bao-cao-he-thong_${fileDateStr}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+      } else if (format === 'excel') {
+        // --- EXCEL EXPORT ---
+        const wb = XLSX.utils.book_new();
+
+        // Sheet 1: General Stats
+        const summaryData = [
+          ['BÁO CÁO TỔNG QUAN HỆ THỐNG'],
+          ['Ngày xuất báo cáo:', `${dateStr} ${timeStr}`],
+          [],
+          ['Hạng mục thống kê', 'Giá trị', 'Chi tiết'],
+          ['Tổng số thành viên', stats?.users?.total || 0, `Premium: ${stats?.users?.premium || 0} | Free: ${stats?.users?.free || 0}`],
+          ['Đăng ký mới (24h)', stats?.users?.newLast24h || 0, 'Thành viên đăng ký trong ngày'],
+          ['Đăng ký mới (7 ngày)', stats?.users?.newLastWeek || 0, 'Thành viên đăng ký trong tuần'],
+          ['Tổng số sách', stats?.books?.total || 0, `Premium: ${stats?.books?.premium || 0} | Free: ${stats?.books?.free || 0}`],
+          ['Tổng số bình luận', stats?.comments?.total || 0, 'Đánh giá từ người dùng']
+        ];
+        const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
+        
+        // Simple column width configuration for clarity
+        wsSummary['!cols'] = [{ wch: 25 }, { wch: 15 }, { wch: 35 }];
+        XLSX.utils.book_append_sheet(wb, wsSummary, 'Tổng quan');
+
+        // Sheet 2: Registration Trend
+        if (processedRegistrationData.length > 0) {
+          const regHeaders = [['Ngày', 'Số lượng đăng ký']];
+          const regRows = processedRegistrationData.map(item => [item.date, parseInt(item.count) || 0]);
+          const wsReg = XLSX.utils.aoa_to_sheet([...regHeaders, ...regRows]);
+          wsReg['!cols'] = [{ wch: 15 }, { wch: 20 }];
+          XLSX.utils.book_append_sheet(wb, wsReg, 'Xu hướng đăng ký');
+        }
+
+        // Sheet 3: Subject Distribution
+        if (subjectStats?.distribution?.length > 0) {
+          const subHeaders = [['Thể loại', 'Số lượng sách', 'Phần trăm']];
+          const subRows = subjectStats.distribution.map(item => [item.name, item.count, `${item.percent}%`]);
+          const wsSub = XLSX.utils.aoa_to_sheet([...subHeaders, ...subRows]);
+          wsSub['!cols'] = [{ wch: 20 }, { wch: 15 }, { wch: 15 }];
+          XLSX.utils.book_append_sheet(wb, wsSub, 'Phân bổ danh mục');
+        }
+
+        // Sheet 4: Recent Users
+        if (recentUsers.length > 0) {
+          const userHeaders = [['Tên người dùng', 'Email', 'Ngày đăng ký', 'Gói dịch vụ']];
+          const userRows = recentUsers.map(user => [
+            user.full_name || 'Chưa đặt tên',
+            user.email,
+            formatDate(user.created_at),
+            user.tier
+          ]);
+          const wsUser = XLSX.utils.aoa_to_sheet([...userHeaders, ...userRows]);
+          wsUser['!cols'] = [{ wch: 25 }, { wch: 30 }, { wch: 15 }, { wch: 15 }];
+          XLSX.utils.book_append_sheet(wb, wsUser, 'Thành viên mới');
+        }
+
+        XLSX.writeFile(wb, `bao-cao-he-thong_${fileDateStr}.xlsx`);
+
+      } else if (format === 'pdf') {
+        // --- PDF EXPORT ---
+        const doc = new jsPDF();
+        
+        // Load Unicode Font for Vietnamese support
+        const fontBase64 = await fetchFontBase64();
+        if (fontBase64) {
+          doc.addFileToVFS('Roboto-Regular.ttf', fontBase64);
+          doc.addFont('Roboto-Regular.ttf', 'Roboto', 'normal');
+          doc.setFont('Roboto');
+        }
+
+        // Color palette
+        const primaryColor = [19, 127, 236]; // #137fec (Blue)
+        const darkSlate = [15, 23, 42]; // #0f172a
+        
+        // Title & Header Line
+        doc.setFillColor(...primaryColor);
+        doc.rect(0, 0, 210, 8, 'F'); // Top bar
+        
+        doc.setFontSize(22);
+        doc.setTextColor(...darkSlate);
+        doc.text('BÁO CÁO TỔNG QUAN HỆ THỐNG', 14, 25);
+        
+        doc.setFontSize(10);
+        doc.setTextColor(100, 116, 139);
+        doc.text(`Ngày xuất báo cáo: ${dateStr} ${timeStr}`, 14, 32);
+        doc.text(`Người xuất: Quản trị viên`, 14, 37);
+        
+        doc.setDrawColor(226, 232, 240);
+        doc.line(14, 42, 196, 42); // Separator line
+
+        let currentY = 48;
+
+        // 1. General Stats Table
+        doc.setFontSize(14);
+        doc.setTextColor(...darkSlate);
+        doc.text('1. Số liệu thống kê chung', 14, currentY);
+        currentY += 6;
+
+        const generalStatsRows = [
+          ['Tổng số thành viên', `${stats?.users?.total || 0} thành viên`, `Premium: ${stats?.users?.premium || 0} · Free: ${stats?.users?.free || 0}`],
+          ['Đăng ký mới 24h', `${stats?.users?.newLast24h || 0} thành viên`, 'Thành viên đăng ký mới trong ngày'],
+          ['Đăng ký mới 7 ngày', `${stats?.users?.newLastWeek || 0} thành viên`, 'Thành viên đăng ký mới trong tuần'],
+          ['Tổng số đầu sách', `${stats?.books?.total || 0} cuốn sách`, `Premium: ${stats?.books?.premium || 0} · Free: ${stats?.books?.free || 0}`],
+          ['Tổng số bình luận', `${stats?.comments?.total || 0} bình luận`, 'Đánh giá từ người dùng hệ thống']
+        ];
+
+        autoTable(doc, {
+          startY: currentY,
+          head: [['Hạng mục', 'Số liệu', 'Chi tiết bổ sung']],
+          body: generalStatsRows,
+          theme: 'striped',
+          styles: { font: fontBase64 ? 'Roboto' : 'helvetica', fontSize: 9 },
+          headStyles: { fillColor: primaryColor, textColor: [255, 255, 255], fontStyle: 'normal' },
+          margin: { left: 14, right: 14 },
+          didDrawPage: (data) => { currentY = data.cursor.y; }
+        });
+
+        currentY += 15;
+
+        // 2. Subject Distribution Table
+        if (subjectStats?.distribution?.length > 0) {
+          if (currentY > 230) { doc.addPage(); currentY = 20; }
+          doc.setFontSize(14);
+          doc.setTextColor(...darkSlate);
+          doc.text('2. Phân bổ danh mục sách', 14, currentY);
+          currentY += 6;
+
+          const subjectRows = subjectStats.distribution.map(item => [
+            item.name,
+            `${item.count} cuốn`,
+            `${item.percent}%`
+          ]);
+
+          autoTable(doc, {
+            startY: currentY,
+            head: [['Thể loại sách', 'Số lượng', 'Tỷ lệ phân bổ']],
+            body: subjectRows,
+            theme: 'striped',
+            styles: { font: fontBase64 ? 'Roboto' : 'helvetica', fontSize: 9 },
+            headStyles: { fillColor: [147, 51, 234], textColor: [255, 255, 255], fontStyle: 'normal' }, // Purple
+            margin: { left: 14, right: 14 },
+            didDrawPage: (data) => { currentY = data.cursor.y; }
+          });
+          
+          currentY += 15;
+        }
+
+        // 3. Recent Users Table
+        if (recentUsers.length > 0) {
+          if (currentY > 220) { doc.addPage(); currentY = 20; }
+          doc.setFontSize(14);
+          doc.setTextColor(...darkSlate);
+          doc.text('3. Danh sách thành viên mới nhất', 14, currentY);
+          currentY += 6;
+
+          const userRows = recentUsers.map(user => [
+            user.full_name || 'Chưa đặt tên',
+            user.email,
+            formatDate(user.created_at),
+            user.tier
+          ]);
+
+          autoTable(doc, {
+            startY: currentY,
+            head: [['Tên thành viên', 'Địa chỉ Email', 'Ngày đăng ký', 'Gói dịch vụ']],
+            body: userRows,
+            theme: 'striped',
+            styles: { font: fontBase64 ? 'Roboto' : 'helvetica', fontSize: 9 },
+            headStyles: { fillColor: [249, 115, 22], textColor: [255, 255, 255], fontStyle: 'normal' }, // Orange
+            margin: { left: 14, right: 14 },
+            didDrawPage: (data) => { currentY = data.cursor.y; }
+          });
+        }
+
+        // Page Numbers / Footer
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+          doc.setPage(i);
+          doc.setFontSize(8);
+          doc.setTextColor(148, 163, 184);
+          doc.text(`Trang ${i} / ${pageCount}`, 196, 287, { align: 'right' });
+          doc.text(`Hệ thống thư viện Lybrary — Báo cáo bảo mật nội bộ`, 14, 287);
+        }
+
+        doc.save(`bao-cao-he-thong_${fileDateStr}.pdf`);
+      }
+    } catch (err) {
+      console.error('Lỗi khi xuất báo cáo:', err);
+    } finally {
+      setExporting(false);
     }
-
-    // Subject Distribution
-    if (subjectStats?.distribution?.length > 0) {
-      csvContent += "=== PHÂN BỔ DANH MỤC SÁCH ===\n";
-      csvContent += "Thể loại,Số lượng,Phần trăm\n";
-      subjectStats.distribution.forEach(item => {
-        csvContent += `${item.name},${item.count},${item.percent}%\n`;
-      });
-      csvContent += "\n";
-    }
-
-    // Recent Users
-    if (recentUsers.length > 0) {
-      csvContent += "=== THÀNH VIÊN MỚI NHẤT ===\n";
-      csvContent += "Tên,Email,Ngày đăng ký,Gói\n";
-      recentUsers.forEach(user => {
-        csvContent += `${user.full_name || 'Chưa đặt tên'},${user.email},${formatDate(user.created_at)},${user.tier}\n`;
-      });
-    }
-
-    // Create Blob with BOM for proper UTF-8 encoding in Excel
-    const BOM = "\uFEFF";
-    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", `bao-cao-he-thong_${now.toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
   };
 
   if (loading) {
@@ -201,19 +429,19 @@ export default function Dashboard() {
   ];
 
   const generateChartPath = () => {
-    if (!registrationData.length) return { line: '', area: '' };
+    if (!processedRegistrationData.length) return { line: '', area: '' };
 
-    const maxCount = Math.max(...registrationData.map(d => parseInt(d.count) || 0), 1);
+    const maxCount = Math.max(...processedRegistrationData.map(d => parseInt(d.count) || 0), 1);
     const width = 800;
     const height = 250;
     const paddingLeft = 60; // Increased padding for Y-axis labels
     const paddingRight = 20;
     const paddingY = 25;
 
-    const points = registrationData.map((d, i) => {
+    const points = processedRegistrationData.map((d, i) => {
       // Calculate X based on available width after padding
       const availableWidth = width - paddingLeft - paddingRight;
-      const x = paddingLeft + (i / (registrationData.length - 1 || 1)) * availableWidth;
+      const x = paddingLeft + (i / (processedRegistrationData.length - 1 || 1)) * availableWidth;
 
       // Calculate Y based on available height
       const availableHeight = height - (paddingY * 2);
@@ -251,16 +479,127 @@ export default function Dashboard() {
           <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white mb-2">
             Chào mừng trở lại, Admin
           </h2>
-          <p className="text-slate-500 dark:text-slate-400">Tổng quan số liệu và báo cáo hệ thống.</p>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-2">
+            <p className="text-slate-500 dark:text-slate-400 text-sm">
+              Tổng quan số liệu và báo cáo hệ thống.
+            </p>
+            {currentDateTime && (
+              <div className="inline-flex items-center gap-2 self-start px-3 py-1 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 text-blue-600 dark:text-blue-400 border border-blue-100/80 dark:border-blue-900/30 rounded-full text-xs font-semibold shadow-sm tracking-wide">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span className="font-mono">{currentDateTime}</span>
+              </div>
+            )}
+          </div>
         </div>
-        <div className="flex gap-3">
-          <button
-            onClick={exportReport}
-            className="px-4 py-2 bg-white dark:bg-[#1C252E] border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-sm font-medium rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors flex items-center gap-2"
-          >
-            <Download size={18} />
-            <span>Xuất báo cáo</span>
-          </button>
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Nút Thao tác nhanh */}
+          <div className="relative w-fit">
+            <button
+              onClick={() => setShowQuickActionDropdown(!showQuickActionDropdown)}
+              className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-medium rounded-lg shadow-sm hover:shadow transition-all flex items-center gap-2"
+            >
+              <Plus size={18} />
+              <span>Thao tác nhanh</span>
+            </button>
+
+            {showQuickActionDropdown && (
+              <>
+                <div 
+                  className="fixed inset-0 z-10" 
+                  onClick={() => setShowQuickActionDropdown(false)}
+                />
+                <div className="absolute left-0 md:left-auto md:right-0 mt-2 w-48 bg-white dark:bg-[#1C252E] border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg py-1 z-20 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <Link
+                    to="/admin/books"
+                    state={{ openAddModal: true }}
+                    onClick={() => setShowQuickActionDropdown(false)}
+                    className="w-full text-left px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors flex items-center gap-2"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                    Thêm sách mới
+                  </Link>
+                  <Link
+                    to="/admin/authors"
+                    state={{ openAddModal: true }}
+                    onClick={() => setShowQuickActionDropdown(false)}
+                    className="w-full text-left px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors flex items-center gap-2"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+                    Thêm tác giả
+                  </Link>
+                  <Link
+                    to="/admin/subjects"
+                    state={{ openAddModal: true }}
+                    onClick={() => setShowQuickActionDropdown(false)}
+                    className="w-full text-left px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors flex items-center gap-2"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
+                    Thêm chủ đề
+                  </Link>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Nút Xuất báo cáo */}
+          <div className="relative w-fit">
+            <button
+              onClick={() => !exporting && setShowExportDropdown(!showExportDropdown)}
+              disabled={exporting}
+              className="px-4 py-2 bg-white dark:bg-[#1C252E] border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-sm font-medium rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors flex items-center gap-2 disabled:opacity-50"
+            >
+              {exporting ? (
+                <Loader2 className="w-4 h-4 animate-spin text-slate-500 dark:text-slate-400" />
+              ) : (
+                <Download size={18} />
+              )}
+              <span>{exporting ? 'Đang xuất...' : 'Xuất báo cáo'}</span>
+            </button>
+
+            {showExportDropdown && (
+              <>
+                <div 
+                  className="fixed inset-0 z-10" 
+                  onClick={() => setShowExportDropdown(false)}
+                />
+                <div className="absolute left-0 md:left-auto md:right-0 mt-2 w-fit min-w-40 bg-white dark:bg-[#1C252E] border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg py-1 z-20 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <button
+                    onClick={() => {
+                      exportReport('csv');
+                      setShowExportDropdown(false);
+                    }}
+                    className="w-full text-left px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors flex items-center gap-2"
+                  >
+                    <span className="w-2 h-2 rounded-full bg-blue-500" />
+                    Xuất CSV
+                  </button>
+                  <button
+                    onClick={() => {
+                      exportReport('excel');
+                      setShowExportDropdown(false);
+                    }}
+                    className="w-full text-left px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors flex items-center gap-2"
+                  >
+                    <span className="w-2 h-2 rounded-full bg-green-500" />
+                    Xuất Excel
+                  </button>
+                  <button
+                    onClick={() => {
+                      exportReport('pdf');
+                      setShowExportDropdown(false);
+                    }}
+                    className="w-full text-left px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors flex items-center gap-2"
+                  >
+                    <span className="w-2 h-2 rounded-full bg-red-500" />
+                    Xuất PDF
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
@@ -298,7 +637,14 @@ export default function Dashboard() {
           </div>
           <div className="relative w-full aspect-2/1 max-h-[300px]">
             {/* Chart Container */}
-            <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 800 300">
+            <svg 
+              ref={svgRef}
+              onMouseMove={handleMouseMove}
+              onMouseLeave={handleMouseLeave}
+              className="w-full h-full cursor-crosshair" 
+              preserveAspectRatio="none" 
+              viewBox="0 0 800 300"
+            >
               <defs>
                 <linearGradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">
                   <stop offset="0%" stopColor="#137fec" stopOpacity="0.2" />
@@ -308,11 +654,12 @@ export default function Dashboard() {
 
               {/* Grid Lines and Labels */}
               {/* Grid Lines and Labels */}
-              {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
+              {chartTicks.map((val) => {
+                const ratio = val / maxRegistrationCount;
                 const availableHeight = 250 - (25 * 2); // paddingY = 25
                 const y = 250 - 25 - (ratio * availableHeight);
                 return (
-                  <g key={ratio}>
+                  <g key={val}>
                     {/* Horizontal Grid Line */}
                     <line
                       stroke="#334155"
@@ -332,7 +679,7 @@ export default function Dashboard() {
                       fill="#94a3b8"
                       fontWeight="500"
                     >
-                      {Math.round(ratio * (Math.max(...registrationData.map(d => parseInt(d.count) || 0), 1)))}
+                      {val}
                     </text>
                   </g>
                 );
@@ -343,19 +690,70 @@ export default function Dashboard() {
 
               {chartArea && <path d={chartArea} fill="url(#chartGradient)" />}
               {chartLine && <path d={chartLine} fill="none" stroke="#137fec" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" />}
+
+              {/* Active Tooltip Guide Lines & Dots */}
+              {activeTooltipPoint && (
+                <g>
+                  {/* Vertical Guide Line */}
+                  <line
+                    x1={activeTooltipPoint.x}
+                    y1={25}
+                    x2={activeTooltipPoint.x}
+                    y2={225}
+                    stroke="#64748b"
+                    strokeWidth="1"
+                    strokeDasharray="4 4"
+                    strokeOpacity="0.4"
+                  />
+                  {/* Glowing active dot */}
+                  <circle
+                    cx={activeTooltipPoint.x}
+                    cy={activeTooltipPoint.y}
+                    r="8"
+                    fill="#137fec"
+                    fillOpacity="0.2"
+                  />
+                  <circle
+                    cx={activeTooltipPoint.x}
+                    cy={activeTooltipPoint.y}
+                    r="4"
+                    fill="#137fec"
+                    stroke="#ffffff"
+                    strokeWidth="2"
+                  />
+                </g>
+              )}
             </svg>
-            {registrationData.length === 0 && (
+
+            {/* HTML Tooltip Overlay */}
+            {activeTooltipPoint && (
+              <div 
+                className="absolute bg-slate-900/90 dark:bg-slate-950/95 text-white text-xs rounded-lg p-2.5 shadow-xl border border-slate-700/50 pointer-events-none transition-all duration-75 z-30"
+                style={{ 
+                  left: `${tooltipPos.x}px`, 
+                  top: `${tooltipPos.y}px`,
+                  transform: 'translate(-50%, -120%)' // Center horizontally and place above cursor
+                }}
+              >
+                <div className="font-semibold text-slate-200">{formatDate(activeTooltipPoint.date)}</div>
+                <div className="text-[11px] text-blue-400 font-medium mt-0.5">
+                  Đăng ký: <span className="font-bold text-white">{activeTooltipPoint.count}</span>
+                </div>
+              </div>
+            )}
+
+            {processedRegistrationData.length === 0 && (
               <div className="absolute inset-0 flex items-center justify-center text-slate-400">
                 Chưa có dữ liệu đăng ký
               </div>
             )}
           </div>
           <div className="flex justify-between mt-4 text-xs text-slate-400 font-medium">
-            {registrationData.length > 0 ? (
+            {processedRegistrationData.length > 0 ? (
               <>
-                <span>{formatDate(registrationData[0]?.date)}</span>
-                <span>{formatDate(registrationData[Math.floor(registrationData.length / 2)]?.date)}</span>
-                <span>{formatDate(registrationData[registrationData.length - 1]?.date)}</span>
+                <span>{formatDate(processedRegistrationData[0]?.date)}</span>
+                <span>{formatDate(processedRegistrationData[Math.floor(processedRegistrationData.length / 2)]?.date)}</span>
+                <span>{formatDate(processedRegistrationData[processedRegistrationData.length - 1]?.date)}</span>
               </>
             ) : (
               <>
@@ -456,11 +854,9 @@ export default function Dashboard() {
         <div className="bg-white dark:bg-card-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col">
           <div className="p-6 border-b border-slate-100 dark:border-slate-800/50 flex justify-between items-center">
             <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Bình luận gần đây</h3>
-            <span className="bg-teal-100 text-teal-600 dark:bg-teal-500/20 dark:text-teal-400 text-xs font-bold px-2 py-1 rounded">
-              {stats?.comments?.total || 0} tổng
-            </span>
+            <Link to="/admin/comments" className="text-sm text-primary font-medium hover:underline">Xem tất cả</Link>
           </div>
-          <div className="flex-1 overflow-y-auto max-h-[300px] p-0">
+          <div className="flex-1 overflow-y-auto max-h-[500px]">
             {recentComments.map((comment) => (
               <div key={comment.comment_id} className="p-5 border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
                 <div className="flex justify-between mb-2">

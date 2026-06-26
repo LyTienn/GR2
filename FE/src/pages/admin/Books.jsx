@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Plus, Search, Filter, Pencil, Trash2, Loader2, X, ChevronDown, BookOpen } from 'lucide-react';
 import { toast } from 'react-toastify';
 import ConfirmModal from '@/components/admin/ConfirmModal';
@@ -263,6 +263,7 @@ function MultiSubjectSelect({ subjects, value, onChange }) {
 
 export default function Books() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [books, setBooks] = useState([]);
   const [authors, setAuthors] = useState([]);
   const [subjects, setSubjects] = useState([]);
@@ -529,9 +530,20 @@ export default function Books() {
   useEffect(() => {
     if (location.state?.openAddModal) {
       handleOpenModal();
-      window.history.replaceState({}, '');
+      const { openAddModal, ...restState } = location.state;
+      navigate(
+        {
+          pathname: location.pathname,
+          search: location.search,
+          hash: location.hash,
+        },
+        {
+          replace: true,
+          state: Object.keys(restState).length ? restState : null,
+        }
+      );
     }
-  }, [location]);
+  }, [location, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

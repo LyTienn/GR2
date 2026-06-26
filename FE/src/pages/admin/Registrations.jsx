@@ -38,16 +38,30 @@ export default function Registrations() {
     }
   };
 
-  // Safe parser for package_details (handles JSON string, object, or plain string)
   const parsePackageDetails = (details) => {
     if (!details) return { name: 'N/A', price: 0 };
     if (typeof details === 'object') return details;
+    const packageMap = {
+      "3_THANG": { name: "Gói 3 tháng", price: 99000 },
+      "6_THANG": { name: "Gói 6 tháng", price: 179000 },
+      "12_THANG": { name: "Gói 12 tháng", price: 299000 }
+    };
+
+    if (packageMap[details]) {
+      return packageMap[details];
+    }
+
     try {
-      return JSON.parse(details);
+      const parsed = JSON.parse(details);
+      if (!parsed) return { name: 'N/A', price: 0 };
+      if (typeof parsed === 'object') return parsed;
+      if (packageMap[parsed]) return packageMap[parsed];
+      return { name: String(parsed), price: 0 };
     } catch {
-      return { name: details, price: 0 }; // Plain string like "Premium"
+      return { name: details, price: 0 };
     }
   };
+
 
   const getStatusBadge = (status) => {
     switch (status) {

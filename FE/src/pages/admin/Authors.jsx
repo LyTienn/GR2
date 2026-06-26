@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Plus, Pencil, Trash2, X, Loader2, Search } from 'lucide-react';
 import AdminAuthorService from '../../service/AdminAuthorService';
 import Pagination from '@/components/Pagination';
@@ -6,6 +7,8 @@ import { toast } from 'react-toastify';
 import ConfirmModal from '@/components/admin/ConfirmModal';
 
 export default function Authors() {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [authors, setAuthors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -82,6 +85,24 @@ export default function Authors() {
     }
     setShowModal(true);
   };
+
+  useEffect(() => {
+    if (location.state?.openAddModal) {
+      handleOpenModal();
+      const { openAddModal, ...restState } = location.state;
+      navigate(
+        {
+          pathname: location.pathname,
+          search: location.search,
+          hash: location.hash,
+        },
+        {
+          replace: true,
+          state: Object.keys(restState).length ? restState : null,
+        }
+      );
+    }
+  }, [location, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
