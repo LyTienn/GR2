@@ -111,13 +111,16 @@ export const chatWithAgent = async (message, currentBookTitle, currentChapterId,
 
         let query = `
             SELECT e.chunk_content, 
-                   1 - (e.embedding::vector <=> :queryVector::vector) as similarity
+            1 - (e.embedding::vector <=> :queryVector::vector) as similarity
             FROM chapter_embeddings e
         `;
         const replacements = { queryVector: vectorString };
 
         if (currentChapterId) {
-            query += ` WHERE e.chapter_id = :chapterId`;
+            query += `
+                JOIN chapters c ON e.chapter_id = c.id
+                WHERE c.book_id = (SELECT book_id FROM chapters WHERE id = :chapterId)
+            `;
             replacements.chapterId = currentChapterId;
         } else if (currentBookTitle) {
             query += `
@@ -130,7 +133,11 @@ export const chatWithAgent = async (message, currentBookTitle, currentChapterId,
             query += ` WHERE 1=1`;
         }
 
-        query += ` ORDER BY e.embedding::vector <=> :queryVector::vector LIMIT 5;`;
+        query += `
+            AND (1 - (e.embedding::vector <=> :queryVector::vector)) >= 0.5
+            ORDER BY e.embedding::vector <=> :queryVector::vector 
+            LIMIT 15;
+        `;
 
         const [results] = await sequelize.query(query, { replacements, logging: false });
         const context = results.map(r => r.chunk_content).join("\n\n");
