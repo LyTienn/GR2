@@ -135,14 +135,13 @@ export const chatWithAgent = async (message, currentBookTitle, currentChapterId,
         const [results] = await sequelize.query(query, { replacements, logging: false });
         const context = results.map(r => r.chunk_content).join("\n\n");
 
-        const prompt = `Bạn là trợ lý AI đọc sách. Dựa vào [THÔNG TIN HỆ THỐNG] và [TÀI LIỆU THAM KHẢO] dưới đây để trả lời câu hỏi một cách ngắn gọn, tự nhiên. Nếu thông tin không có, hãy nói là bạn không biết.
-        
+        const prompt = `Bạn là trợ lý AI đọc sách. Dựa vào [THÔNG TIN HỆ THỐNG] và [TÀI LIỆU THAM KHẢO] dưới đây để trả lời câu hỏi một cách ngắn gọn, tự nhiên. 
+        Lưu ý quan trọng:
+        - Nếu thông tin không có trong tài liệu tham khảo, hoặc người dùng hỏi về các diễn biến tiếp theo của câu chuyện nằm ngoài chương hiện tại, hãy trả lời là bạn không biết/không có thông tin và kết thúc bằng câu: "Bạn hãy đọc các chương tiếp theo để nắm rõ nội dung."
         [THÔNG TIN HỆ THỐNG]
         ${metaContext}
-        
         [TÀI LIỆU THAM KHẢO (Trích xuất từ nội dung sách)]
         ${context}
-        
         Người hỏi: ${userName || 'Khách'}
         Câu hỏi: ${message}
         `;
