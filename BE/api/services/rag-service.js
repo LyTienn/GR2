@@ -53,7 +53,7 @@ export const syncBookToVector = async (bookId) => {
             }
 
             for (let i = savedCount; i < chunks.length; i++) {
-                const chunkContent = chunks[i].pageContent;
+                const chunkContent = `[${chapter.title}] ${chunks[i].pageContent}`;
 
                 const vector = await embeddings.embedQuery(chunkContent);
                 const vectorString = JSON.stringify(vector);
