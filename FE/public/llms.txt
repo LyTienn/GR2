@@ -1,0 +1,17 @@
+# Thư Viện Sách Lybrary
+
+> Nền tảng quản lý, đọc sách và lưu trữ tài liệu trực tuyến dành cho người dùng và các trợ lý AI. Hệ thống hỗ trợ đọc sách dạng văn bản thuần (plaintext), lưu trữ ghi chú, thực hiện đánh giá/phản hồi và tích hợp công nghệ AI.
+
+## Các đường dẫn công khai (Public Routes)
+
+Dưới đây là danh sách các route chính trên hệ thống mà các AI Agent và Crawler có thể truy cập để thu thập hoặc tương tác:
+
+- [/](/) - **Trang chủ**: Landing page giới thiệu về website, hiển thị các số liệu thống kê thư viện, danh sách sách nổi bật/mới cập nhật và các gói dịch vụ hội viên.
+- [/search](/search) - **Trang tìm kiếm**: Cung cấp giao diện và bộ lọc tìm kiếm sách theo từ khóa, tác giả, chủ đề, thể loại hoặc trạng thái (miễn phí/premium).
+- [/profile](/profile) - **Trang cá nhân**: Khu vực quản lý thông tin tài khoản của người dùng, cho phép thay đổi thông tin cá nhân, cập nhật mật khẩu hoặc yêu cầu xóa tài khoản.
+- [/books/[id]](/books/[id]) - **Trang chi tiết sách**: Hiển thị thông tin chi tiết của một cuốn sách (tiêu đề, tác giả, tóm tắt nội dung), các đánh giá/phản hồi từ người dùng và liên kết trực tiếp đến trình đọc sách.
+
+## Thông tin bổ sung cho LLMs & AI Agents
+
+- **Định dạng tài liệu chính:** Nội dung các chương sách được lưu trữ và hiển thị dưới dạng plaintext hoặc Markdown thô để tối ưu hóa khả năng đọc và xử lý ngôn ngữ tự nhiên.
+- **Tương tác đính kèm:** Người dùng có thể để lại bình luận, chấm điểm đánh giá (rating từ 1 đến 5 sao) và tương tác với chatbot AI hỗ trợ trả lời câu hỏi trực tiếp trên từng chương sách.
