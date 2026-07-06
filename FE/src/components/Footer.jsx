@@ -21,13 +21,13 @@ const Footer = () => {
               </p>
               {/* Social icons */}
               <div className="flex gap-3 mt-4">
-                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-blue-500">
+                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-blue-500" aria-label="Facebook">
                   <svg width="24" height="24" fill="currentColor"><path d="M22 12c0-5.522-4.477-10-10-10S2 6.478 2 12c0 4.991 3.657 9.128 8.438 9.877v-6.987h-2.54v-2.89h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.242 0-1.632.771-1.632 1.562v1.875h2.773l-.443 2.89h-2.33v6.987C18.343 21.128 22 16.991 22 12"></path></svg>
                 </a>
-                <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="hover:text-red-500">
+                <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="hover:text-red-500" aria-label="Youtube">
                   <svg width="24" height="24" fill="currentColor"><path d="M21.8 8.001a2.75 2.75 0 0 0-1.936-1.946C18.077 6 12 6 12 6s-6.077 0-7.864.055A2.75 2.75 0 0 0 2.2 8.001 28.6 28.6 0 0 0 2 12a28.6 28.6 0 0 0 .2 3.999 2.75 2.75 0 0 0 1.936 1.946C5.923 18 12 18 12 18s6.077 0 7.864-.055a2.75 2.75 0 0 0 1.936-1.946A28.6 28.6 0 0 0 22 12a28.6 28.6 0 0 0-.2-3.999zM10 15V9l6 3-6 3z"></path></svg>
                 </a>
-                <a href="https://zalo.me" target="_blank" rel="noopener noreferrer" className="hover:text-cyan-400">
+                <a href="https://zalo.me" target="_blank" rel="noopener noreferrer" className="hover:text-cyan-400" aria-label="Zalo">
                   <svg width="24" height="24" fill="currentColor"><path d="M4 4h16v12H5.17L4 17.17V4zm0-2a2 2 0 0 0-2 2v20l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H4z"></path></svg>
                 </a>
               </div>

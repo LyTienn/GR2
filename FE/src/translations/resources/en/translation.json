@@ -62,6 +62,10 @@
     },
     "loading": "Loading...",
     "header": {
+      "ariaLabel": {
+        "openMenu": "Open navigation menu",
+        "closeMenu": "Close navigation menu"
+      },
       "title": "Lybrary",
       "explore": "Explore",
       "search_placeholder": "Search for books, authors,...",

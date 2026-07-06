@@ -62,6 +62,10 @@
     },
     "loading": "Đang tải thư viện...",
     "header": {
+      "ariaLabel": {
+        "openMenu": "Mở menu điều hướng",
+        "closeMenu": "Đóng menu điều hướng"
+      },
       "title": "Lybrary",
       "explore": "Khám phá",
       "search_placeholder": "Tìm kiếm sách, tác giả,...",

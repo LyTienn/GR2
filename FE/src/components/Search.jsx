@@ -179,7 +179,7 @@ const Search = ({ variant = "dynamic", className = "" }) => {
                                         onClick={() => setIsOpen(false)}
                                     >
                                         <div className="w-10 h-14 bg-slate-200 rounded shrink-0 overflow-hidden">
-                                            <img src={book.image_url} className="w-full h-full object-cover" />
+                                            <img src={book.image_url} alt={book.title} className="w-full h-full object-cover" />
                                         </div>
                                         <div>
                                             <p className="text-sm font-medium text-slate-800 line-clamp-1">{book.title}</p>

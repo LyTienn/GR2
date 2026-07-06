@@ -220,6 +220,7 @@ const HeaderBar = () => {
             size="icon"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="text-slate-600"
+            aria-label={isMenuOpen ? t("layout.header.ariaLabel.closeMenu") : t("layout.header.ariaLabel.openMenu")}
           >
             {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>

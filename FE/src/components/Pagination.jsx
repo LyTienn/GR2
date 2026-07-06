@@ -66,8 +66,11 @@ export default function Pagination({
       <div className="text-sm text-slate-600 font-medium">
         {isEditingPage ? (
           <form onSubmit={handlePageJump} className="flex items-center gap-2">
-            <span className="hidden sm:inline">{t("components.pagination.page")}</span>
+            <label htmlFor="page-jump-input" className="hidden sm:inline cursor-pointer">
+              {t("components.pagination.page")}
+            </label>
             <input
+              id="page-jump-input"
               type="number"
               min={1}
               max={totalPages}

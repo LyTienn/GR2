@@ -314,7 +314,11 @@ export default function ChatPanel({ bookTitle, chapterId, t }) {
 
           <div className="p-3 border-t border-inherit shrink-0">
             <form onSubmit={handleSendMessage} className="relative">
+              <label htmlFor="chat-message-input" className="sr-only">
+                {t('components.chatPanel.placeholder')}
+              </label>
               <input
+                id="chat-message-input"
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
