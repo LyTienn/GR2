@@ -235,33 +235,7 @@ const HeaderBar = () => {
           </div> */}
 
           <nav className="flex flex-col gap-2">
-            <div className="flex items-center w-fit bg-slate-200/60 p-1 rounded-lg border border-slate-300/50 mb-2">
-            {/* Nút Tiếng Việt */}
-            <button
-              onClick={() => i18n.changeLanguage('vi')}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all duration-200 ${
-                i18n.language === 'vi' 
-                  ? 'bg-white text-slate-900 shadow-sm' 
-                  : 'text-slate-500 hover:text-slate-700 hover:bg-slate-300/30' 
-              }`}
-            >
-              <FlagVI />
-              <span className="text-xs font-bold tracking-tight">VI</span>
-            </button>
-
-            {/* Nút Tiếng Anh */}
-            <button
-              onClick={() => i18n.changeLanguage('en')}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all duration-200 ${
-                i18n.language?.startsWith('en') 
-                  ? 'bg-white text-slate-900 shadow-sm' 
-                  : 'text-slate-500 hover:text-slate-700 hover:bg-slate-300/30'
-              }`}
-            >
-              <FlagEN />
-              <span className="text-xs font-bold tracking-tight">EN</span>
-            </button>
-          </div>
+            <LanguageSwitcher className="bg-slate-200/60 border border-slate-300/50 mb-2" />
             <Button variant="ghost" onClick={() => { navigate('/search'); setIsMenuOpen(false); }} className={`transition-colors ${
               location.pathname === '/search' 
                 ? "bg-slate-100 text-slate-600 font-semibold justify-start" 
