@@ -1,6 +1,7 @@
 import Book from "../models/book-model.js";
 import Subject from "../models/subject-model.js";
 import Author from "../models/author-model.js";
+import UserBookshelf from "../models/user-bookshelf-model.js";
 import BookSubject from "../models/book_subject-model.js";
 import BookShelf from "../models/bookshelf-model.js";
 import BookBookshelf from "../models/book_bookshelf-model.js";
@@ -216,14 +217,29 @@ export const fetchSimilarBooks = async (id) => {
   }
 
   if (!Array.isArray(similarBookIds) || similarBookIds.length === 0) {
-    const currentBook = await Book.findByPk(id);
-    if (!currentBook) return [];
+    const popularItems = await UserBookshelf.findAll({
+      attributes: [
+        'book_id',
+        [sequelize.fn('COUNT', sequelize.col('user_id')), 'read_count']
+      ],
+      where: {
+        is_reading: true,
+        book_id: { [Op.ne]: id }
+      },
+      group: ['book_id'],
+      order: [[sequelize.literal('read_count'), 'DESC']],
+      limit: 5,
+      raw: true
+    });
+
+    if (popularItems.length === 0) return [];
+
+    const popularBookIds = popularItems.map(item => item.book_id);
 
     return await Book.findAll({
-      where: { author_id: currentBook.author_id, id: { [Op.ne]: id }, is_deleted: 0 },
+      where: { id: { [Op.in]: popularBookIds }, is_deleted: 0 },
       include: [{ model: Author, as: "author", attributes: ["name"] }],
-      attributes: ['id', 'title', 'image_url', 'type'],
-      limit: 5
+      attributes: ['id', 'title', 'image_url', 'type']
     });
   }
 
