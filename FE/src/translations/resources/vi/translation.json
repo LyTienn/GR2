@@ -487,7 +487,8 @@
       "deleteConversationError": "Không thể xóa cuộc trò chuyện này.",
       "confirmDeleteConversation": "Bạn có chắc chắn muốn xóa cuộc trò chuyện này không?",
       "untitledConversation": "Cuộc trò chuyện mới",
-      "noBookTitle": "Sách hiện tại"
+      "noBookTitle": "Sách hiện tại",
+      "loadMoreConversations": "Tải thêm cuộc trò chuyện"
     }
   },
   "toasts": {
@@ -539,5 +540,14 @@
     "info": {
       "continueReading": "Đọc tiếp: "
     }
+  },
+  "time": {
+    "justNow": "vừa xong",
+    "minsAgo": "{{count}} phút trước",
+    "hrsAgo": "{{count}} giờ trước",
+    "daysAgo": "{{count}} ngày trước",
+    "wksAgo": "{{count}} tuần trước",
+    "mosAgo": "{{count}} tháng trước",
+    "yrsAgo": "{{count}} năm trước"
   }
 }

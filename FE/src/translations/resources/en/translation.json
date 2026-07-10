@@ -487,7 +487,8 @@
       "deleteConversationError": "Unable to delete this conversation.",
       "confirmDeleteConversation": "Are you sure you want to delete this conversation?",
       "untitledConversation": "New conversation",
-      "noBookTitle": "Current book"
+      "noBookTitle": "Current book",
+      "loadMoreConversations": "Load more conversations"
     }
   },
   "toasts": {
@@ -538,5 +539,20 @@
     "info": {
       "continueReading": "Continue reading: "
     }
+  },
+  "time": {
+    "justNow": "just now",
+    "minsAgo_one": "{{count}} min ago",
+    "minsAgo_other": "{{count}} mins ago",
+    "hrsAgo_one": "{{count}} hr ago",
+    "hrsAgo_other": "{{count}} hrs ago",
+    "daysAgo_one": "{{count}} day ago",
+    "daysAgo_other": "{{count}} days ago",
+    "wksAgo_one": "{{count}} wk ago",
+    "wksAgo_other": "{{count}} wks ago",
+    "mosAgo_one": "{{count}} mo ago",
+    "mosAgo_other": "{{count}} mos ago",
+    "yrsAgo_one": "{{count}} yr ago",
+    "yrsAgo_other": "{{count}} yrs ago"
   }
 }

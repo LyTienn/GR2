@@ -2,8 +2,11 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowLeft, Bot, Loader2, MessageCircle, Plus, Send, Trash2, User } from 'lucide-react';
 import HttpClient from '@/service/HttpClient';
 import { firstValueFrom } from 'rxjs';
+import { useRelativeTime } from '@/hooks/useRelativeTime';
 
 export default function ChatPanel({ bookTitle, chapterId, t }) {
+  const formatRelativeTime = useRelativeTime();
+
   const greetingMessage = useCallback(() => ({
     role: 'ai',
     content: `${t('components.chatPanel.greeting')} "${bookTitle}" ?`
@@ -21,17 +24,35 @@ export default function ChatPanel({ bookTitle, chapterId, t }) {
   const [conversationError, setConversationError] = useState('');
   const messagesEndRef = useRef(null);
 
-  const getConversations = useCallback(async () => {
-    setIsLoadingConversations(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+  const fetchConversations = useCallback(async (pageNumber = 1) => {
+    if (pageNumber === 1) {
+      setIsLoadingConversations(true);
+    } else {
+      setIsLoadingMore(true);
+    }
     setConversationError('');
 
     try {
       const result = await firstValueFrom(
-        HttpClient.get('/chatbot/conversations', { skipToast: true })
+        HttpClient.get('/chatbot/conversations', { 
+          search: { bookTitle, page: pageNumber, limit: 3 }, 
+          skipToast: true 
+        })
       );
 
       if (result.success) {
-        setConversations(result.data?.conversations || []);
+        const conversationsList = result.data?.conversations || [];
+        if (pageNumber === 1) {
+          setConversations(conversationsList);
+        } else {
+          setConversations(prev => [...prev, ...conversationsList]);
+        }
+        setTotalPages(result.data?.totalPages || 1);
+        setPage(pageNumber);
       } else {
         setConversationError(result.message || t('components.chatPanel.loadConversationsError'));
       }
@@ -40,12 +61,13 @@ export default function ChatPanel({ bookTitle, chapterId, t }) {
       setConversationError(t('components.chatPanel.loadConversationsError'));
     } finally {
       setIsLoadingConversations(false);
+      setIsLoadingMore(false);
     }
-  }, [t]);
+  }, [bookTitle, t]);
 
   useEffect(() => {
-    getConversations();
-  }, [getConversations]);
+    fetchConversations(1);
+  }, [fetchConversations]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -147,7 +169,7 @@ export default function ChatPanel({ bookTitle, chapterId, t }) {
     setActiveConversationId(null);
     setMessages([]);
     setInput('');
-    getConversations();
+    fetchConversations(1);
   };
 
   const handleSendMessage = async (e) => {
@@ -238,9 +260,16 @@ export default function ChatPanel({ bookTitle, chapterId, t }) {
                       <p className="text-sm font-medium text-slate-900 dark:text-slate-100 line-clamp-1">
                         {conversation.title || t('components.chatPanel.untitledConversation')}
                       </p>
-                      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 line-clamp-1">
-                        {conversation.book_title || bookTitle || t('components.chatPanel.noBookTitle')}
-                      </p>
+                      <div className="flex justify-between items-center mt-1 text-xs text-slate-500 dark:text-slate-400">
+                        <span className="line-clamp-1">
+                          {conversation.book_title || bookTitle || t('components.chatPanel.noBookTitle')}
+                        </span>
+                        {conversation.updated_at && (
+                          <span className="shrink-0 text-[10px] ml-2 text-slate-400">
+                            {formatRelativeTime(conversation.updated_at)}
+                          </span>
+                        )}
+                      </div>
                     </button>
                     <button
                       type="button"
@@ -258,6 +287,20 @@ export default function ChatPanel({ bookTitle, chapterId, t }) {
                     </button>
                   </div>
                 ))}
+
+                {page < totalPages && (
+                  <div className="pt-2 pb-4 text-center">
+                    <button
+                      type="button"
+                      onClick={() => fetchConversations(page + 1)}
+                      disabled={isLoadingMore}
+                      className="text-xs font-semibold px-4 py-2 border border-slate-200 dark:border-slate-800 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-blue-600 dark:text-blue-400 transition-colors inline-flex items-center gap-1.5"
+                    >
+                      {isLoadingMore ? <Loader2 size={12} className="animate-spin" /> : null}
+                      {t('components.chatPanel.loadMoreConversations')}
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>

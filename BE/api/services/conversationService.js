@@ -16,8 +16,14 @@ export const fetchAllConversations = async (userId, queryParams = {}) => {
   const limitNum = Math.min(100, Math.max(1, parseInt(queryParams.limit, 10) || 10));
   const offset = (pageNum - 1) * limitNum;
 
+  const whereClause = { user_id: userId, is_deleted: 0 };
+
+  if (queryParams.bookTitle) {
+    whereClause.book_title = queryParams.bookTitle;
+  }
+
   const { count, rows } = await Conversation.findAndCountAll({
-    where: { user_id: userId, is_deleted: 0 },
+    where: whereClause,
     attributes: ["id", "title", "book_title", "chapter_id", "created_at", "updated_at"],
     order: [["updated_at", "DESC"]],
     limit: limitNum,
@@ -52,6 +58,20 @@ export const appendMessage = async (conversationId, role, content) => {
     role,
     content,
   });
+
+  if (role === "user") {
+    const conversation = await Conversation.findOne({ where: { id: conversationId } });
+    if (conversation && conversation.title === "Cuộc trò chuyện mới") {
+      await Conversation.update(
+        { 
+          title: content.slice(0, 50) || "Cuộc trò chuyện mới",
+          updated_at: new Date() 
+        },
+        { where: { id: conversationId } }
+      );
+      return message;
+    }
+  }
 
   await Conversation.update(
     { updated_at: new Date() },
