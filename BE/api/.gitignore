@@ -16,3 +16,4 @@ update_*.js
 tmp/
 temp/
 scripts/
+gcp_key.json

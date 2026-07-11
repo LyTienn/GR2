@@ -36,6 +36,14 @@ const AdminBookService = {
   async getBookChapters(id) {
     const res = await firstValueFrom(HttpClient.get(`/books/${id}/chapters`));
     return res?.data || [];
+  },
+
+  // Upload ảnh bìa sách (GCP)
+  async uploadCoverImage(file) {
+    const formData = new FormData();
+    formData.append("image", file);
+    const res = await firstValueFrom(HttpClient.post('/upload/image', formData));
+    return res?.imageUrl;
   }
 };
 

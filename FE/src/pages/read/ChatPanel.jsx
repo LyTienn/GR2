@@ -188,7 +188,7 @@ export default function ChatPanel({ bookTitle, chapterId, t }) {
           currentBookTitle: bookTitle,
           currentChapterId: chapterId,
           conversationId: activeConversationId
-        })
+        }, { skipToast: true })
       );
 
       if (result.success) {
@@ -201,7 +201,18 @@ export default function ChatPanel({ bookTitle, chapterId, t }) {
       }
     } catch (error) {
       console.error('Connection error:', error);
-      setMessages(prev => [...prev, { role: 'ai', content: t('components.chatPanel.connectionError') }]);
+      const errorCode = error?.response?.error_code;
+      let friendlyErrorMessage;
+      
+      if (errorCode === 'DAILY_LIMIT_EXCEEDED') {
+        friendlyErrorMessage = t('components.chatPanel.dailyLimitExceeded');
+      } else if (errorCode === 'SPAM_LIMIT_EXCEEDED') {
+        friendlyErrorMessage = t('components.chatPanel.spamLimitExceeded');
+      } else {
+        friendlyErrorMessage = error?.response?.message || t('components.chatPanel.connectionError');
+      }
+
+      setMessages(prev => [...prev, { role: 'ai', content: friendlyErrorMessage }]);
     } finally {
       setIsLoading(false);
     }

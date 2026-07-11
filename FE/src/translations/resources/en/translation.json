@@ -473,6 +473,8 @@
       "placeholder": "Ask AI about this book...",
       "errorFormat": "❌ Error:",
       "connectionError": "❌ Unable to connect to AI server.",
+      "dailyLimitExceeded": "You have reached your daily limit of 5 chatbot questions. Please return tomorrow!",
+      "spamLimitExceeded": "You are sending questions too quickly. Please wait a moment and try again!",
       "newConversation": "New",
       "loadingConversations": "Loading conversations...",
       "loadingMessages": "Loading messages...",

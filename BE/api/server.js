@@ -18,6 +18,7 @@ import chatbotRoutes from "./routes/chatbot-route.js";
 import subscriptionRoutes from "./routes/subscription-route.js";
 import chapterRoutes from "./routes/chapter-route.js";
 import chapterNoteRoutes from "./routes/chapterNote-route.js";
+import uploadRoutes from "./routes/upload-route.js";
 // import { initializeVectorStore } from "./services/rag-service.js";
 import cron from "node-cron";
 import PaymentController from "./controllers/payment-controller.js";
@@ -64,6 +65,7 @@ app.use("/api/chatbot", chatbotRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);
 app.use("/api/chapters", chapterRoutes);
 app.use("/api/chapter-notes", chapterNoteRoutes);
+app.use("/api/upload", uploadRoutes);
 // Public stats route (no auth required)
 import StatsController from "./controllers/stats-controller.js";
 app.get("/api/public/stats", StatsController.getPublicStats);

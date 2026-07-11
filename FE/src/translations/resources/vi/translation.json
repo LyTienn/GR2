@@ -473,6 +473,8 @@
       "placeholder": "Hỏi AI về sách này...",
       "errorFormat": "❌ Lỗi:",
       "connectionError": "❌ Không thể kết nối đến máy chủ AI.",
+      "dailyLimitExceeded": "Bạn đã dùng hết 5 lượt hỏi chatbot miễn phí của ngày hôm nay. Vui lòng quay lại vào ngày mai!",
+      "spamLimitExceeded": "Bạn đang gửi câu hỏi quá nhanh. Vui lòng đợi một chút rồi thử lại!",
       "newConversation": "Tạo mới",
       "loadingConversations": "Đang tải cuộc trò chuyện...",
       "loadingMessages": "Đang tải tin nhắn...",

@@ -61,6 +61,7 @@ const handleError = (error, requestObj, skipToast = false) => {
       case 400: errorMessage = error.response.message || "Yêu cầu không hợp lệ."; break;
       case 403: errorMessage = "Bạn không có quyền thực hiện hành động này."; break;
       case 404: errorMessage = "Không tìm thấy dữ liệu."; break;
+      case 429: errorMessage = error.response.message || "Bạn đã gửi quá nhiều yêu cầu."; break;
       case 500: errorMessage = "Lỗi hệ thống máy chủ."; break;
     }
   }
@@ -79,7 +80,8 @@ const request = (method, url, body = null, options = {}) => {
     return defer(() => {
         const skipToast = options.skipToast || false;
         const fullUrl = buildRequestUrl(`${BASE_URL}${url}`, options.search);
-        const headers = extractHeaders({ ...options, body: body ? JSON.stringify(body) : null });
+        const isFormData = body instanceof FormData;
+        const headers = extractHeaders({ ...options, body: body ? (isFormData ? body : JSON.stringify(body)) : null });
         const cleanOptions = removeCustomKeys(options);
         const requestObj = {
             url: fullUrl,

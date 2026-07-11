@@ -5,6 +5,7 @@ import UserBookshelf from "../models/user-bookshelf-model.js";
 import BookSubject from "../models/book_subject-model.js";
 import BookShelf from "../models/bookshelf-model.js";
 import BookBookshelf from "../models/book_bookshelf-model.js";
+import { deleteImageFromGCS } from "./gcsService.js";
 import { User } from "../models/user-model.js";
 import Chapter from "../models/chapter-model.js";
 import { Op } from "sequelize";
@@ -178,6 +179,9 @@ export const createNewBook = async (bookData) => {
 export const removeBook = async (id) => {
   const book = await Book.findOne({ where: { id, is_deleted: 0 } });
   if (!book) throw new Error("Không tìm thấy sách");
+  if (book.image_url) {
+    await deleteImageFromGCS(book.image_url);
+  }
   return await book.update({ is_deleted: 1 });
 };
 
@@ -185,6 +189,9 @@ export const modifyBook = async (id, bookData) => {
   const { title, author_id, summary, image_url, type, language, page_count, published_year, subjectIds } = bookData;
   const book = await Book.findOne({ where: { id, is_deleted: 0 } });
   if (!book) throw new Error("Không tìm thấy sách");
+  if (book.image_url && book.image_url !== image_url) {
+    await deleteImageFromGCS(book.image_url);
+  }
   await book.update({ title, author_id, summary, image_url, type, language, page_count, published_year });
 
   if (subjectIds && Array.isArray(subjectIds)) await book.setSubjects(subjectIds);

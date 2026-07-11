@@ -676,10 +676,10 @@ export default function Books() {
                 <td className="px-4 py-3">{b.id}</td>
                 <td className="px-4 py-3">
                   <img
-                    src={b.image_url || 'https://via.placeholder.com/40'}
+                    src={b.image_url || 'https://placehold.co/40x56?text=Book'}
                     alt={b.title}
                     className="w-10 h-14 object-cover rounded border border-slate-200 dark:border-slate-700"
-                    onError={(e) => { e.target.onerror = null; e.target.src = 'https://via.placeholder.com/40?text=Book'; }}
+                    onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/40x56?text=Book?text=Book'; }}
                   />
                 </td>
                 <td className="px-4 py-3 font-medium">{b.title}</td>
@@ -813,14 +813,49 @@ export default function Books() {
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">URL Ảnh bìa</label>
-                  <input
-                    type="text"
-                    value={formData.image_url}
-                    onChange={e => setFormData({ ...formData, image_url: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-primary/50 text-sm"
-                    placeholder="https://example.com/image.jpg"
-                  />
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Ảnh bìa sách</label>
+                  <div className="flex items-center gap-4">
+                    {/* Khung hiển thị trước ảnh bìa */}
+                    <div className="w-16 h-24 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center overflow-hidden border border-slate-200 dark:border-slate-700 flex-shrink-0">
+                      {formData.image_url ? (
+                        <img src={formData.image_url} alt="Preview" className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-xs text-slate-400">Trống</span>
+                      )}
+                    </div>
+                    
+                    <div className="flex-1 flex flex-col gap-2">
+                      {/* Nút Upload ảnh từ máy tính */}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={async (e) => {
+                          const file = e.target.files[0];
+                          if (!file) return;
+                          try {
+                            toast.info("Đang tải ảnh...");
+                            const uploadedUrl = await AdminBookService.uploadCoverImage(file);
+                            if (uploadedUrl) {
+                              setFormData(prev => ({ ...prev, image_url: uploadedUrl }));
+                              toast.success("Tải ảnh lên thành công!");
+                            }
+                          } catch (error) {
+                            console.error(error);
+                            toast.error("Tải ảnh thất bại: " + (error.response?.data?.message || error.message));
+                          }
+                        }}
+                        className="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 dark:file:bg-blue-900/30 dark:file:text-blue-400 hover:file:bg-blue-100 dark:hover:file:bg-blue-900/50 cursor-pointer"
+                      />
+                      {/* Input nhập URL như cũ phòng trường hợp sơ cua */}
+                      <input
+                        type="text"
+                        value={formData.image_url}
+                        onChange={e => setFormData({ ...formData, image_url: e.target.value })}
+                        className="w-full px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-primary/50 text-xs"
+                        placeholder="Hoặc dán URL ảnh có sẵn..."
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 <div className="flex flex-col gap-1.5">
