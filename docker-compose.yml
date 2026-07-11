@@ -23,6 +23,8 @@ services:
     restart: always
     ports:
       - "${PORT}:5000"
+    volumes:
+      - ./BE/api/gcp_key.json:/app/gcp_key.json
     environment:
       - PORT=5000
       - DB_HOST=db
