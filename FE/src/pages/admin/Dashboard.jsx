@@ -428,50 +428,6 @@ export default function Dashboard() {
     'bg-indigo-500'
   ];
 
-  const generateChartPath = () => {
-    if (!processedRegistrationData.length) return { line: '', area: '' };
-
-    const maxCount = Math.max(...processedRegistrationData.map(d => parseInt(d.count) || 0), 1);
-    const width = 800;
-    const height = 250;
-    const paddingLeft = 60; // Increased padding for Y-axis labels
-    const paddingRight = 20;
-    const paddingY = 25;
-
-    const points = processedRegistrationData.map((d, i) => {
-      // Calculate X based on available width after padding
-      const availableWidth = width - paddingLeft - paddingRight;
-      const x = paddingLeft + (i / (processedRegistrationData.length - 1 || 1)) * availableWidth;
-
-      // Calculate Y based on available height
-      const availableHeight = height - (paddingY * 2);
-      const y = height - paddingY - ((parseInt(d.count) || 0) / maxCount) * availableHeight;
-      return { x, y };
-    });
-
-    if (points.length === 0) return { line: '', area: '' };
-    if (points.length === 1) {
-      return {
-        line: `M${points[0].x},${points[0].y}`,
-        area: `M${points[0].x},${height - paddingY} L${points[0].x},${points[0].y} L${points[0].x},${height - paddingY} Z`
-      };
-    }
-
-    let linePath = `M${points[0].x},${points[0].y}`;
-    for (let i = 1; i < points.length; i++) {
-      const cp1x = points[i - 1].x + (points[i].x - points[i - 1].x) / 3;
-      const cp1y = points[i - 1].y;
-      const cp2x = points[i].x - (points[i].x - points[i - 1].x) / 3;
-      const cp2y = points[i].y;
-      linePath += ` C${cp1x},${cp1y} ${cp2x},${cp2y} ${points[i].x},${points[i].y}`;
-    }
-
-    const areaPath = linePath + ` L${points[points.length - 1].x},${height - paddingY} L${points[0].x},${height - paddingY} Z`;
-
-    return { line: linePath, area: areaPath };
-  };
-
-  const { line: chartLine, area: chartArea } = generateChartPath();
   return (
     <>
       <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -688,8 +644,36 @@ export default function Dashboard() {
               {/* Y-axis Title */}
               <text x="10" y="20" fontSize="14" fill="#64748b" fontWeight="bold">SL</text>
 
-              {chartArea && <path d={chartArea} fill="url(#chartGradient)" />}
-              {chartLine && <path d={chartLine} fill="none" stroke="#137fec" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" />}
+              {processedRegistrationData.map((d, i) => {
+                const maxCount = Math.max(...processedRegistrationData.map(item => parseInt(item.count) || 0), 1);
+                const width = 800;
+                const height = 250;
+                const paddingLeft = 60;
+                const paddingRight = 20;
+                const paddingY = 25;
+                const availableWidth = width - paddingLeft - paddingRight;
+                const slotWidth = availableWidth / (processedRegistrationData.length - 1 || 1);
+                
+                const barWidth = Math.max(slotWidth * 0.6, 6);
+                const x = paddingLeft + i * slotWidth - barWidth / 2;
+                const availableHeight = height - (paddingY * 2);
+                const barHeight = ((parseInt(d.count) || 0) / maxCount) * availableHeight;
+                const y = height - paddingY - barHeight;
+                const isHovered = activeTooltipPoint?.date === d.date;
+                return (
+                  <rect
+                    key={i}
+                    x={x}
+                    y={y}
+                    width={barWidth}
+                    height={Math.max(barHeight, 2)} 
+                    fill={isHovered ? "#3b82f6" : "#137fec"} 
+                    opacity={isHovered ? 1 : 0.8} 
+                    rx={3} 
+                    className="transition-all duration-150"
+                  />
+                );
+              })}
 
               {/* Active Tooltip Guide Lines & Dots */}
               {activeTooltipPoint && (
