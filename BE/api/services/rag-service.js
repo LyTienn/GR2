@@ -83,7 +83,7 @@ export const syncBookToVector = async (bookId) => {
     }
 };
 
-export const chatWithAgent = async (message, currentBookTitle, currentChapterId, userName) => {
+export const chatWithAgent = async (message, currentBookTitle, currentChapterId, userName, history=[]) => {
     if (process.env.NODE_ENV === "test") {
         return { success: true, reply: `Hệ thống phản hồi giả lập cho câu hỏi: "${message}"` };
     }
@@ -134,16 +134,22 @@ export const chatWithAgent = async (message, currentBookTitle, currentChapterId,
 
         const [results] = await sequelize.query(query, { replacements, logging: false });
         const context = results.map(r => r.chunk_content).join("\n\n");
-
-        const prompt = `Bạn là trợ lý AI đọc sách. Dựa vào [THÔNG TIN HỆ THỐNG] và [TÀI LIỆU THAM KHẢO] dưới đây để trả lời câu hỏi một cách ngắn gọn, tự nhiên. 
+        const recentHistory = history.slice(-10);
+        const formattedHistory = recentHistory.length > 0
+            ? recentHistory.map(msg => `${msg.role === 'user' ? 'Người dùng' : 'AI'}: ${msg.content}`).join("\n")
+            : "Chưa có lịch sử trò chuyện.";
+        const prompt = `Bạn là trợ lý AI đọc sách. Dựa vào [LỊCH SỬ CUỘC TRÒ CHUYỆN], [THÔNG TIN HỆ THỐNG] và [TÀI LIỆU THAM KHẢO] dưới đây để trả lời câu hỏi một cách ngắn gọn, tự nhiên và liền mạch với mạch truyện đang thảo luận. 
         Lưu ý quan trọng:
         - Nếu thông tin không có trong tài liệu tham khảo, hoặc người dùng hỏi về các diễn biến tiếp theo của câu chuyện nằm ngoài chương hiện tại, hãy trả lời là bạn không biết/không có thông tin và kết thúc bằng câu: "Bạn hãy đọc các chương tiếp theo để nắm rõ nội dung."
+        
+        [LỊCH SỬ CUỘC TRÒ CHUYỆN]
+        ${formattedHistory}
         [THÔNG TIN HỆ THỐNG]
         ${metaContext}
         [TÀI LIỆU THAM KHẢO (Trích xuất từ nội dung sách)]
         ${context}
         Người hỏi: ${userName || 'Khách'}
-        Câu hỏi: ${message}
+        Câu hỏi mới: ${message}
         `;
 
         const aiResponse = await llm.invoke(prompt);
